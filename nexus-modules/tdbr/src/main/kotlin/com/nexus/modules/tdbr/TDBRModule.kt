@@ -30,7 +30,7 @@ class TDBRModule : NexusModule {
         when {
             registry.isAvailable("PIXEL_LOCAL_STORAGE") -> {
                 println("[TDBR] Path: Pixel Local Storage (on-chip G‑buffer)")
-                // PLSManager.setup(...)
+                PLSManager.setup(1920, 1080) // resolução temporária; no futuro virá do viewport real
             }
             registry.isAvailable("FRAMEBUFFER_FETCH") -> {
                 println("[TDBR] Path: Framebuffer Fetch (deferred via MRTs + fetch)")
@@ -44,7 +44,7 @@ class TDBRModule : NexusModule {
 
     override fun onRegisterPipeline(pipeline: RenderPipeline) {
         // Registar callbacks nos estágios do pipeline
-        // pipeline.onGeometryPass { ... }
+        // pipeline.onGeometryPass { PLSManager.beginGeometryPass() }
         // pipeline.onLightingPass { ... }
         println("[TDBR] Registered on pipeline")
     }
