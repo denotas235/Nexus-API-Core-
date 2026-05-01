@@ -10,6 +10,7 @@ import com.nexuapicore.core.ResourceManager
 import com.nexuapicore.core.pipeline.RenderPipeline
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
 
 class NexusAPICoreClient : ClientModInitializer {
 
@@ -21,7 +22,7 @@ class NexusAPICoreClient : ClientModInitializer {
     override fun onInitializeClient() {
         println("[Nexus] Starting client initialization...")
 
-        // Carregar a lib nativa agora (não precisa de contexto GL)
+        // Carregar a lib nativa
         try {
             NexusNativeLoader.load()
             if (NexusNativeLoader.loaded) {
@@ -32,17 +33,23 @@ class NexusAPICoreClient : ClientModInitializer {
             println("[Nexus] Lib nativa falhou no load: ${e.message}")
         }
 
-        // Preparar pipeline vazia por agora
         val modules = ModuleLoader.discoverModules()
         featureRegistry = FeatureRegistry(emptyMap())
         ResourceManager.init()
         RenderPipeline.assemble(modules)
 
-        // Adiar a deteção de extensões para o primeiro tick (GL já inicializado)
+        // Primeiro tick: detetar extensões GL e inicializar módulos com capacidades reais
         ClientTickEvents.END_CLIENT_TICK.register { client ->
             if (!extensionsDetected) {
                 extensionsDetected = true
                 detectAndLogExtensions(modules)
+            }
+        }
+
+        // A cada frame de render: executar o pipeline TDBR
+        WorldRenderEvents.END.register { context ->
+            if (extensionsDetected) {
+                RenderPipeline.executeFrame()
             }
         }
 
@@ -52,7 +59,6 @@ class NexusAPICoreClient : ClientModInitializer {
     private fun detectAndLogExtensions(modules: List<com.nexuapicore.core.module.NexusModule>) {
         val allKnown = ExtensionDatabase.getAllExtensions()
 
-        // === FONTE 1: Biblioteca Nativa ===
         var nativeExtensions: List<String> = emptyList()
         try {
             if (NexusNativeLoader.loaded) {
@@ -65,7 +71,6 @@ class NexusAPICoreClient : ClientModInitializer {
             println("[Nexus] Erro ao obter extensões nativas: ${e.message}")
         }
 
-        // === FONTE 2: Renderizador (fallback) ===
         var rendererExtensions: List<String> = emptyList()
         try {
             rendererExtensions = ALLExtensionDetector.detectExtensions()
@@ -73,7 +78,6 @@ class NexusAPICoreClient : ClientModInitializer {
             println("[Nexus] Erro no fallback GL: ${e.message}")
         }
 
-        // === LOG: Lista Nativa ===
         println("[Nexus] ===== LISTA NATIVA (fonte: libnexus_mali_core.so) =====")
         if (nativeExtensions.isEmpty()) {
             println("[Nexus] [NATIVA] INDISPONÍVEL")
@@ -85,7 +89,6 @@ class NexusAPICoreClient : ClientModInitializer {
         }
         println("[Nexus] ===== FIM LISTA NATIVA (${nativeExtensions.size} extensões) =====")
 
-        // === LOG: Lista Renderizador ===
         println("[Nexus] ===== LISTA RENDERIZADOR (fonte: GL/LTW) =====")
         if (rendererExtensions.isEmpty()) {
             println("[Nexus] [RENDERER] INDISPONÍVEL")
@@ -97,7 +100,6 @@ class NexusAPICoreClient : ClientModInitializer {
         }
         println("[Nexus] ===== FIM LISTA RENDERIZADOR (${rendererExtensions.size} extensões) =====")
 
-        // === Escolher melhor fonte ===
         val availableExtensions = when {
             nativeExtensions.isNotEmpty() -> {
                 println("[Nexus] Fonte ativa: Biblioteca Nativa")
@@ -113,7 +115,6 @@ class NexusAPICoreClient : ClientModInitializer {
             }
         }
 
-        // Atualizar o registry com as capacidades reais
         val resolver = CapabilityResolver(availableExtensions)
         val capMap = resolver.resolve()
         featureRegistry = FeatureRegistry(capMap)
