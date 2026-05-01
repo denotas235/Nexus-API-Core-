@@ -1,0 +1,44 @@
+name: Build Native Library
+
+on:
+  push:
+    paths:
+      - 'nexus-native/**'
+  workflow_dispatch:
+
+jobs:
+  build-native:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install NDK
+        run: |
+          echo "y" | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "ndk;27.0.12077973"
+          echo "ANDROID_NDK=$ANDROID_SDK_ROOT/ndk/27.0.12077973" >> $GITHUB_ENV
+
+      - name: Build libnexus_mali_core.so
+        run: |
+          cd nexus-native
+          cmake -B build \
+            -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake \
+            -DANDROID_ABI=arm64-v8a \
+            -DANDROID_PLATFORM=android-26 \
+            -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --config Release
+
+      - name: Copy .so to resources
+        run: |
+          mkdir -p src/main/resources/natives/arm64-v8a
+          cp nexus-native/build/libnexus_mali_core.so \
+             src/main/resources/natives/arm64-v8a/libnexus_mali_core.so
+
+      - name: Commit .so to repository
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/main/resources/natives/arm64-v8a/libnexus_mali_core.so
+          git diff --cached --quiet || git commit -m "ci: update libnexus_mali_core.so [skip ci]"
+          git push
