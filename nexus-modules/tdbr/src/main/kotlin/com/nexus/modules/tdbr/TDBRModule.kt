@@ -20,34 +20,43 @@ class TDBRModule : NexusModule {
         println("[TDBR]   MSAA  : ${registry.isAvailable("FAST_MSAA")}")
         println("[TDBR]   HDR   : ${registry.isAvailable("HDR_COLOR")}")
 
+        DiscardHandler.init()
+
         when {
             registry.isAvailable("PIXEL_LOCAL_STORAGE") -> {
                 println("[TDBR] Path: Pixel Local Storage")
                 PLSManager.setup(1920, 1080)
             }
             registry.isAvailable("FRAMEBUFFER_FETCH") -> {
-                println("[TDBR] Path: Framebuffer Fetch")
+                println("[TDBR] Path: MRT Fallback")
+                MRTManager.setup(1920, 1080)
             }
             else -> {
-                println("[TDBR] Path: Forward fallback")
+                println("[TDBR] Path: MRT Fallback (forward)")
+                MRTManager.setup(1920, 1080)
             }
         }
     }
 
     override fun onRegisterPipeline(pipeline: RenderPipeline) {
         pipeline.onBeginFrame {
-            // Atualizar direção do sol com base no tempo (futura integração)
-            // PLSManager.updateLight(...)
+            // Futura integração: PLSManager.updateLight(...)
         }
         pipeline.onGeometryPass {
-            PLSManager.beginGeometryPass()
+            if (PLSManager.enabled)      PLSManager.beginGeometryPass()
+            else if (MRTManager.enabled) MRTManager.beginGeometryPass()
         }
         pipeline.onLightingPass {
-            PLSManager.endGeometryPass()
-            PLSManager.beginLightingPass()
+            if (PLSManager.enabled) {
+                PLSManager.endGeometryPass()
+                PLSManager.beginLightingPass()
+            } else if (MRTManager.enabled) {
+                MRTManager.endGeometryPass()
+                MRTManager.beginLightingPass()
+            }
         }
         pipeline.onEndFrame {
-            // DiscardHandler virá aqui
+            DiscardHandler.discardAfterLighting()
         }
         println("[TDBR] Pipeline registado")
     }

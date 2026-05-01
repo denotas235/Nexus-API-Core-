@@ -3,27 +3,35 @@ package com.nexuapicore.core
 import org.lwjgl.opengl.GL20
 
 object ResourceManager {
-    private var plsGBufferHandle: Int  = 0
+    private var plsGBufferHandle:  Int = 0
     private var plsLightingHandle: Int = 0
+    private var mrtGBufferHandle:  Int = 0
+    private var mrtLightingHandle: Int = 0
 
     fun init() {
         println("[ResourceManager] Initialized")
     }
 
-    fun compilePLSShaders(
-        gbufferVsh: String,
-        gbufferFsh: String,
-        quadVsh: String,
-        lightingFsh: String
-    ) {
+    fun compilePLSShaders(gbufferVsh: String, gbufferFsh: String,
+                          quadVsh: String,    lightingFsh: String) {
         plsGBufferHandle  = linkProgram(gbufferVsh, gbufferFsh)
-        plsLightingHandle = linkProgram(quadVsh, lightingFsh)
+        plsLightingHandle = linkProgram(quadVsh,    lightingFsh)
         println("[ResourceManager] PLS GBuffer  program: $plsGBufferHandle")
         println("[ResourceManager] PLS Lighting program: $plsLightingHandle")
     }
 
-    fun getPLSShaderHandle(): Int   = plsGBufferHandle
+    fun compileMRTShaders(gbufferVsh: String, gbufferFsh: String,
+                          quadVsh: String,    lightingFsh: String) {
+        mrtGBufferHandle  = linkProgram(gbufferVsh, gbufferFsh)
+        mrtLightingHandle = linkProgram(quadVsh,    lightingFsh)
+        println("[ResourceManager] MRT GBuffer  program: $mrtGBufferHandle")
+        println("[ResourceManager] MRT Lighting program: $mrtLightingHandle")
+    }
+
+    fun getPLSShaderHandle():   Int = plsGBufferHandle
     fun getPLSLightingHandle(): Int = plsLightingHandle
+    fun getMRTGBufferHandle():  Int = mrtGBufferHandle
+    fun getMRTLightingHandle(): Int = mrtLightingHandle
 
     private fun compileShader(source: String, type: Int): Int {
         val id = GL20.glCreateShader(type)
