@@ -11,11 +11,20 @@ data class ExtensionDef(
 )
 
 object ExtensionDatabase {
-    val extensions: List<ExtensionDef> by lazy {
-        val json = javaClass.classLoader.getResourceAsStream("extensions.json")?.bufferedReader()?.readText()
-            ?: throw RuntimeException("extensions.json not found")
-        Gson().fromJson(json, object : TypeToken<Map<String, List<ExtensionDef>>>() {}.type)["extensions"] ?: emptyList()
-    }
+    private var _extensions: List<ExtensionDef>? = null
+
+    val extensions: List<ExtensionDef>
+        get() {
+            if (_extensions == null) {
+                val json = ExtensionDatabase::class.java.classLoader
+                    .getResourceAsStream("extensions.json")?.bufferedReader()?.readText()
+                    ?: throw RuntimeException("extensions.json not found")
+                val type = object : TypeToken<Map<String, List<ExtensionDef>>>() {}.type
+                val map: Map<String, List<ExtensionDef>> = Gson().fromJson(json, type)
+                _extensions = map["extensions"] ?: emptyList()
+            }
+            return _extensions!!
+        }
 
     fun getCapabilitiesFor(extName: String): List<String> {
         return extensions.find { it.name == extName }?.capabilities ?: emptyList()
