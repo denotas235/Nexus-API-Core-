@@ -50,7 +50,7 @@ class NexusAPICoreClient : ClientModInitializer {
     }
 
     private fun detectAndLogExtensions(modules: List<com.nexuapicore.core.module.NexusModule>) {
-        val allKnown = ExtensionDatabase.INSTANCE.getAllExtensions()
+        val allKnown = ExtensionDatabase.getAllExtensions()
 
         // === FONTE 1: Biblioteca Nativa ===
         var nativeExtensions: List<String> = emptyList()
