@@ -13,7 +13,7 @@ jobs:
       - name: checkout repository
         uses: actions/checkout@v6
       - name: validate gradle wrapper
-        uses: gradle/actions/wrapper-validation@v6
+        uses: gradle/actions/wrapper-validation@v5
       - name: setup jdk
         uses: actions/setup-java@v5
         with:
@@ -23,8 +23,13 @@ jobs:
         run: chmod +x ./gradlew
       - name: build
         run: ./gradlew build
-      - name: capture build artifacts
-        uses: actions/upload-artifact@v7
+      - name: capture build artifacts (Nexus API Core)
+        uses: actions/upload-artifact@v5
         with:
-          name: Artifacts
+          name: nexus-api-core
           path: build/libs/
+      - name: capture build artifacts (TDBR module)
+        uses: actions/upload-artifact@v5
+        with:
+          name: nexus-tdbr
+          path: nexus-modules/tdbr/build/libs/
