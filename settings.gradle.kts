@@ -15,3 +15,4 @@ pluginManagement {
 
 // Should match your modid
 rootProject.name = "nexus-api-core"
+include(":nexus-modules:tdbr")

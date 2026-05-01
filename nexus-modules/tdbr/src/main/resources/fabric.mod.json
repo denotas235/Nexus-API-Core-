@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "nexus-tdbr",
+  "version": "${version}",
+  "name": "Nexus TDBR",
+  "description": "Tile-Based Deferred Renderer module for Nexus API",
+  "authors": ["denotas235"],
+  "license": "MIT",
+  "environment": "client",
+  "depends": {
+    "fabricloader": ">=0.14.0",
+    "minecraft": "~1.21.1",
+    "fabric-api": "*",
+    "fabric-language-kotlin": "*",
+    "nexus-api-core": ">=1.0.0"
+  },
+  "entrypoints": {
+    "client": [
+      "com.nexus.modules.tdbr.TDBREntrypoint"
+    ]
+  }
+}
