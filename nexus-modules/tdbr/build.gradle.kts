@@ -1,5 +1,4 @@
 plugins {
-    // Não especifiques versão aqui – a raiz do projecto já a define.
     kotlin("jvm")
     id("net.fabricmc.fabric-loom-remap")
 }
@@ -15,18 +14,15 @@ repositories {
 }
 
 dependencies {
-    // dependência da API Core
+    // dependência da API Core (project raiz)
     implementation(project(":"))
 
-    // Minecraft e Fabric (necessários para entrypoint)
+    // Minecraft e Fabric (necessários para o entrypoint)
     minecraft("com.mojang:minecraft:$minecraft_version")
     mappings("net.fabricmc:yarn:$yarn_mappings:v2")
     modImplementation("net.fabricmc:fabric-loader:$loader_version")
     modImplementation("net.fabricmc.fabric-api:fabric-api:$fabric_api_version")
     modImplementation("net.fabricmc:fabric-language-kotlin:$fabric_kotlin_version")
-
-    // YACL (config) – opcional, mas útil
-    modImplementation("com.terraformersmc.modmenu:modmenu:11.0.4")
 }
 
 tasks.processResources {
