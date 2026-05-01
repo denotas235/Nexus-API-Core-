@@ -31,7 +31,6 @@ jobs:
 
       - name: Copy .so to resources
         run: |
-          mkdir -p src/main/resources/natives/arm64-v8a
           cp nexus-native/build/libnexus_mali_core.so \
              src/main/resources/natives/arm64-v8a/libnexus_mali_core.so
 
