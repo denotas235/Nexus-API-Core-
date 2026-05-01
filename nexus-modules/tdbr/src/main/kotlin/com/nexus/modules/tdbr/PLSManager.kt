@@ -1,6 +1,6 @@
 package com.nexus.modules.tdbr
 
-import com.nexusapicore.core.ResourceManager
+import com.nexuapicore.core.ResourceManager
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL20
 
