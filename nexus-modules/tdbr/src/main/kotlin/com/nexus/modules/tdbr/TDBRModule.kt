@@ -8,19 +8,13 @@ class TDBRModule : NexusModule {
     override val id = "tdbr"
     override val requiredCapabilities = setOf("DEFERRED_BASELINE")
     override val optionalCapabilities = setOf(
-        "FRAMEBUFFER_FETCH",
-        "PIXEL_LOCAL_STORAGE",
-        "FAST_MSAA",
-        "ADVANCED_BLENDING",
-        "HDR_COLOR",
-        "SRGB_CORRECTION",
-        "PRIMITIVE_BOUNDING_BOX",
-        "BUFFER_STORAGE",
-        "DEBUG_ROBUSTNESS"
+        "FRAMEBUFFER_FETCH", "PIXEL_LOCAL_STORAGE", "FAST_MSAA",
+        "ADVANCED_BLENDING", "HDR_COLOR", "SRGB_CORRECTION",
+        "PRIMITIVE_BOUNDING_BOX", "BUFFER_STORAGE", "DEBUG_ROBUSTNESS"
     )
 
     override fun onInitialize(registry: FeatureRegistry) {
-        println("[TDBR] Initializing with capabilities:")
+        println("[TDBR] Capacidades:")
         println("[TDBR]   PLS   : ${registry.isAvailable("PIXEL_LOCAL_STORAGE")}")
         println("[TDBR]   Fetch : ${registry.isAvailable("FRAMEBUFFER_FETCH")}")
         println("[TDBR]   MSAA  : ${registry.isAvailable("FAST_MSAA")}")
@@ -28,33 +22,34 @@ class TDBRModule : NexusModule {
 
         when {
             registry.isAvailable("PIXEL_LOCAL_STORAGE") -> {
-                println("[TDBR] Path: Pixel Local Storage (on-chip G-buffer)")
+                println("[TDBR] Path: Pixel Local Storage")
                 PLSManager.setup(1920, 1080)
             }
             registry.isAvailable("FRAMEBUFFER_FETCH") -> {
-                println("[TDBR] Path: Framebuffer Fetch (deferred via MRTs + fetch)")
+                println("[TDBR] Path: Framebuffer Fetch")
             }
             else -> {
-                println("[TDBR] Path: Fallback forward rendering")
+                println("[TDBR] Path: Forward fallback")
             }
         }
     }
 
     override fun onRegisterPipeline(pipeline: RenderPipeline) {
         pipeline.onBeginFrame {
-            println("[TDBR] beginFrame")
+            // Atualizar direção do sol com base no tempo (futura integração)
+            // PLSManager.updateLight(...)
         }
         pipeline.onGeometryPass {
             PLSManager.beginGeometryPass()
         }
         pipeline.onLightingPass {
             PLSManager.endGeometryPass()
-            println("[TDBR] lightingPass — deferred shading here")
+            PLSManager.beginLightingPass()
         }
         pipeline.onEndFrame {
-            println("[TDBR] endFrame")
+            // DiscardHandler virá aqui
         }
-        println("[TDBR] Callbacks registered on pipeline")
+        println("[TDBR] Pipeline registado")
     }
 
     override fun onShutdown() {
