@@ -1,6 +1,5 @@
 package com.nexus.modules.tdbr
 
-import com.nexuapicore.core.ResourceManager
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL20
 
@@ -8,6 +7,8 @@ object PLSManager {
     private const val PLS_ALBEDO_SLOT = 0u
     private const val PLS_NORMAL_SLOT = 1u
     private const val PLS_DEPTH_SLOT  = 2u
+
+    private var shaderHandle: Int = 0
 
     var enabled = false
         private set
@@ -23,10 +24,13 @@ object PLSManager {
         println("[TDBR] PLS G-buffer configured: 3 slots (albedo, normal, depth)")
     }
 
+    fun setShaderHandle(handle: Int) {
+        shaderHandle = handle
+    }
+
     fun bindGBuffer() {
         if (!enabled) return
-        val handle = ResourceManager.getPLSShaderHandle()
-        GL20.glUseProgram(handle)
+        GL20.glUseProgram(shaderHandle)
     }
 
     fun unbindGBuffer() {
