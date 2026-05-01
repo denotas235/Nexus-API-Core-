@@ -4,7 +4,6 @@ import com.nexuapicore.core.ExtensionDatabase
 import com.nexuapicore.core.CapabilityResolver
 import com.nexuapicore.core.FeatureRegistry
 import com.nexuapicore.core.ModuleLoader
-import com.nexuapicore.core.RenderPipeline
 import com.nexuapicore.core.ResourceManager
 import com.nexuapicore.core.module.NexusModule
 import com.nexuapicore.core.pipeline.RenderPipeline
@@ -24,42 +23,48 @@ object NexusAPI {
         if (initialized) return
         initialized = true
 
-        // 1. Carregar base de extensões
-        val db = ExtensionDatabase.fromJson("extensions.json")
+        // 1. Carregar base de extensões (já está em ExtensionDatabase)
+        val allExtensions = ExtensionDatabase.getAllExtensions()
+        println("[Nexus] Extension database loaded: ${allExtensions.size} known extensions")
 
-        // 2. Resolver capabilities com suporte real da GPU (simulado no desktop; real via JNI)
-        val resolver = CapabilityResolver(db, emptyList()) // placeholder
-        featureRegistry = resolver.resolve()
+        // 2. Obter lista de extensões disponíveis (será preenchida pelo cliente após o primeiro tick)
+        //    Por enquanto, usamos uma lista vazia; o cliente atualizará o registry mais tarde.
+        val availableExtensions = emptyList<String>()
+        val resolver = CapabilityResolver(availableExtensions)
+        val capMap = resolver.resolve()
+        featureRegistry = FeatureRegistry(capMap)
 
         // 3. Inicializar gestor de recursos
-        resourceManager = ResourceManager()
+        resourceManager = ResourceManager
+        ResourceManager.init()   // object, apenas chama o método
 
-        // 4. Registar módulos pendentes (que foram registados antes de init)
+        // 4. Registar módulos pendentes
         pendingModules.forEach { mod ->
             mod.onInitialize(featureRegistry)
-            mod.onRegisterPipeline(pipeline)
+            mod.onRegisterPipeline(RenderPipeline)
         }
         pendingModules.clear()
 
-        // 5. Carregar módulos automáticos (o ModuleLoader pode varrer a classpath)
-        val loader = ModuleLoader()
+        // 5. Carregar módulos automáticos (se houver outros descobertos)
+        val loader = ModuleLoader
         val modules = loader.discoverModules()
         modules.forEach { mod ->
             mod.onInitialize(featureRegistry)
-            mod.onRegisterPipeline(pipeline)
+            mod.onRegisterPipeline(RenderPipeline)
         }
 
         // 6. Pipeline pronto
-        pipeline = RenderPipeline.assemble(modules)
+        RenderPipeline.assemble(modules)
+        pipeline = RenderPipeline   // guardamos o object para facilitar acesso
+
+        println("[Nexus] API initialized")
     }
 
     fun registerModule(module: NexusModule) {
         if (initialized) {
-            // Se a API já foi init, inicializa o módulo imediatamente
             module.onInitialize(featureRegistry)
             module.onRegisterPipeline(pipeline)
         } else {
-            // Caso contrário, guarda para depois
             pendingModules.add(module)
             println("[Nexus] Module '${module.id}' registered (pending init)")
         }
