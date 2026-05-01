@@ -1,126 +1,16 @@
 package com.nexuapicore.client
 
-import com.nexuapicore.core.nativelink.NexusNativeLoader
-import com.nexuapicore.core.fallback.ALLExtensionDetector
-import com.nexuapicore.core.ExtensionDatabase
-import com.nexuapicore.core.CapabilityResolver
-import com.nexuapicore.core.FeatureRegistry
-import com.nexuapicore.core.ModuleLoader
-import com.nexuapicore.core.ResourceManager
-import com.nexuapicore.core.pipeline.RenderPipeline
+import com.nexuapicore.NexusAPI
 import net.fabricmc.api.ClientModInitializer
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents
 
 class NexusAPICoreClient : ClientModInitializer {
-
-    companion object {
-        var extensionsDetected = false
-        lateinit var featureRegistry: FeatureRegistry
-    }
-
     override fun onInitializeClient() {
-        println("[Nexus] Starting client initialization...")
-
-        // Carregar a lib nativa
-        try {
-            NexusNativeLoader.load()
-            if (NexusNativeLoader.loaded) {
-                NexusNativeLoader.initNexusCore()
-                println("[Nexus] Nexus Mali Core pronto.")
-            }
-        } catch (e: Exception) {
-            println("[Nexus] Lib nativa falhou no load: ${e.message}")
+        // CLIENT_STARTED dispara depois do contexto GL estar activo
+        // É o único momento seguro para chamar glGetString(GL_EXTENSIONS)
+        ClientLifecycleEvents.CLIENT_STARTED.register {
+            println("[Nexus] GL context ready — iniciando API")
+            NexusAPI.init()
         }
-
-        val modules = ModuleLoader.discoverModules()
-        featureRegistry = FeatureRegistry(emptyMap())
-        ResourceManager.init()
-        RenderPipeline.assemble(modules)
-
-        // Primeiro tick: detetar extensões GL e inicializar módulos com capacidades reais
-        ClientTickEvents.END_CLIENT_TICK.register { client ->
-            if (!extensionsDetected) {
-                extensionsDetected = true
-                detectAndLogExtensions(modules)
-            }
-        }
-
-        // A cada frame de render: executar o pipeline TDBR
-        WorldRenderEvents.END.register { context ->
-            if (extensionsDetected) {
-                RenderPipeline.executeFrame()
-            }
-        }
-
-        println("[Nexus] Client initialization complete. Extensões serão detetadas no primeiro tick.")
-    }
-
-    private fun detectAndLogExtensions(modules: List<com.nexuapicore.core.module.NexusModule>) {
-        val allKnown = ExtensionDatabase.getAllExtensions()
-
-        var nativeExtensions: List<String> = emptyList()
-        try {
-            if (NexusNativeLoader.loaded) {
-                val raw = NexusNativeLoader.getGLExtensions() ?: ""
-                if (raw.isNotEmpty()) {
-                    nativeExtensions = raw.split(" ").filter { it.isNotEmpty() }
-                }
-            }
-        } catch (e: Exception) {
-            println("[Nexus] Erro ao obter extensões nativas: ${e.message}")
-        }
-
-        var rendererExtensions: List<String> = emptyList()
-        try {
-            rendererExtensions = ALLExtensionDetector.detectExtensions()
-        } catch (e: Exception) {
-            println("[Nexus] Erro no fallback GL: ${e.message}")
-        }
-
-        println("[Nexus] ===== LISTA NATIVA (fonte: libnexus_mali_core.so) =====")
-        if (nativeExtensions.isEmpty()) {
-            println("[Nexus] [NATIVA] INDISPONÍVEL")
-        } else {
-            for (def in allKnown) {
-                val status = if (nativeExtensions.contains(def.name)) "OK" else "ERRO"
-                println("[Nexus] [NAT][$status] ${def.name}")
-            }
-        }
-        println("[Nexus] ===== FIM LISTA NATIVA (${nativeExtensions.size} extensões) =====")
-
-        println("[Nexus] ===== LISTA RENDERIZADOR (fonte: GL/LTW) =====")
-        if (rendererExtensions.isEmpty()) {
-            println("[Nexus] [RENDERER] INDISPONÍVEL")
-        } else {
-            for (def in allKnown) {
-                val status = if (rendererExtensions.contains(def.name)) "OK" else "ERRO"
-                println("[Nexus] [REN][$status] ${def.name}")
-            }
-        }
-        println("[Nexus] ===== FIM LISTA RENDERIZADOR (${rendererExtensions.size} extensões) =====")
-
-        val availableExtensions = when {
-            nativeExtensions.isNotEmpty() -> {
-                println("[Nexus] Fonte ativa: Biblioteca Nativa")
-                nativeExtensions
-            }
-            rendererExtensions.isNotEmpty() -> {
-                println("[Nexus] Fonte ativa: Renderizador (fallback)")
-                rendererExtensions
-            }
-            else -> {
-                println("[Nexus] AVISO: Nenhuma extensão detetada. Modo vanilla ativo.")
-                emptyList()
-            }
-        }
-
-        val resolver = CapabilityResolver(availableExtensions)
-        val capMap = resolver.resolve()
-        featureRegistry = FeatureRegistry(capMap)
-
-        modules.forEach { it.onInitialize(featureRegistry) }
-
-        println("[Nexus] Capacidades ativas: ${featureRegistry.getActiveCapabilities()}")
     }
 }

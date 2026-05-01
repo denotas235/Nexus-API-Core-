@@ -5,6 +5,7 @@ import com.nexuapicore.core.CapabilityResolver
 import com.nexuapicore.core.FeatureRegistry
 import com.nexuapicore.core.ModuleLoader
 import com.nexuapicore.core.ResourceManager
+import com.nexuapicore.core.fallback.ALLExtensionDetector
 import com.nexuapicore.core.module.NexusModule
 import com.nexuapicore.core.pipeline.RenderPipeline
 
@@ -23,39 +24,43 @@ object NexusAPI {
         if (initialized) return
         initialized = true
 
-        // 1. Carregar base de extensões (já está em ExtensionDatabase)
+        // 1. Base de extensões conhecidas
         val allExtensions = ExtensionDatabase.getAllExtensions()
         println("[Nexus] Extension database loaded: ${allExtensions.size} known extensions")
 
-        // 2. Obter lista de extensões disponíveis (será preenchida pelo cliente após o primeiro tick)
-        //    Por enquanto, usamos uma lista vazia; o cliente atualizará o registry mais tarde.
-        val availableExtensions = emptyList<String>()
+        // 2. Detectar extensões reais via GL — ALLExtensionDetector chama glGetString(GL_EXTENSIONS)
+        //    Só funciona após o contexto GL estar activo (chamado do CLIENT_STARTED)
+        val availableExtensions = ALLExtensionDetector.detectExtensions()
+        println("[Nexus] Extensions detected: ${availableExtensions.size}")
+
+        // 3. Resolver capabilities
         val resolver = CapabilityResolver(availableExtensions)
-        val capMap = resolver.resolve()
+        val capMap   = resolver.resolve()
         featureRegistry = FeatureRegistry(capMap)
 
-        // 3. Inicializar gestor de recursos
-        resourceManager = ResourceManager
-        ResourceManager.init()   // object, apenas chama o método
+        val active = featureRegistry.getActiveCapabilities()
+        println("[Nexus] Active capabilities (${active.size}): $active")
 
-        // 4. Registar módulos pendentes
+        // 4. Recursos
+        resourceManager = ResourceManager
+        ResourceManager.init()
+
+        // 5. Módulos pendentes (registados antes do init)
         pendingModules.forEach { mod ->
             mod.onInitialize(featureRegistry)
             mod.onRegisterPipeline(RenderPipeline)
         }
         pendingModules.clear()
 
-        // 5. Carregar módulos automáticos (se houver outros descobertos)
-        val loader = ModuleLoader
-        val modules = loader.discoverModules()
-        modules.forEach { mod ->
+        // 6. Módulos descobertos automaticamente
+        val discovered = ModuleLoader.discoverModules()
+        discovered.forEach { mod ->
             mod.onInitialize(featureRegistry)
             mod.onRegisterPipeline(RenderPipeline)
         }
 
-        // 6. Pipeline pronto
-        RenderPipeline.assemble(modules)
-        pipeline = RenderPipeline   // guardamos o object para facilitar acesso
+        RenderPipeline.assemble(discovered)
+        pipeline = RenderPipeline
 
         println("[Nexus] API initialized")
     }
