@@ -14,25 +14,24 @@ class TDBRModule : NexusModule {
     )
 
     override fun onInitialize(registry: FeatureRegistry) {
+        // Inicializa PLSExtension com o registry real — a partir daqui
+        // isAvailable() lê GL_EXT_shader_pixel_local_storage via extensions.json
+        PLSExtension.init(registry)
+        DiscardHandler.init()
+
         println("[TDBR] Capacidades:")
         println("[TDBR]   PLS   : ${registry.isAvailable("PIXEL_LOCAL_STORAGE")}")
         println("[TDBR]   Fetch : ${registry.isAvailable("FRAMEBUFFER_FETCH")}")
         println("[TDBR]   MSAA  : ${registry.isAvailable("FAST_MSAA")}")
         println("[TDBR]   HDR   : ${registry.isAvailable("HDR_COLOR")}")
 
-        DiscardHandler.init()
-
         when {
             registry.isAvailable("PIXEL_LOCAL_STORAGE") -> {
                 println("[TDBR] Path: Pixel Local Storage")
                 PLSManager.setup(1920, 1080)
             }
-            registry.isAvailable("FRAMEBUFFER_FETCH") -> {
-                println("[TDBR] Path: MRT Fallback")
-                MRTManager.setup(1920, 1080)
-            }
             else -> {
-                println("[TDBR] Path: MRT Fallback (forward)")
+                println("[TDBR] Path: MRT Fallback")
                 MRTManager.setup(1920, 1080)
             }
         }
