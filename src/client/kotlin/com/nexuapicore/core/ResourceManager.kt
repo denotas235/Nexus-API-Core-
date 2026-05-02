@@ -1,7 +1,5 @@
 package com.nexuapicore.core
 
-import org.lwjgl.opengl.GLES30
-
 object ResourceManager {
     var plsShaderHandle: Int = 0
         private set
@@ -11,39 +9,63 @@ object ResourceManager {
     fun getPLSShaderHandle(): Int? = if (plsShaderHandle != 0) plsShaderHandle else null
 
     fun compilePLSShaders(vertexSrc: String, fragmentSrc: String) {
-        val vs = GLES30.glCreateShader(GLES30.GL_VERTEX_SHADER)
-        GLES30.glShaderSource(vs, vertexSrc)
-        GLES30.glCompileShader(vs)
-        checkCompile(vs, "vertex")
+        val vs = GLESHelper.glCompileShader(GLESHelper.GL_VERTEX_SHADER, vertexSrc)
+        val fs = GLESHelper.glCompileShader(GLESHelper.GL_FRAGMENT_SHADER, fragmentSrc)
+        if (vs == 0 || fs == 0) return
 
-        val fs = GLES30.glCreateShader(GLES30.GL_FRAGMENT_SHADER)
-        GLES30.glShaderSource(fs, fragmentSrc)
-        GLES30.glCompileShader(fs)
-        checkCompile(fs, "fragment")
-
-        plsShaderHandle = GLES30.glCreateProgram()
-        GLES30.glAttachShader(plsShaderHandle, vs)
-        GLES30.glAttachShader(plsShaderHandle, fs)
-        GLES30.glLinkProgram(plsShaderHandle)
-        checkLink(plsShaderHandle)
-
-        GLES30.glDeleteShader(vs)
-        GLES30.glDeleteShader(fs)
-
+        plsShaderHandle = GLESHelper.glLinkProgram(vs, fs)
         println("[ResourceManager] PLS shader program linked: $plsShaderHandle")
     }
+}
 
-    private fun checkCompile(shader: Int, type: String) {
-        if (GLES30.glGetShaderi(shader, GLES30.GL_COMPILE_STATUS) == 0) {
-            val log = GLES30.glGetShaderInfoLog(shader)
-            println("[ResourceManager] Shader $type compile error: $log")
+// Funções auxiliares em GLESHelper (completar os métodos necessários)
+private fun GLESHelper.glCompileShader(type: Int, src: String): Int {
+    try {
+        val glCreateShader = glClass?.getMethod("glCreateShader", Int::class.javaPrimitiveType)
+        val glShaderSource = glClass?.getMethod("glShaderSource", Int::class.javaPrimitiveType, String::class.java)
+        val glCompileShader = glClass?.getMethod("glCompileShader", Int::class.javaPrimitiveType)
+        val glGetShaderi = glClass?.getMethod("glGetShaderi", Int::class.javaPrimitiveType, Int::class.javaPrimitiveType)
+        val glGetShaderInfoLog = glClass?.getMethod("glGetShaderInfoLog", Int::class.javaPrimitiveType)
+
+        val shader = glCreateShader?.invoke(null, type) as? Int ?: return 0
+        glShaderSource?.invoke(null, shader, src)
+        glCompileShader?.invoke(null, shader)
+        val status = glGetShaderi?.invoke(null, shader, GL_COMPILE_STATUS) as? Int ?: 0
+        if (status == 0) {
+            val log = glGetShaderInfoLog?.invoke(null, shader) as? String ?: ""
+            println("[ResourceManager] Shader compile error: $log")
+            return 0
         }
+        return shader
+    } catch (e: Exception) {
+        println("[ResourceManager] Exception: ${e.message}")
+        return 0
     }
+}
 
-    private fun checkLink(program: Int) {
-        if (GLES30.glGetProgrami(program, GLES30.GL_LINK_STATUS) == 0) {
-            val log = GLES30.glGetProgramInfoLog(program)
+private fun GLESHelper.glLinkProgram(vs: Int, fs: Int): Int {
+    try {
+        val glCreateProgram = glClass?.getMethod("glCreateProgram")
+        val glAttachShader = glClass?.getMethod("glAttachShader", Int::class.javaPrimitiveType, Int::class.javaPrimitiveType)
+        val glLinkProgram = glClass?.getMethod("glLinkProgram", Int::class.javaPrimitiveType)
+        val glGetProgrami = glClass?.getMethod("glGetProgrami", Int::class.javaPrimitiveType, Int::class.javaPrimitiveType)
+        val glGetProgramInfoLog = glClass?.getMethod("glGetProgramInfoLog", Int::class.javaPrimitiveType)
+        val glDeleteShader = glClass?.getMethod("glDeleteShader", Int::class.javaPrimitiveType)
+
+        val program = glCreateProgram?.invoke(null) as? Int ?: return 0
+        glAttachShader?.invoke(null, program, vs)
+        glAttachShader?.invoke(null, program, fs)
+        glLinkProgram?.invoke(null, program)
+        val status = glGetProgrami?.invoke(null, program, GL_LINK_STATUS) as? Int ?: 0
+        if (status == 0) {
+            val log = glGetProgramInfoLog?.invoke(null, program) as? String ?: ""
             println("[ResourceManager] Program link error: $log")
+            return 0
         }
+        glDeleteShader?.invoke(null, vs)
+        glDeleteShader?.invoke(null, fs)
+        return program
+    } catch (e: Exception) {
+        return 0
     }
 }

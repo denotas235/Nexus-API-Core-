@@ -34,7 +34,6 @@ dependencies {
     modImplementation("net.fabricmc:fabric-language-kotlin:${providers.gradleProperty("fabric_kotlin_version").get()}")
 
     // LWJGL — necessário para GLES30
-    modImplementation("org.lwjgl:lwjgl-opengl:3.3.1")
 }
 
 tasks.processResources {
