@@ -14,8 +14,9 @@ repositories {
 }
 
 dependencies {
-    // dependência da API Core (project raiz)
-    implementation(project(":"))
+    // dependência da API Core (project raiz) — configuração namedElements + client source set
+    implementation(project(":", configuration = "namedElements"))
+    clientImplementation(project(":").sourceSets.client.output)
 
     // Minecraft e Fabric (necessários para o entrypoint)
     minecraft("com.mojang:minecraft:$minecraft_version")
