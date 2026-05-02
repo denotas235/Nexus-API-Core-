@@ -5,12 +5,12 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.GameOptions;
 import net.minecraft.client.option.ParticlesMode;
+import net.minecraft.client.option.SimpleOption;
 import net.minecraft.text.Text;
 
 @Environment(EnvType.CLIENT)
 public class PerformanceGuard {
     private static final int VIEW_MIN = 2;
-    private static final int VIEW_MAX = 32;
     private static int originalViewDistance = -1;
     private static ParticlesMode originalParticles = null;
     private static int lowFpsCounter = 0;
@@ -22,10 +22,11 @@ public class PerformanceGuard {
     private static boolean emergencyActive = false;
 
     public static void init() {
+        MinecraftClient client = MinecraftClient.getInstance();
+        GameOptions opts = client.options;
         if (originalViewDistance == -1) {
-            MinecraftClient client = MinecraftClient.getInstance();
-            originalViewDistance = client.options.getViewDistance().getValue();
-            originalParticles = client.options.getParticles().getValue();
+            originalViewDistance = opts.viewDistance.getValue();
+            originalParticles = opts.particles.getValue();
         }
     }
 
@@ -34,20 +35,16 @@ public class PerformanceGuard {
         if (client == null || client.world == null) return;
         GameOptions opts = client.options;
 
-        // Guarda original se ainda não guardado
-        if (originalViewDistance == -1) {
-            init();
-        }
+        if (originalViewDistance == -1) init();
 
         if (fps < LOW_FPS_THRESHOLD) {
             lowFpsCounter++;
             stableCounter = 0;
             if (lowFpsCounter >= LOW_FPS_TICKS_TRIGGER && !emergencyActive) {
                 emergencyActive = true;
-                // Reduzir view distance e partículas
-                int newView = Math.max(opts.getViewDistance().getValue() / 2, VIEW_MIN);
-                opts.getViewDistance().setValue(newView);
-                opts.getParticles().setValue(ParticlesMode.MINIMAL);
+                int newView = Math.max(opts.viewDistance.getValue() / 2, VIEW_MIN);
+                opts.viewDistance.setValue(newView);
+                opts.particles.setValue(ParticlesMode.MINIMAL);
                 if (client.player != null) {
                     client.player.sendMessage(Text.literal("§cPerformanceGuard: reduzindo qualidade para manter FPS..."), true);
                 }
@@ -57,9 +54,8 @@ public class PerformanceGuard {
             lowFpsCounter = 0;
             if (stableCounter >= RECOVERY_TICKS_TRIGGER && emergencyActive) {
                 emergencyActive = false;
-                // Restaurar original
-                opts.getViewDistance().setValue(originalViewDistance);
-                opts.getParticles().setValue(originalParticles);
+                opts.viewDistance.setValue(originalViewDistance);
+                opts.particles.setValue(originalParticles);
                 if (client.player != null) {
                     client.player.sendMessage(Text.literal("§aPerformanceGuard: qualidade restaurada."), true);
                 }
@@ -70,7 +66,5 @@ public class PerformanceGuard {
         }
     }
 
-    public static void onTick() {
-        // pode ser usado para ajustes menos agressivos
-    }
+    public static void onTick() {}
 }
