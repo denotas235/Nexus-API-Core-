@@ -1,5 +1,11 @@
 {
   "extensions": [
+    {"name":"EGL_NV_context_priority_realtime","group":"EGL_NV","functions":[],"capabilities":["CONTEXT_PRIORITY_REALTIME"]},
+    {"name":"GL_OVR_multiview_multisampled_render_to_texture","group":"GL_OVR","functions":[],"capabilities":["MULTIVIEW_MULTISAMPLED_RENDER_TO_TEXTURE"]},
+    {"name":"AAudio_MMap","group":"AUDIO_AAUDIO","functions":["AAudioStream_isMMapUsed","AAudio_setMMapPolicy","AAudio_getMMapPolicy"],"capabilities":["AUDIO_MMAP"]},
+    {"name":"AAudio_Performance","group":"AUDIO_AAUDIO","functions":["AAudioStreamBuilder_setPerformanceMode","AAudioStream_getPerformanceMode","AAudioStream_getTimestamp"],"capabilities":["AUDIO_PERFORMANCE_MODE","AUDIO_TIMESTAMP"]},
+    {"name":"MTK_AudioDump","group":"AUDIO_MTK","functions":["MTK_GET_AUDIO_DUMP_FILE_LIST","MTK_GET_AUDIO_DUMP_FILE_CONTENT","MTK_DEL_AUDIO_DUMP_FILE","readAudioHalDumpFileContent"],"capabilities":["AUDIO_HAL_DUMP"]},
+    {"name":"AudioToolKit","group":"AUDIO_NATIVE","functions":["AudioToolKit_GetDecodedData"],"capabilities":["AUDIO_DECODED_DATA"]},
     {"name":"GL_ARM_EGL_image_storage_compression","group":"GL_ARM","functions":[],"capabilities":["EGL_IMAGE_STORAGE_COMPRESSION"]},
     {"name":"GL_ARM_all_samples_equal","group":"GL_ARM","functions":[],"capabilities":["FAST_MSAA"]},
     {"name":"GL_ARM_explicit_attribute_access","group":"GL_ARM","functions":[],"capabilities":["EXPLICIT_ATTRIBUTE_ACCESS"]},
