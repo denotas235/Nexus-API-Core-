@@ -3,6 +3,10 @@ package com.nexus.modules.tdbr
 import com.nexuapicore.core.FeatureRegistry
 import com.nexuapicore.core.module.NexusModule
 import com.nexuapicore.core.pipeline.RenderPipeline
+import com.nexuapicore.core.ResourceManager
+import com.nexus.modules.tdbr.log.TDBRLogger
+import com.nexus.modules.tdbr.util.ShaderLoader
+import com.nexus.modules.tdbr.util.FullscreenQuad
 import net.minecraft.client.MinecraftClient
 
 class TDBRModule : NexusModule {
@@ -15,34 +19,40 @@ class TDBRModule : NexusModule {
     )
 
     override fun onInitialize(registry: FeatureRegistry) {
+        TDBRLogger.log("Initializing TDBR Module")
         PLSExtension.init(registry)
         DiscardHandler.init()
-
-        println("[TDBR] Capacidades:")
-        println("[TDBR]   PLS   : ${registry.isAvailable("PIXEL_LOCAL_STORAGE")}")
-        println("[TDBR]   Fetch : ${registry.isAvailable("FRAMEBUFFER_FETCH")}")
-        println("[TDBR]   MSAA  : ${registry.isAvailable("FAST_MSAA")}")
-        println("[TDBR]   HDR   : ${registry.isAvailable("COLOR_BUFFER_FLOAT")}")
 
         val mc = MinecraftClient.getInstance()
         val w = mc?.window?.framebufferWidth  ?: 1280
         val h = mc?.window?.framebufferHeight ?: 720
-        println("[TDBR] Resolução detectada: ${w}x${h}")
 
         when {
             registry.isAvailable("PIXEL_LOCAL_STORAGE") -> {
-                println("[TDBR] Path: Pixel Local Storage")
+                TDBRLogger.log("Path: Pixel Local Storage (on-chip)")
                 PLSManager.setup(w, h)
+                // Carregar shaders PLS
+                try {
+                    val vertSrc = ShaderLoader.load("assets/nexus-tdbr/shaders/pls_gbuffer.vsh")
+                    val fragSrc = ShaderLoader.load("assets/nexus-tdbr/shaders/pls_lighting.fsh")
+                    ResourceManager.compilePLSShaders(vertSrc, fragSrc)
+                    TDBRLogger.log("PLS shaders compiled successfully")
+                } catch (e: Exception) {
+                    TDBRLogger.log("Error loading shaders: ${e.message}")
+                    // fallback: manter enabled mas sem shader
+                }
             }
             else -> {
-                println("[TDBR] Path: MRT Fallback")
+                TDBRLogger.log("Path: MRT Fallback")
                 MRTManager.setup(w, h)
+                // TODO: carregar shaders MRT
             }
         }
+
+        FullscreenQuad.init() // preparar quad
     }
 
     override fun onRegisterPipeline(pipeline: RenderPipeline) {
-        pipeline.onBeginFrame { }
         pipeline.onGeometryPass {
             if (PLSManager.enabled)      PLSManager.beginGeometryPass()
             else if (MRTManager.enabled) MRTManager.beginGeometryPass()
@@ -59,15 +69,14 @@ class TDBRModule : NexusModule {
         pipeline.onEndFrame {
             DiscardHandler.discardAfterLighting()
         }
-        println("[TDBR] Pipeline registado")
+        TDBRLogger.log("Pipeline registado")
     }
 
     override fun onShutdown() {
-        println("[TDBR] Shutdown")
+        TDBRLogger.log("Shutdown")
     }
 
     companion object {
-        @JvmStatic
-        fun onRenderStart() { }
+        @JvmStatic fun onRenderStart() { }
     }
 }
