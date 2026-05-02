@@ -1,5 +1,13 @@
 name: Build TDBR Module
-on: [pull_request, push]
+on:
+  push:
+    paths:
+      - 'nexus-tdbr/**'
+      - 'src/main/resources/natives/arm64-v8a/libnexus_mali_core.so'
+  pull_request:
+    paths:
+      - 'nexus-tdbr/**'
+      - 'src/main/resources/natives/arm64-v8a/libnexus_mali_core.so'
 
 jobs:
   build-tdbr:

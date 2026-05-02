@@ -1,5 +1,11 @@
 name: Build API Core
-on: [pull_request, push]
+on:
+  push:
+    paths-ignore:
+      - 'nexus-tdbr/**'
+  pull_request:
+    paths-ignore:
+      - 'nexus-tdbr/**'
 
 jobs:
   build-api:
