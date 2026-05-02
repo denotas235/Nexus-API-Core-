@@ -18,8 +18,12 @@ jobs:
         run: chmod +x ./gradlew
       - name: build and publish API Core to mavenLocal
         run: ./gradlew publishToMavenLocal
-      - name: build TDBR module
-        run: cd nexus-tdbr-standalone && ../gradlew build
+      - name: clean gradle cache before TDBR build
+        run: rm -rf ~/.gradle/caches/
+      - name: build TDBR module (standalone)
+        run: |
+          cd nexus-tdbr-standalone
+          ../gradlew build --no-daemon
       - name: capture build artifacts (Nexus API Core)
         uses: actions/upload-artifact@v7
         with:
