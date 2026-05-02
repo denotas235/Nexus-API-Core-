@@ -3,6 +3,7 @@ package com.nexus.modules.tdbr
 import com.nexuapicore.core.FeatureRegistry
 import com.nexuapicore.core.module.NexusModule
 import com.nexuapicore.core.pipeline.RenderPipeline
+import net.minecraft.client.MinecraftClient
 
 class TDBRModule : NexusModule {
     override val id = "tdbr"
@@ -14,8 +15,6 @@ class TDBRModule : NexusModule {
     )
 
     override fun onInitialize(registry: FeatureRegistry) {
-        // Inicializa PLSExtension com o registry real — a partir daqui
-        // isAvailable() lê GL_EXT_shader_pixel_local_storage via extensions.json
         PLSExtension.init(registry)
         DiscardHandler.init()
 
@@ -23,23 +22,29 @@ class TDBRModule : NexusModule {
         println("[TDBR]   PLS   : ${registry.isAvailable("PIXEL_LOCAL_STORAGE")}")
         println("[TDBR]   Fetch : ${registry.isAvailable("FRAMEBUFFER_FETCH")}")
         println("[TDBR]   MSAA  : ${registry.isAvailable("FAST_MSAA")}")
-        println("[TDBR]   HDR   : ${registry.isAvailable("HDR_COLOR")}")
+        println("[TDBR]   HDR   : ${registry.isAvailable("COLOR_BUFFER_FLOAT")}")
+
+        // Resolução real da janela do Minecraft
+        val mc = MinecraftClient.getInstance()
+        val w = mc?.window?.framebufferWidth  ?: 1280
+        val h = mc?.window?.framebufferHeight ?: 720
+        println("[TDBR] Resolução detectada: ${w}x${h}")
 
         when {
             registry.isAvailable("PIXEL_LOCAL_STORAGE") -> {
                 println("[TDBR] Path: Pixel Local Storage")
-                PLSManager.setup(1920, 1080)
+                PLSManager.setup(w, h)
             }
             else -> {
                 println("[TDBR] Path: MRT Fallback")
-                MRTManager.setup(1920, 1080)
+                MRTManager.setup(w, h)
             }
         }
     }
 
     override fun onRegisterPipeline(pipeline: RenderPipeline) {
         pipeline.onBeginFrame {
-            // Futura integração: PLSManager.updateLight(...)
+            // Futuro: updateLight com tempo do Minecraft
         }
         pipeline.onGeometryPass {
             if (PLSManager.enabled)      PLSManager.beginGeometryPass()

@@ -145,8 +145,8 @@ object MRTManager {
 
     private fun loadShader(name: String): String? {
         return try {
-            val path = "/assets/nexus-tdbr/shaders/$name"
-            MRTManager::class.java.getResourceAsStream(path)
+            val path = "assets/nexus-tdbr/shaders/$name"
+            Thread.currentThread().contextClassLoader.getResourceAsStream(path) ?: MRTManager::class.java.classLoader.getResourceAsStream(path)
                 ?.bufferedReader()?.readText()
                 ?: run { println("[MRT] Shader não encontrado: $path"); null }
         } catch (e: Exception) {

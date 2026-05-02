@@ -1,16 +1,27 @@
 package com.nexuapicore.client
 
 import com.nexuapicore.NexusAPI
+import com.nexuapicore.core.pipeline.RenderPipeline
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
 
 class NexusAPICoreClient : ClientModInitializer {
     override fun onInitializeClient() {
-        // CLIENT_STARTED dispara depois do contexto GL estar activo
-        // É o único momento seguro para chamar glGetString(GL_EXTENSIONS)
+
+        // 1. Init após contexto GL pronto
         ClientLifecycleEvents.CLIENT_STARTED.register {
             println("[Nexus] GL context ready — iniciando API")
             NexusAPI.init()
+        }
+
+        // 2. Executa o pipeline a cada frame (após render do mundo)
+        WorldRenderEvents.END.register {
+            try {
+                RenderPipeline.executeFrame()
+            } catch (e: Throwable) {
+                println("[Nexus] RenderPipeline.executeFrame() crash: ${e.message} — frame ignorado")
+            }
         }
     }
 }
