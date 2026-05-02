@@ -24,7 +24,6 @@ class TDBRModule : NexusModule {
         println("[TDBR]   MSAA  : ${registry.isAvailable("FAST_MSAA")}")
         println("[TDBR]   HDR   : ${registry.isAvailable("COLOR_BUFFER_FLOAT")}")
 
-        // Resolução real da janela do Minecraft
         val mc = MinecraftClient.getInstance()
         val w = mc?.window?.framebufferWidth  ?: 1280
         val h = mc?.window?.framebufferHeight ?: 720
@@ -68,5 +67,9 @@ class TDBRModule : NexusModule {
     override fun onShutdown() {
         println("[TDBR] Shutdown")
     }
-    @JvmStatic fun onRenderStart() { }
+
+    companion object {
+        @JvmStatic
+        fun onRenderStart() { }
+    }
 }
