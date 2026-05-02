@@ -12,7 +12,6 @@
       "com.nexuapicore.client.NexusAPICoreClient"
     ]
   },
-  "accessWidener": "nexus-api-core.accesswidener",
   "mixins": [
     "nexus-api-core.mixins.json"
   ],

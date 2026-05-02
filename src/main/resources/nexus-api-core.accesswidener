@@ -1,4 +1,0 @@
-accessWidener	v2	named
-accessible	class	net/minecraft/client/MinecraftClient	field	currentFps	I
-accessible	class	net/minecraft/client/option/GameOptions	field	viewDistance	Lnet/minecraft/client/option/SimpleOption;
-accessible	class	net/minecraft/client/option/GameOptions	field	particles	Lnet/minecraft/client/option/SimpleOption;
