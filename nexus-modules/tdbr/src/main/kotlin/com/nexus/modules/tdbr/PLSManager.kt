@@ -8,7 +8,6 @@ object PLSManager {
     var enabled = false
         private set
 
-    // Direção da luz — aproximação do sol do Minecraft
     private var lightDirX  = 0.6f
     private var lightDirY  = 1.0f
     private var lightDirZ  = 0.8f
@@ -34,6 +33,10 @@ object PLSManager {
             enabled = false
             return
         }
+
+        // Log dos primeiros caracteres para confirmar conteúdo real
+        println("[TDBR] vsh[0..50]: ${vsh.take(50)}")
+        println("[TDBR] fsh[0..50]: ${gbufferFsh.take(50)}")
 
         ResourceManager.compilePLSShaders(vsh, gbufferFsh, quadVsh, lightingFsh)
 
@@ -70,13 +73,10 @@ object PLSManager {
         if (prog == 0) return
 
         GL20.glUseProgram(prog)
-
-        // Enviar luz para o shader
         GL20.glUniform3f(GL20.glGetUniformLocation(prog, "uLightDir"),   lightDirX, lightDirY, lightDirZ)
         GL20.glUniform3f(GL20.glGetUniformLocation(prog, "uLightColor"), lightR, lightG, lightB)
         GL20.glUniform1f(GL20.glGetUniformLocation(prog, "uAmbient"),    ambient)
 
-        // Desenhar quad fullscreen (sem VBO — o vertex shader gera os vértices)
         GL11.glDisable(GL11.GL_DEPTH_TEST)
         GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, 3)
         GL11.glEnable(GL11.GL_DEPTH_TEST)
@@ -91,14 +91,28 @@ object PLSManager {
     }
 
     private fun loadShader(name: String): String? {
+        // USA o context classloader do Fabric — garante acesso aos assets do mod
+        val path = "assets/nexus-tdbr/shaders/$name"
         return try {
-            val path = "/assets/nexus-tdbr/shaders/$name"
-            PLSManager::class.java.getResourceAsStream(path)
-                ?.bufferedReader()
-                ?.readText()
-                ?: run { println("[TDBR] Shader não encontrado: $path"); null }
+            val cl = Thread.currentThread().contextClassLoader
+            val stream = cl.getResourceAsStream(path)
+                ?: run {
+                    // Fallback: classloader da própria classe
+                    PLSManager::class.java.classLoader.getResourceAsStream(path)
+                }
+                ?: run {
+                    println("[TDBR] Shader não encontrado: $path")
+                    return null
+                }
+            val text = stream.bufferedReader().readText()
+            if (text.isBlank()) {
+                println("[TDBR] Shader vazio: $path")
+                return null
+            }
+            text
         } catch (e: Exception) {
-            println("[TDBR] Erro ao carregar $name: ${e.message}"); null
+            println("[TDBR] Erro ao carregar $name: ${e.message}")
+            null
         }
     }
 }
