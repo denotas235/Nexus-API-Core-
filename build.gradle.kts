@@ -10,6 +10,7 @@ version = providers.gradleProperty("mod_version").get()
 group = providers.gradleProperty("maven_group").get()
 
 repositories {
+        maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots/") }
 }
 
 loom {
@@ -29,6 +30,7 @@ client = true
 }
 
 dependencies {
+    modClientImplementation("org.lwjgl:lwjgl-opengl:3.3.6-SNAPSHOT")
 minecraft("com.mojang:minecraft:${providers.gradleProperty("minecraft_version").get()}")
 mappings("net.fabricmc:yarn:${providers.gradleProperty("yarn_mappings").get()}:v2")
 modImplementation("net.fabricmc:fabric-loader:${providers.gradleProperty("loader_version").get()}")
