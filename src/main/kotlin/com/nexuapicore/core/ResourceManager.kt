@@ -1,49 +1,44 @@
 package com.nexuapicore.core
 
-import org.lwjgl.opengl.GL20
-
 object ResourceManager {
-    private var mrtGBufferProgram = 0
-    private var mrtLightingProgram = 0
+    var plsShaderHandle: Int = 0
+        private set
+    var mrtGBufferHandle: Int = 0
+        private set
+    var mrtLightingHandle: Int = 0
+        private set
 
-    fun compileMRTShaders(
-        vertexShader: String,
-        gbufferFragShader: String,
-        quadVertexShader: String,
-        lightingFragShader: String
-    ) {
-        // Compile G-Buffer shader program
-        mrtGBufferProgram = compileShaderProgram(vertexShader, gbufferFragShader)
+    fun init() { }
 
-        // Compile Lighting shader program
-        mrtLightingProgram = compileShaderProgram(quadVertexShader, lightingFragShader)
+    // ── PLS ────────────────────────────────────────────
+    fun getPLSShaderHandle(): Int? = if (plsShaderHandle != 0) plsShaderHandle else null
+
+    fun compilePLSShaders(vertexSrc: String, fragmentSrc: String) {
+        val vs = GLESHelper.glCompileShader(GLESHelper.GL_VERTEX_SHADER, vertexSrc)
+        val fs = GLESHelper.glCompileShader(GLESHelper.GL_FRAGMENT_SHADER, fragmentSrc)
+        if (vs == 0 || fs == 0) return
+        plsShaderHandle = GLESHelper.glLinkProgram(vs, fs)
+        println("[ResourceManager] PLS shader program linked: $plsShaderHandle")
     }
 
-    fun getMRTGBufferHandle(): Int {
-        return mrtGBufferProgram
-    }
+    // ── MRT ────────────────────────────────────────────
+    fun getMRTGBufferHandle(): Int? = if (mrtGBufferHandle != 0) mrtGBufferHandle else null
+    fun getMRTLightingHandle(): Int? = if (mrtLightingHandle != 0) mrtLightingHandle else null
 
-    fun getMRTLightingHandle(): Int {
-        return mrtLightingProgram
-    }
-
-    private fun compileShaderProgram(vertexSource: String, fragmentSource: String): Int {
-        val vertexShader = GL20.glCreateShader(GL20.GL_VERTEX_SHADER)
-        GL20.glShaderSource(vertexShader, vertexSource)
-        GL20.glCompileShader(vertexShader)
-
-        val fragmentShader = GL20.glCreateShader(GL20.GL_FRAGMENT_SHADER)
-        GL20.glShaderSource(fragmentShader, fragmentSource)
-        GL20.glCompileShader(fragmentShader)
-
-        val program = GL20.glCreateProgram()
-        GL20.glAttachShader(program, vertexShader)
-        GL20.glAttachShader(program, fragmentShader)
-        GL20.glLinkProgram(program)
-
-        GL20.glDeleteShader(vertexShader)
-        GL20.glDeleteShader(fragmentShader)
-
-        return program
+    fun compileMRTShaders(gbufferVert: String, gbufferFrag: String, lightingVert: String, lightingFrag: String) {
+        // G‑buffer
+        val gvs = GLESHelper.glCompileShader(GLESHelper.GL_VERTEX_SHADER, gbufferVert)
+        val gfs = GLESHelper.glCompileShader(GLESHelper.GL_FRAGMENT_SHADER, gbufferFrag)
+        if (gvs != 0 && gfs != 0) {
+            mrtGBufferHandle = GLESHelper.glLinkProgram(gvs, gfs)
+            println("[ResourceManager] MRT G‑buffer program linked: $mrtGBufferHandle")
+        }
+        // Iluminação
+        val lvs = GLESHelper.glCompileShader(GLESHelper.GL_VERTEX_SHADER, lightingVert)
+        val lfs = GLESHelper.glCompileShader(GLESHelper.GL_FRAGMENT_SHADER, lightingFrag)
+        if (lvs != 0 && lfs != 0) {
+            mrtLightingHandle = GLESHelper.glLinkProgram(lvs, lfs)
+            println("[ResourceManager] MRT lighting program linked: $mrtLightingHandle")
+        }
     }
 }
