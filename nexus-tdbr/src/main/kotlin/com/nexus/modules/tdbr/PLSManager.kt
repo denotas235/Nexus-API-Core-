@@ -1,10 +1,10 @@
 package com.nexus.modules.tdbr
 
 import com.nexuapicore.core.ResourceManager
-import org.lwjgl.opengl.GLES30
 
 object PLSManager {
     var enabled = false
+
     private val plsAvailable: Boolean by lazy {
         try {
             Class.forName("org.lwjgl.opengl.EXTShaderPixelLocalStorage")
@@ -21,7 +21,6 @@ object PLSManager {
             return
         }
         try {
-            // Chamada direta, pois a classe já foi verificada
             val cls = Class.forName("org.lwjgl.opengl.EXTShaderPixelLocalStorage")
             val method = cls.getMethod("glFramebufferPixelLocalStorageSize", Int::class.javaPrimitiveType, Int::class.javaPrimitiveType, Int::class.javaPrimitiveType)
             method.invoke(null, 3, width, height)
@@ -33,16 +32,25 @@ object PLSManager {
         }
     }
 
-    // ... manter restantes métodos beginGeometryPass, etc., com a mesma lógica de reflection ou assumindo que a classe já está carregada.
-    // Vou colocar a implementação original, mas com enabled a proteger
     fun beginGeometryPass() {
         if (!enabled) return
-        // Supondo que o ResourceManager tem o handle do shader PLS
-        ResourceManager.getPLSShaderHandle()?.let { GLES30.glUseProgram(it) }
-        GLES30.glDepthMask(true)
-        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT or GLES30.GL_DEPTH_BUFFER_BIT)
+        try {
+            val gl = Class.forName("org.lwjgl.opengl.GLES30")
+            val useProgram = gl.getMethod("glUseProgram", Int::class.javaPrimitiveType)
+            val depthMask = gl.getMethod("glDepthMask", Boolean::class.javaPrimitiveType)
+            val clear = gl.getMethod("glClear", Int::class.javaPrimitiveType)
+            val handle = ResourceManager.getPLSShaderHandle()
+            if (handle != null) {
+                useProgram.invoke(null, handle)
+            }
+            depthMask.invoke(null, true)
+            clear.invoke(null, 0x00004000 or 0x00000100) // GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT
+        } catch (e: Exception) {
+            println("[PLSManager] GL error: ${e.message}")
+        }
     }
-    fun endGeometryPass() { if (!enabled) return }
-    fun beginLightingPass() { if (!enabled) return /* aplicar shader de iluminação */ }
-    fun endLightingPass() { if (!enabled) return }
+
+    fun endGeometryPass() { /* nothing */ }
+    fun beginLightingPass() { /* nothing */ }
+    fun endLightingPass() { /* nothing */ }
 }
