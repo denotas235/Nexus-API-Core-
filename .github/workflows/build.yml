@@ -7,43 +7,19 @@ jobs:
     steps:
       - name: checkout repository
         uses: actions/checkout@v6
-
       - name: validate gradle wrapper
-        uses: gradle/actions/wrapper-validation@v5
-
+        uses: gradle/actions/wrapper-validation@v6
       - name: setup jdk
         uses: actions/setup-java@v5
         with:
           java-version: '25'
           distribution: 'microsoft'
-
-      - name: setup gradle cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-
       - name: make gradle wrapper executable
         run: chmod +x ./gradlew
-
-      - name: clean gradle cache
-        run: rm -rf ~/.gradle/caches/ ~/.gradle/loom-cache/ ~/.gradle/fabric-loom/
-
       - name: build
         run: ./gradlew build
-
-      - name: capture build artifacts (Nexus API Core)
-        uses: actions/upload-artifact@v5
+      - name: capture build artifacts
+        uses: actions/upload-artifact@v7
         with:
-          name: nexus-api-core
+          name: Artifacts
           path: build/libs/
-
-      - name: capture build artifacts (TDBR module)
-        uses: actions/upload-artifact@v5
-        with:
-          name: nexus-tdbr
-          path: nexus-modules/tdbr/build/libs/
