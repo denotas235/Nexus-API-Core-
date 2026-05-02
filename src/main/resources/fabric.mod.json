@@ -34,7 +34,8 @@
 			}
 		]
 	},
-	"mixins": [
+	"accessWidener": "nexus-api-core.accesswidener",
+  "mixins": [
 		"nexus-api-core.mixins.json",
 		{
 			"config": "nexus-api-core.client.mixins.json",
@@ -47,5 +48,6 @@
 		"java": ">=21",
 		"fabric-api": "*",
 		"fabric-language-kotlin": "*"
-	}
+	},
+  "accessWidener": "nexus-api-core.accesswidener"
 }
