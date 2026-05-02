@@ -36,3 +36,12 @@ modImplementation("net.fabricmc.fabric-api:fabric-api:${providers.gradleProperty
 modImplementation("net.fabricmc:fabric-language-kotlin:${providers.gradleProperty("fabric_kotlin_version").get()}")
 implementation("com.google.code.gson:gson:2.10.1")
 }
+
+// Habilitar publicação local para consumo por módulos independentes
+publishing {
+    publications {
+        register<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
+    }
+}
