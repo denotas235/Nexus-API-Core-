@@ -26,8 +26,7 @@ object NexusAPI {
         val availableExtensions = ALLExtensionDetector.detectExtensions()
         println("[Nexus] Extensions detected: ${availableExtensions.size}")
 
-        val resolver = CapabilityResolver(availableExtensions)
-        val capMap   = resolver.resolve()
+        val capMap = CapabilityResolver(availableExtensions).resolve()
         featureRegistry = FeatureRegistry(capMap)
 
         val active = featureRegistry.getActiveCapabilities()
@@ -35,14 +34,12 @@ object NexusAPI {
 
         ResourceManager.init()
 
-        // Módulos pendentes registados antes do init()
         pendingModules.forEach { mod ->
             mod.onInitialize(featureRegistry)
             mod.onRegisterPipeline(RenderPipeline)
         }
         pendingModules.clear()
 
-        // Módulos descobertos por ServiceLoader
         val discovered = ModuleLoader.discoverModules()
         discovered.forEach { mod ->
             mod.onInitialize(featureRegistry)

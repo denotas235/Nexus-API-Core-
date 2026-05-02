@@ -34,9 +34,8 @@ object PLSManager {
             return
         }
 
-        // Log dos primeiros caracteres para confirmar conteúdo real
-        println("[TDBR] vsh[0..50]: ${vsh.take(50)}")
-        println("[TDBR] fsh[0..50]: ${gbufferFsh.take(50)}")
+        println("[TDBR] vsh[0..60]:  ${vsh.take(60)}")
+        println("[TDBR] fsh[0..60]:  ${gbufferFsh.take(60)}")
 
         ResourceManager.compilePLSShaders(vsh, gbufferFsh, quadVsh, lightingFsh)
 
@@ -52,9 +51,7 @@ object PLSManager {
         GL20.glUseProgram(handle)
     }
 
-    fun unbindGBuffer() {
-        GL20.glUseProgram(0)
-    }
+    fun unbindGBuffer() { GL20.glUseProgram(0) }
 
     fun beginGeometryPass() {
         if (!enabled) return
@@ -63,9 +60,7 @@ object PLSManager {
         bindGBuffer()
     }
 
-    fun endGeometryPass() {
-        unbindGBuffer()
-    }
+    fun endGeometryPass() { unbindGBuffer() }
 
     fun beginLightingPass() {
         if (!enabled) return
@@ -91,19 +86,13 @@ object PLSManager {
     }
 
     private fun loadShader(name: String): String? {
-        // USA o context classloader do Fabric — garante acesso aos assets do mod
         val path = "assets/nexus-tdbr/shaders/$name"
         return try {
-            val cl = Thread.currentThread().contextClassLoader
-            val stream = cl.getResourceAsStream(path)
-                ?: run {
-                    // Fallback: classloader da própria classe
-                    PLSManager::class.java.classLoader.getResourceAsStream(path)
-                }
-                ?: run {
-                    println("[TDBR] Shader não encontrado: $path")
-                    return null
-                }
+            val stream =
+                Thread.currentThread().contextClassLoader.getResourceAsStream(path)
+                ?: PLSManager::class.java.classLoader.getResourceAsStream(path)
+                ?: run { println("[TDBR] Shader não encontrado: $path"); return null }
+
             val text = stream.bufferedReader().readText()
             if (text.isBlank()) {
                 println("[TDBR] Shader vazio: $path")
