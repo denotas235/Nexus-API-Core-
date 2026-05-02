@@ -48,7 +48,58 @@ object GLESHelper {
         } catch (e: Exception) { }
     }
 
-    // constantes
+    fun glCompileShader(type: Int, src: String): Int {
+        try {
+            val glCreateShader = glClass?.getMethod("glCreateShader", Int::class.javaPrimitiveType)
+            val glShaderSource = glClass?.getMethod("glShaderSource", Int::class.javaPrimitiveType, String::class.java)
+            val glCompileShader = glClass?.getMethod("glCompileShader", Int::class.javaPrimitiveType)
+            val glGetShaderi = glClass?.getMethod("glGetShaderi", Int::class.javaPrimitiveType, Int::class.javaPrimitiveType)
+            val glGetShaderInfoLog = glClass?.getMethod("glGetShaderInfoLog", Int::class.javaPrimitiveType)
+
+            val shader = glCreateShader?.invoke(null, type) as? Int ?: return 0
+            glShaderSource?.invoke(null, shader, src)
+            glCompileShader?.invoke(null, shader)
+            val status = glGetShaderi?.invoke(null, shader, GL_COMPILE_STATUS) as? Int ?: 0
+            if (status == 0) {
+                val log = glGetShaderInfoLog?.invoke(null, shader) as? String ?: ""
+                println("[GLESHelper] Shader compile error: $log")
+                return 0
+            }
+            return shader
+        } catch (e: Exception) {
+            println("[GLESHelper] Exception: ${e.message}")
+            return 0
+        }
+    }
+
+    fun glLinkProgram(vs: Int, fs: Int): Int {
+        try {
+            val glCreateProgram = glClass?.getMethod("glCreateProgram")
+            val glAttachShader = glClass?.getMethod("glAttachShader", Int::class.javaPrimitiveType, Int::class.javaPrimitiveType)
+            val glLinkProgram = glClass?.getMethod("glLinkProgram", Int::class.javaPrimitiveType)
+            val glGetProgrami = glClass?.getMethod("glGetProgrami", Int::class.javaPrimitiveType, Int::class.javaPrimitiveType)
+            val glGetProgramInfoLog = glClass?.getMethod("glGetProgramInfoLog", Int::class.javaPrimitiveType)
+            val glDeleteShader = glClass?.getMethod("glDeleteShader", Int::class.javaPrimitiveType)
+
+            val program = glCreateProgram?.invoke(null) as? Int ?: return 0
+            glAttachShader?.invoke(null, program, vs)
+            glAttachShader?.invoke(null, program, fs)
+            glLinkProgram?.invoke(null, program)
+            val status = glGetProgrami?.invoke(null, program, GL_LINK_STATUS) as? Int ?: 0
+            if (status == 0) {
+                val log = glGetProgramInfoLog?.invoke(null, program) as? String ?: ""
+                println("[GLESHelper] Program link error: $log")
+                return 0
+            }
+            glDeleteShader?.invoke(null, vs)
+            glDeleteShader?.invoke(null, fs)
+            return program
+        } catch (e: Exception) {
+            println("[GLESHelper] Exception: ${e.message}")
+            return 0
+        }
+    }
+
     const val GL_COMPILE_STATUS = 0x8B81
     const val GL_LINK_STATUS = 0x8B82
     const val GL_VERTEX_SHADER = 0x8B31
