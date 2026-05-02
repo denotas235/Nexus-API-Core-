@@ -8,6 +8,4 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
-
 rootProject.name = "nexus-api-core"
-include("nexus-tdbr")

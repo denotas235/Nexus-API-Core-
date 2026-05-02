@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     id("net.fabricmc.fabric-loom-remap")
     `maven-publish`
-    id("org.jetbrains.kotlin.jvm") version "2.0.0"
+    id("org.jetbrains.kotlin.jvm") version "2.3.21"
 }
 
 version = providers.gradleProperty("mod_version").get()
@@ -14,7 +14,6 @@ repositories {
 
 loom {
     splitEnvironmentSourceSets()
-
     mods {
         register("nexus-api-core") {
             sourceSet(sourceSets.main.get())
@@ -35,6 +34,8 @@ dependencies {
     modImplementation("net.fabricmc:fabric-loader:${providers.gradleProperty("loader_version").get()}")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${providers.gradleProperty("fabric_api_version").get()}")
     modImplementation("net.fabricmc:fabric-language-kotlin:${providers.gradleProperty("fabric_kotlin_version").get()}")
+    implementation("com.google.code.gson:gson:2.10.1")
+    modClientImplementation("org.lwjgl:lwjgl-opengl:3.3.1")
 }
 
 tasks.processResources {
