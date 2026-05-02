@@ -46,11 +46,3 @@ publishing {
     }
 }
 
-// Configuração mínima para publishToMavenLocal
-publishing {
-    publications {
-        register<MavenPublication>("mavenJava") {
-            from(components["java"])
-        }
-    }
-}
