@@ -7,7 +7,6 @@ import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
-import net.minecraft.client.MinecraftClient
 
 class NexusAPICoreClient : ClientModInitializer {
     override fun onInitializeClient() {
@@ -20,13 +19,14 @@ class NexusAPICoreClient : ClientModInitializer {
         }
 
         // 2. Pipeline TDBR + PerformanceGuard a cada frame
-        WorldRenderEvents.END.register { context ->
+        WorldRenderEvents.END.register {
             try {
                 RenderPipeline.executeFrame()
             } catch (e: Throwable) {
                 println("[Nexus] RenderPipeline crash: ${e.message} — frame ignorado")
             }
-            PerformanceGuard.onFrame(MinecraftClient.getInstance().fpsCounter)
+            // FPS será integrado mais tarde via mixin; por agora passamos 0
+            PerformanceGuard.onFrame(0)
         }
 
         // 3. PerformanceGuard anti-spike a cada tick
