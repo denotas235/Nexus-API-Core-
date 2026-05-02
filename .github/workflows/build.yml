@@ -18,8 +18,13 @@ jobs:
         run: chmod +x ./gradlew
       - name: build
         run: ./gradlew build
-      - name: capture build artifacts
+      - name: capture build artifacts (Nexus API Core)
         uses: actions/upload-artifact@v7
         with:
-          name: Artifacts
+          name: nexus-api-core
           path: build/libs/
+      - name: capture build artifacts (TDBR module)
+        uses: actions/upload-artifact@v7
+        with:
+          name: nexus-tdbr
+          path: nexus-modules/tdbr/build/libs/
