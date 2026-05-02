@@ -1,7 +1,6 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    // O plugin do Loom é herdado via pluginManagement do settings.gradle.kts
     id("net.fabricmc.fabric-loom-remap")
     `maven-publish`
     id("org.jetbrains.kotlin.jvm") version "2.3.21"
@@ -16,7 +15,6 @@ repositories {
 }
 
 loom {
-    // Apenas cliente
     runs {
         configureEach {
             ideConfigGenerated(true)
@@ -35,8 +33,8 @@ dependencies {
     modImplementation("net.fabricmc.fabric-api:fabric-api:${providers.gradleProperty("fabric_api_version").get()}")
     modImplementation("net.fabricmc:fabric-language-kotlin:${providers.gradleProperty("fabric_kotlin_version").get()}")
 
-    // LWJGL para acesso a GLES30 (apenas no cliente)
-    modClientImplementation("org.lwjgl:lwjgl-opengl:3.3.1")
+    // LWJGL — necessário para GLES30
+    modImplementation("org.lwjgl:lwjgl-opengl:3.3.1")
 }
 
 tasks.processResources {
