@@ -27,6 +27,7 @@ loom {
 }
 
 dependencies {
+    modImplementation("org.lwjgl:lwjgl-opengl:3.3.1")
     // Dependência da API Core (versão dinâmica, mesmo grupo)
     modImplementation("com.nexuapicore:nexus-api-core:${providers.gradleProperty("mod_version").get()}")
     minecraft("com.mojang:minecraft:${providers.gradleProperty("minecraft_version").get()}")
