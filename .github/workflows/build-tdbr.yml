@@ -3,11 +3,14 @@ on:
   push:
     paths:
       - 'nexus-tdbr/**'
-      - 'src/main/resources/natives/arm64-v8a/libnexus_mali_core.so'
+      - 'src/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
   pull_request:
     paths:
       - 'nexus-tdbr/**'
-      - 'src/main/resources/natives/arm64-v8a/libnexus_mali_core.so'
+      - 'src/**'
 
 jobs:
   build-tdbr:
@@ -24,12 +27,14 @@ jobs:
           distribution: 'microsoft'
       - name: make root gradlew executable
         run: chmod +x ./gradlew
+      - name: clean maven local cache (forçar nova publicação)
+        run: rm -rf ~/.m2/repository/com/nexuapicore
       - name: publish API Core to local Maven
-        run: ./gradlew publishToMavenLocal
+        run: ./gradlew clean build publishToMavenLocal
       - name: make TDBR gradlew executable
         run: chmod +x nexus-tdbr/gradlew
       - name: build TDBR module
-        run: cd nexus-tdbr && ./gradlew build
+        run: cd nexus-tdbr && ./gradlew clean build --no-daemon
       - name: capture build artifacts
         uses: actions/upload-artifact@v4
         with:
