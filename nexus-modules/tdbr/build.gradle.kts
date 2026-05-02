@@ -13,12 +13,15 @@ repositories {
     mavenCentral()
 }
 
-dependencies {
-    // dependência da API Core (project raiz) — configuração namedElements + client source set
-    implementation(project(":", configuration = "namedElements"))
-    clientImplementation(project(":").sourceSets.client.output)
+configurations {
+    create("clientImplementation")
+}
 
-    // Minecraft e Fabric (necessários para o entrypoint)
+dependencies {
+    // dependência da API Core (project raiz)
+    implementation(project(":"))
+
+    // Minecraft e Fabric (necessários para entrypoint)
     minecraft("com.mojang:minecraft:$minecraft_version")
     mappings("net.fabricmc:yarn:$yarn_mappings:v2")
     modImplementation("net.fabricmc:fabric-loader:$loader_version")
