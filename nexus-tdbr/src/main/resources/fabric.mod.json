@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "nexus-tdbr",
-  "version": "${version}",
+  "version": "1.0.0",
   "name": "Nexus TDBR",
   "description": "Tile-Based Deferred Renderer module for Nexus API",
   "authors": ["denotas235"],
@@ -18,5 +18,8 @@
     "client": [
       "com.nexus.modules.tdbr.TDBREntrypoint"
     ]
-  }
+  },
+  "mixins": [
+    "mixin.nexus-tdbr.json"
+  ]
 }
