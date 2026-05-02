@@ -1,0 +1,25 @@
+name: Build API Core
+on: [pull_request, push]
+
+jobs:
+  build-api:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@v6
+      - name: Setup JDK
+        uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'microsoft'
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+      - name: Build & publish to local Maven
+        run: ./gradlew build publishToMavenLocal
+      - name: Upload API Core artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: nexus-api-core
+          path: build/libs/
