@@ -68,4 +68,5 @@ class TDBRModule : NexusModule {
     override fun onShutdown() {
         println("[TDBR] Shutdown")
     }
+    @JvmStatic fun onRenderStart() { }
 }
