@@ -30,9 +30,10 @@ jobs:
       - name: make gradle wrapper executable
         run: chmod +x ./gradlew
 
-      - name: build
       - name: clean gradle cache
         run: rm -rf ~/.gradle/caches/ ~/.gradle/loom-cache/ ~/.gradle/fabric-loom/
+
+      - name: build
         run: ./gradlew build
 
       - name: capture build artifacts (Nexus API Core)
