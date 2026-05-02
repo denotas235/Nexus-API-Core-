@@ -6,6 +6,9 @@ object GLESHelper {
         catch (e: ClassNotFoundException) { null }
     }
 
+    // Getter público para acesso controlado
+    fun getGlClass(): Class<*>? = glClass
+
     fun glUseProgram(program: Int) {
         try {
             val m = glClass?.getMethod("glUseProgram", Int::class.javaPrimitiveType)
@@ -48,6 +51,7 @@ object GLESHelper {
         } catch (e: Exception) { }
     }
 
+    // Métodos de compilação e linkagem (já são públicos e usam glClass internamente)
     fun glCompileShader(type: Int, src: String): Int {
         try {
             val glCreateShader = glClass?.getMethod("glCreateShader", Int::class.javaPrimitiveType)
