@@ -1,5 +1,5 @@
 plugins {
-    id("fabric-loom") version "1.6-SNAPSHOT"
+    id("fabric-loom") version "1.7-SNAPSHOT"
     id("org.jetbrains.kotlin.jvm") version "2.0.0"
     `maven-publish`
 }
@@ -30,7 +30,7 @@ dependencies {
     modImplementation("net.fabricmc.fabric-api:fabric-api:${providers.gradleProperty("fabric_api_version").get()}")
     modImplementation("net.fabricmc:fabric-language-kotlin:${providers.gradleProperty("fabric_kotlin_version").get()}")
     
-    // Invocação via string para evitar "Unresolved reference" no Gradle 9 / KTS
+    // Essencial para o EngenhariaSonora (GLES30 / Pojav)
     "modClientImplementation"("org.lwjgl:lwjgl-opengl:3.3.6-SNAPSHOT")
 }
 
