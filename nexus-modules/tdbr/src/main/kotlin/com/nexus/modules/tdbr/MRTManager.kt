@@ -5,26 +5,15 @@ import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL20
 import org.lwjgl.opengl.GL30
 
-/**
- * MRTManager — G-buffer via Multiple Render Targets.
- * Usado quando PLS não está disponível (PLSExtension.isAvailable() = false).
- * Funciona em qualquer GPU com GLES 3.0+.
- *
- * G-buffer layout:
- *   Attachment 0 — RGBA8   — albedo (RGB) + oclusão (A)
- *   Attachment 1 — RGBA8   — normal (RGB comprimida)
- *   Attachment 2 — RGBA8   — material (roughness, metallic)
- *   Depth         — DEPTH24_STENCIL8
- */
 object MRTManager {
     var enabled = false
         private set
 
-    private var fbo          = 0
-    private var texAlbedo    = 0
-    private var texNormal    = 0
-    private var texMaterial  = 0
-    private var rboDepth     = 0
+    private var fbo         = 0
+    private var texAlbedo   = 0
+    private var texNormal   = 0
+    private var texMaterial = 0
+    private var rboDepth    = 0
 
     private var width  = 0
     private var height = 0
@@ -36,7 +25,7 @@ object MRTManager {
     fun setup(w: Int, h: Int) {
         width = w; height = h
 
-        val vsh         = loadShader("pls_gbuffer.vsh")   // reutiliza o mesmo VSH
+        val vsh         = loadShader("pls_gbuffer.vsh")
         val gbufferFsh  = loadShader("mrt_gbuffer.fsh")
         val quadVsh     = loadShader("pls_quad.vsh")
         val lightingFsh = loadShader("mrt_lighting.fsh")
@@ -45,6 +34,9 @@ object MRTManager {
             println("[MRT] Falha ao carregar shaders, desativando")
             return
         }
+
+        println("[MRT] vsh[0..60]:  ${vsh.take(60)}")
+        println("[MRT] fsh[0..60]:  ${gbufferFsh.take(60)}")
 
         ResourceManager.compileMRTShaders(vsh, gbufferFsh, quadVsh, lightingFsh)
         createFramebuffer(w, h)
@@ -111,7 +103,6 @@ object MRTManager {
 
         GL20.glUseProgram(prog)
 
-        // Bind G-buffer textures
         GL30.glActiveTexture(GL30.GL_TEXTURE0)
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, texAlbedo)
         GL20.glUniform1i(GL20.glGetUniformLocation(prog, "uAlbedo"), 0)
@@ -124,12 +115,10 @@ object MRTManager {
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, texMaterial)
         GL20.glUniform1i(GL20.glGetUniformLocation(prog, "uMaterial"), 2)
 
-        // Uniforms de luz
         GL20.glUniform3f(GL20.glGetUniformLocation(prog, "uLightDir"),   lightDirX, lightDirY, lightDirZ)
         GL20.glUniform3f(GL20.glGetUniformLocation(prog, "uLightColor"), lightR, lightG, lightB)
         GL20.glUniform1f(GL20.glGetUniformLocation(prog, "uAmbient"),    ambient)
 
-        // Draw quad fullscreen sem VBO
         GL11.glDisable(GL11.GL_DEPTH_TEST)
         GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, 3)
         GL11.glEnable(GL11.GL_DEPTH_TEST)
@@ -144,13 +133,21 @@ object MRTManager {
     }
 
     private fun loadShader(name: String): String? {
+        val path = "assets/nexus-tdbr/shaders/$name"
         return try {
-            val path = "assets/nexus-tdbr/shaders/$name"
-            Thread.currentThread().contextClassLoader.getResourceAsStream(path) ?: MRTManager::class.java.classLoader.getResourceAsStream(path)
-                ?.bufferedReader()?.readText()
-                ?: run { println("[MRT] Shader não encontrado: $path"); null }
+            val stream =
+                Thread.currentThread().contextClassLoader.getResourceAsStream(path)
+                ?: MRTManager::class.java.classLoader.getResourceAsStream(path)
+                ?: run { println("[MRT] Shader não encontrado: $path"); return null }
+            val text = stream.bufferedReader().readText()
+            if (text.isBlank()) {
+                println("[MRT] Shader vazio: $path")
+                return null
+            }
+            text
         } catch (e: Exception) {
-            println("[MRT] Erro ao carregar $name: ${e.message}"); null
+            println("[MRT] Erro ao carregar $name: ${e.message}")
+            null
         }
     }
 }
