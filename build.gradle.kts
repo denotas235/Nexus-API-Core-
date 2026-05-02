@@ -35,7 +35,7 @@ dependencies {
     modImplementation("net.fabricmc.fabric-api:fabric-api:${providers.gradleProperty("fabric_api_version").get()}")
     modImplementation("net.fabricmc:fabric-language-kotlin:${providers.gradleProperty("fabric_kotlin_version").get()}")
     implementation("com.google.code.gson:gson:2.10.1")
-    modClientImplementation("org.lwjgl:lwjgl-opengl:3.3.1")
+    modImplementation("org.lwjgl:lwjgl-opengl:3.3.1")
 }
 
 tasks.processResources {
