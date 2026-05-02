@@ -1,56 +1,35 @@
 package com.nexus.modules.tdbr
 
 import com.nexuapicore.core.ResourceManager
+import org.lwjgl.opengl.GLES20
+import org.lwjgl.opengl.GLES30
 
 object PLSManager {
     var enabled = false
 
-    private val plsAvailable: Boolean by lazy {
-        try {
-            Class.forName("org.lwjgl.opengl.EXTShaderPixelLocalStorage")
-            true
-        } catch (e: ClassNotFoundException) {
-            false
-        }
+    fun detectPLS(): Boolean {
+        val extensions = GLES20.glGetString(GLES20.GL_EXTENSIONS)
+        return extensions != null && extensions.contains("GL_EXT_shader_pixel_local_storage")
     }
 
     fun setup(width: Int, height: Int) {
-        if (!plsAvailable) {
-            println("[PLSManager] EXTShaderPixelLocalStorage not found in LWJGL, disabling PLS")
-            enabled = false
-            return
-        }
+        if (!enabled) return
         try {
-            val cls = Class.forName("org.lwjgl.opengl.EXTShaderPixelLocalStorage")
-            val method = cls.getMethod("glFramebufferPixelLocalStorageSize", Int::class.javaPrimitiveType, Int::class.javaPrimitiveType, Int::class.javaPrimitiveType)
-            method.invoke(null, 3, width, height)
-            enabled = true
-            println("[PLSManager] PLS G‑buffer configured: 3 slots")
+            // A extensão é activada no shader, não precisamos de chamar glFramebufferPixelLocalStorageSizeEXT
+            println("[PLSManager] PLS activado via shader (sem dependência LWJGL)")
         } catch (e: Exception) {
-            println("[PLSManager] Failed to setup PLS: ${e.message}")
+            println("[PLSManager] Erro ao configurar PLS: ${e.message}")
             enabled = false
         }
     }
 
     fun beginGeometryPass() {
         if (!enabled) return
-        try {
-            val gl = Class.forName("org.lwjgl.opengl.GLES30")
-            val useProgram = gl.getMethod("glUseProgram", Int::class.javaPrimitiveType)
-            val depthMask = gl.getMethod("glDepthMask", Boolean::class.javaPrimitiveType)
-            val clear = gl.getMethod("glClear", Int::class.javaPrimitiveType)
-            val handle = ResourceManager.getPLSShaderHandle()
-            if (handle != null) {
-                useProgram.invoke(null, handle)
-            }
-            depthMask.invoke(null, true)
-            clear.invoke(null, 0x00004000 or 0x00000100) // GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT
-        } catch (e: Exception) {
-            println("[PLSManager] GL error: ${e.message}")
-        }
+        ResourceManager.getPLSShaderHandle()?.let { GLES30.glUseProgram(it) }
+        GLES30.glDepthMask(true)
+        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT or GLES30.GL_DEPTH_BUFFER_BIT)
     }
-
-    fun endGeometryPass() { /* nothing */ }
-    fun beginLightingPass() { /* nothing */ }
-    fun endLightingPass() { /* nothing */ }
+    fun endGeometryPass() { if (!enabled) return }
+    fun beginLightingPass() { if (!enabled) return }
+    fun endLightingPass() { if (!enabled) return }
 }

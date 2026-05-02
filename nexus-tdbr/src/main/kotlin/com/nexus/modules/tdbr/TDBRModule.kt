@@ -27,29 +27,45 @@ class TDBRModule : NexusModule {
         val w = mc?.window?.framebufferWidth  ?: 1280
         val h = mc?.window?.framebufferHeight ?: 720
 
+        // Verificar PLS via string (sem dependência LWJGL)
+        val plsAvailable = PLSManager.detectPLS()
+
         when {
-            registry.isAvailable("PIXEL_LOCAL_STORAGE") -> {
+            plsAvailable -> {
                 TDBRLogger.log("Path: Pixel Local Storage (on-chip)")
+                PLSManager.enabled = true
                 PLSManager.setup(w, h)
-                // Carregar shaders PLS
                 try {
                     val vertSrc = ShaderLoader.load("assets/nexus-tdbr/shaders/pls_gbuffer.vsh")
                     val fragSrc = ShaderLoader.load("assets/nexus-tdbr/shaders/pls_lighting.fsh")
                     ResourceManager.compilePLSShaders(vertSrc, fragSrc)
                     TDBRLogger.log("PLS shaders compiled successfully")
                 } catch (e: Exception) {
-                    TDBRLogger.log("Error loading shaders: ${e.message}")
-                    // fallback: manter enabled mas sem shader
+                    TDBRLogger.log("Error loading PLS shaders: ${e.message}, fallback to MRT")
+                    PLSManager.enabled = false
+                    MRTManager.setup(w, h)
+                    loadMRTShaders()
                 }
             }
             else -> {
                 TDBRLogger.log("Path: MRT Fallback")
                 MRTManager.setup(w, h)
-                // TODO: carregar shaders MRT
+                loadMRTShaders()
             }
         }
+        FullscreenQuad.init()
+    }
 
-        FullscreenQuad.init() // preparar quad
+    private fun loadMRTShaders() {
+        try {
+            val vertSrc = ShaderLoader.load("assets/nexus-tdbr/shaders/mrt_quad.vsh")
+            val gBufferFrag = ShaderLoader.load("assets/nexus-tdbr/shaders/mrt_gbuffer.fsh")
+            val lightFrag = ShaderLoader.load("assets/nexus-tdbr/shaders/mrt_lighting.fsh")
+            ResourceManager.compileMRTShaders(vertSrc, gBufferFrag, vertSrc, lightFrag)
+            TDBRLogger.log("MRT shaders compiled successfully")
+        } catch (e: Exception) {
+            TDBRLogger.log("Error loading MRT shaders: ${e.message}")
+        }
     }
 
     override fun onRegisterPipeline(pipeline: RenderPipeline) {
