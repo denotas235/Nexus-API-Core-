@@ -27,15 +27,18 @@ loom {
 }
 
 dependencies {
-    modImplementation("org.lwjgl:lwjgl-opengl:3.3.1")
-    // Dependência da API Core (versão dinâmica, mesmo grupo)
-    modImplementation("com.nexuapicore:nexus-api-core:${providers.gradleProperty("mod_version").get()}")
+    // API Core (publicada localmente pelo workflow)
+    modImplementation("com.nexuapicore:nexus-api-core:1.0.0")
+
+    // Dependência do source set client da API Core (necessária para GLESHelper)
+    clientImplementation(project(":").sourceSets.client.output)
+
+    // Minecraft / Fabric
     minecraft("com.mojang:minecraft:${providers.gradleProperty("minecraft_version").get()}")
     mappings("net.fabricmc:yarn:${providers.gradleProperty("yarn_mappings").get()}:v2")
     modImplementation("net.fabricmc:fabric-loader:${providers.gradleProperty("loader_version").get()}")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${providers.gradleProperty("fabric_api_version").get()}")
     modImplementation("net.fabricmc:fabric-language-kotlin:${providers.gradleProperty("fabric_kotlin_version").get()}")
-    modImplementation("org.lwjgl:lwjgl-opengl:3.3.1")
 }
 
 tasks.processResources {
