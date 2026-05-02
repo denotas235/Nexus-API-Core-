@@ -1,56 +1,49 @@
 package com.nexuapicore.core
 
-import org.lwjgl.opengl.GL20
+import org.lwjgl.opengl.GLES30
 
 object ResourceManager {
-    private var plsGBufferHandle:  Int = 0
-    private var plsLightingHandle: Int = 0
-    private var mrtGBufferHandle:  Int = 0
-    private var mrtLightingHandle: Int = 0
+    var plsShaderHandle: Int = 0
+        private set
 
-    fun init() {
-        println("[ResourceManager] Initialized")
+    fun init() { }
+
+    fun getPLSShaderHandle(): Int? = if (plsShaderHandle != 0) plsShaderHandle else null
+
+    fun compilePLSShaders(vertexSrc: String, fragmentSrc: String) {
+        val vs = GLES30.glCreateShader(GLES30.GL_VERTEX_SHADER)
+        GLES30.glShaderSource(vs, vertexSrc)
+        GLES30.glCompileShader(vs)
+        checkCompile(vs, "vertex")
+
+        val fs = GLES30.glCreateShader(GLES30.GL_FRAGMENT_SHADER)
+        GLES30.glShaderSource(fs, fragmentSrc)
+        GLES30.glCompileShader(fs)
+        checkCompile(fs, "fragment")
+
+        plsShaderHandle = GLES30.glCreateProgram()
+        GLES30.glAttachShader(plsShaderHandle, vs)
+        GLES30.glAttachShader(plsShaderHandle, fs)
+        GLES30.glLinkProgram(plsShaderHandle)
+        checkLink(plsShaderHandle)
+
+        GLES30.glDeleteShader(vs)
+        GLES30.glDeleteShader(fs)
+
+        println("[ResourceManager] PLS shader program linked: $plsShaderHandle")
     }
 
-    fun compilePLSShaders(gbufferVsh: String, gbufferFsh: String,
-                          quadVsh: String,    lightingFsh: String) {
-        plsGBufferHandle  = linkProgram(gbufferVsh, gbufferFsh)
-        plsLightingHandle = linkProgram(quadVsh,    lightingFsh)
-        println("[ResourceManager] PLS GBuffer  program: $plsGBufferHandle")
-        println("[ResourceManager] PLS Lighting program: $plsLightingHandle")
+    private fun checkCompile(shader: Int, type: String) {
+        if (GLES30.glGetShaderi(shader, GLES30.GL_COMPILE_STATUS) == 0) {
+            val log = GLES30.glGetShaderInfoLog(shader)
+            println("[ResourceManager] Shader $type compile error: $log")
+        }
     }
 
-    fun compileMRTShaders(gbufferVsh: String, gbufferFsh: String,
-                          quadVsh: String,    lightingFsh: String) {
-        mrtGBufferHandle  = linkProgram(gbufferVsh, gbufferFsh)
-        mrtLightingHandle = linkProgram(quadVsh,    lightingFsh)
-        println("[ResourceManager] MRT GBuffer  program: $mrtGBufferHandle")
-        println("[ResourceManager] MRT Lighting program: $mrtLightingHandle")
-    }
-
-    fun getPLSShaderHandle():   Int = plsGBufferHandle
-    fun getPLSLightingHandle(): Int = plsLightingHandle
-    fun getMRTGBufferHandle():  Int = mrtGBufferHandle
-    fun getMRTLightingHandle(): Int = mrtLightingHandle
-
-    private fun compileShader(source: String, type: Int): Int {
-        val id = GL20.glCreateShader(type)
-        GL20.glShaderSource(id, source)
-        GL20.glCompileShader(id)
-        val log = GL20.glGetShaderInfoLog(id)
-        if (log.isNotEmpty()) println("[ResourceManager] Shader log: $log")
-        return id
-    }
-
-    private fun linkProgram(vsh: String, fsh: String): Int {
-        val v    = compileShader(vsh, GL20.GL_VERTEX_SHADER)
-        val f    = compileShader(fsh, GL20.GL_FRAGMENT_SHADER)
-        val prog = GL20.glCreateProgram()
-        GL20.glAttachShader(prog, v)
-        GL20.glAttachShader(prog, f)
-        GL20.glLinkProgram(prog)
-        GL20.glDeleteShader(v)
-        GL20.glDeleteShader(f)
-        return prog
+    private fun checkLink(program: Int) {
+        if (GLES30.glGetProgrami(program, GLES30.GL_LINK_STATUS) == 0) {
+            val log = GLES30.glGetProgramInfoLog(program)
+            println("[ResourceManager] Program link error: $log")
+        }
     }
 }

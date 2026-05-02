@@ -7,7 +7,8 @@ import java.time.format.DateTimeFormatter
 
 object TDBRLogger {
     private val logFile: File by lazy {
-        val dir = File(FabricLoader.getInstance().gameDir, "logs/nexus")
+        val gameDir = FabricLoader.getInstance().gameDir.toFile()
+        val dir = File(gameDir, "logs/nexus")
         if (!dir.exists()) dir.mkdirs()
         File(dir, "tdbr.log")
     }
