@@ -1,3 +1,4 @@
+import net.minecraft.client.MinecraftClient
 package com.nexuapicore.client
 
 import com.nexuapicore.NexusAPI
@@ -25,7 +26,7 @@ class NexusAPICoreClient : ClientModInitializer {
             } catch (e: Throwable) {
                 println("[Nexus] RenderPipeline crash: ${e.message} — frame ignorado")
             }
-            PerformanceGuard.onFrame()
+            PerformanceGuard.onFrame(client.fpsCounter)
         }
 
         // 3. PerformanceGuard anti-spike a cada tick
