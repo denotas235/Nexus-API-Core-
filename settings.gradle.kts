@@ -14,4 +14,3 @@ id("net.fabricmc.fabric-loom-remap") version providers.gradleProperty("loom_vers
 }
 
 rootProject.name = "nexus-api-core"
-include(":nexus-modules:tdbr")
