@@ -27,7 +27,8 @@ loom {
 }
 
 dependencies {
-    modImplementation("com.nexuapicore:nexus-api-core:1.0.0")
+    // Dependência da API Core (versão dinâmica, mesmo grupo)
+    modImplementation("com.nexuapicore:nexus-api-core:${providers.gradleProperty("mod_version").get()}")
     minecraft("com.mojang:minecraft:${providers.gradleProperty("minecraft_version").get()}")
     mappings("net.fabricmc:yarn:${providers.gradleProperty("yarn_mappings").get()}:v2")
     modImplementation("net.fabricmc:fabric-loader:${providers.gradleProperty("loader_version").get()}")
