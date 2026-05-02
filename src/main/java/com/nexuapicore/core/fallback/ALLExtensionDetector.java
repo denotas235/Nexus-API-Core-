@@ -25,12 +25,12 @@ public class ALLExtensionDetector {
             System.err.println("[Nexus] Fallback GL/LTW erro: " + e.getMessage());
         }
 
-        // ── 2. GL nativo (via .so) ───────────────────────────────────
+        // ── 2. GL nativo (via .so) ── usando as versões Safe ──────
         if (NexusNativeLoader.loaded) {
-            mergeFrom("GL nativo",     NexusNativeLoader.getGLExtensions(),      available);
-            mergeFrom("EGL nativo",    NexusNativeLoader.getEGLExtensions(),     available);
-            mergeFrom("Audio nativo",  NexusNativeLoader.getAudioExtensions(),   available);
-            mergeFrom("Vulkan nativo", NexusNativeLoader.getVulkanExtensions(),  available);
+            mergeFrom("GL nativo",     NexusNativeLoader.getGLExtensionsSafe(),      available);
+            mergeFrom("EGL nativo",    NexusNativeLoader.getEGLExtensionsSafe(),     available);
+            mergeFrom("Audio nativo",  NexusNativeLoader.getAudioExtensionsSafe(),   available);
+            mergeFrom("Vulkan",        NexusNativeLoader.getVulkanExtensionsSafe(),  available);
         } else {
             System.err.println("[Nexus] Native lib não carregada — apenas GL/LTW disponível.");
         }
