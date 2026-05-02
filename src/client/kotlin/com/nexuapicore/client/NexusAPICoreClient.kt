@@ -1,9 +1,11 @@
 package com.nexuapicore.client
 
 import com.nexuapicore.NexusAPI
+import com.nexuapicore.core.PerformanceGuard
 import com.nexuapicore.core.pipeline.RenderPipeline
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
 
 class NexusAPICoreClient : ClientModInitializer {
@@ -13,15 +15,22 @@ class NexusAPICoreClient : ClientModInitializer {
         ClientLifecycleEvents.CLIENT_STARTED.register {
             println("[Nexus] GL context ready — iniciando API")
             NexusAPI.init()
+            PerformanceGuard.init()
         }
 
-        // 2. Executa o pipeline a cada frame (após render do mundo)
+        // 2. Pipeline TDBR + PerformanceGuard a cada frame
         WorldRenderEvents.END.register {
             try {
                 RenderPipeline.executeFrame()
             } catch (e: Throwable) {
-                println("[Nexus] RenderPipeline.executeFrame() crash: ${e.message} — frame ignorado")
+                println("[Nexus] RenderPipeline crash: ${e.message} — frame ignorado")
             }
+            PerformanceGuard.onFrame()
+        }
+
+        // 3. PerformanceGuard anti-spike a cada tick
+        ClientTickEvents.END_CLIENT_TICK.register {
+            PerformanceGuard.onTick()
         }
     }
 }
