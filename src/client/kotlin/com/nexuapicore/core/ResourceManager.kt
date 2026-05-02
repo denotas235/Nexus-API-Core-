@@ -10,7 +10,6 @@ object ResourceManager {
 
     fun init() { }
 
-    // ── PLS ────────────────────────────────────────────
     fun getPLSShaderHandle(): Int? = if (plsShaderHandle != 0) plsShaderHandle else null
 
     fun compilePLSShaders(vertexSrc: String, fragmentSrc: String) {
@@ -21,19 +20,16 @@ object ResourceManager {
         println("[ResourceManager] PLS shader program linked: $plsShaderHandle")
     }
 
-    // ── MRT ────────────────────────────────────────────
     fun getMRTGBufferHandle(): Int? = if (mrtGBufferHandle != 0) mrtGBufferHandle else null
     fun getMRTLightingHandle(): Int? = if (mrtLightingHandle != 0) mrtLightingHandle else null
 
     fun compileMRTShaders(gbufferVert: String, gbufferFrag: String, lightingVert: String, lightingFrag: String) {
-        // G‑buffer
         val gvs = GLESHelper.glCompileShader(GLESHelper.GL_VERTEX_SHADER, gbufferVert)
         val gfs = GLESHelper.glCompileShader(GLESHelper.GL_FRAGMENT_SHADER, gbufferFrag)
         if (gvs != 0 && gfs != 0) {
             mrtGBufferHandle = GLESHelper.glLinkProgram(gvs, gfs)
             println("[ResourceManager] MRT G‑buffer program linked: $mrtGBufferHandle")
         }
-        // Iluminação
         val lvs = GLESHelper.glCompileShader(GLESHelper.GL_VERTEX_SHADER, lightingVert)
         val lfs = GLESHelper.glCompileShader(GLESHelper.GL_FRAGMENT_SHADER, lightingFrag)
         if (lvs != 0 && lfs != 0) {
