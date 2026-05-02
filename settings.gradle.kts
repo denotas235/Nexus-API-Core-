@@ -6,6 +6,9 @@ pluginManagement {
         }
         mavenCentral()
         gradlePluginPortal()
+    plugins {
+        id("net.fabricmc.fabric-loom-remap") version providers.gradleProperty("loom_version")
+    }
     }
 }
 rootProject.name = "nexus-api-core"
