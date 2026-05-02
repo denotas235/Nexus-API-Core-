@@ -10,7 +10,7 @@ object ResourceManager {
 
     fun init() { }
 
-    fun getPLSShaderHandle(): Int? = if (plsShaderHandle != 0) plsShaderHandle else null
+    fun getPLSShaderHandle(): Int = plsShaderHandle
 
     fun compilePLSShaders(vertexSrc: String, fragmentSrc: String) {
         val vs = GLESHelper.glCompileShader(GLESHelper.GL_VERTEX_SHADER, vertexSrc)
@@ -20,8 +20,8 @@ object ResourceManager {
         println("[ResourceManager] PLS shader program linked: $plsShaderHandle")
     }
 
-    fun getMRTGBufferHandle(): Int? = if (mrtGBufferHandle != 0) mrtGBufferHandle else null
-    fun getMRTLightingHandle(): Int? = if (mrtLightingHandle != 0) mrtLightingHandle else null
+    fun getMRTGBufferHandle(): Int = mrtGBufferHandle
+    fun getMRTLightingHandle(): Int = mrtLightingHandle
 
     fun compileMRTShaders(gbufferVert: String, gbufferFrag: String, lightingVert: String, lightingFrag: String) {
         val gvs = GLESHelper.glCompileShader(GLESHelper.GL_VERTEX_SHADER, gbufferVert)
