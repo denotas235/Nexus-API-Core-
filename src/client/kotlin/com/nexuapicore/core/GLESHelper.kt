@@ -1,13 +1,10 @@
 package com.nexuapicore.core
 
 object GLESHelper {
-    private val glClass: Class<*>? by lazy {
+    val glClass: Class<*>? by lazy {
         try { Class.forName("org.lwjgl.opengl.GLES30") }
         catch (e: ClassNotFoundException) { null }
     }
-
-    // Getter público para acesso controlado
-    fun getGlClass(): Class<*>? = glClass
 
     fun glUseProgram(program: Int) {
         try {
@@ -51,7 +48,6 @@ object GLESHelper {
         } catch (e: Exception) { }
     }
 
-    // Métodos de compilação e linkagem (já são públicos e usam glClass internamente)
     fun glCompileShader(type: Int, src: String): Int {
         try {
             val glCreateShader = glClass?.getMethod("glCreateShader", Int::class.javaPrimitiveType)
