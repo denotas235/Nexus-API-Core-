@@ -42,9 +42,7 @@ class TDBRModule : NexusModule {
     }
 
     override fun onRegisterPipeline(pipeline: RenderPipeline) {
-        pipeline.onBeginFrame {
-            // Futuro: updateLight com tempo do Minecraft
-        }
+        pipeline.onBeginFrame { }
         pipeline.onGeometryPass {
             if (PLSManager.enabled)      PLSManager.beginGeometryPass()
             else if (MRTManager.enabled) MRTManager.beginGeometryPass()
