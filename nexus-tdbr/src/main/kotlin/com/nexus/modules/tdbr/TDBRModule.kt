@@ -3,10 +3,9 @@ package com.nexus.modules.tdbr
 import com.nexuapicore.core.FeatureRegistry
 import com.nexuapicore.core.module.NexusModule
 import com.nexuapicore.core.pipeline.RenderPipeline
-import com.nexuapicore.core.ResourceManager
 import com.nexus.modules.tdbr.log.TDBRLogger
-import com.nexus.modules.tdbr.util.ShaderLoader
 import com.nexus.modules.tdbr.util.FullscreenQuad
+import com.nexus.modules.tdbr.util.ShaderLoader
 import net.minecraft.client.MinecraftClient
 
 class TDBRModule : NexusModule {
@@ -27,62 +26,23 @@ class TDBRModule : NexusModule {
         val w = mc?.window?.framebufferWidth  ?: 1280
         val h = mc?.window?.framebufferHeight ?: 720
 
-        // Verificar PLS via string (sem dependência LWJGL)
-        val plsAvailable = PLSManager.detectPLS()
-
-        when {
-            plsAvailable -> {
-                TDBRLogger.log("Path: Pixel Local Storage (on-chip)")
-                PLSManager.enabled = true
-                PLSManager.setup(w, h)
-                try {
-                    val vertSrc = ShaderLoader.load("assets/nexus-tdbr/shaders/pls_gbuffer.vsh")
-                    val fragSrc = ShaderLoader.load("assets/nexus-tdbr/shaders/pls_lighting.fsh")
-                    ResourceManager.compilePLSShaders(vertSrc, fragSrc)
-                    TDBRLogger.log("PLS shaders compiled successfully")
-                } catch (e: Exception) {
-                    TDBRLogger.log("Error loading PLS shaders: ${e.message}, fallback to MRT")
-                    PLSManager.enabled = false
-                    MRTManager.setup(w, h)
-                    loadMRTShaders()
-                }
-            }
-            else -> {
-                TDBRLogger.log("Path: MRT Fallback")
-                MRTManager.setup(w, h)
-                loadMRTShaders()
-            }
-        }
+        TDBRLogger.log("Path: Pixel Local Storage (on-chip)")
+        PLSManager.setup(w, h)
         FullscreenQuad.init()
-    }
 
-    private fun loadMRTShaders() {
         try {
-            val vertSrc = ShaderLoader.load("assets/nexus-tdbr/shaders/mrt_quad.vsh")
-            val gBufferFrag = ShaderLoader.load("assets/nexus-tdbr/shaders/mrt_gbuffer.fsh")
-            val lightFrag = ShaderLoader.load("assets/nexus-tdbr/shaders/mrt_lighting.fsh")
-            ResourceManager.compileMRTShaders(vertSrc, gBufferFrag, vertSrc, lightFrag)
-            TDBRLogger.log("MRT shaders compiled successfully")
+            val vertSrc = ShaderLoader.load("assets/nexus-tdbr/shaders/pls_gbuffer.vsh")
+            val fragSrc = ShaderLoader.load("assets/nexus-tdbr/shaders/pls_lighting.fsh")
+            ResourceManager.compilePLSShaders(vertSrc, fragSrc)
+            TDBRLogger.log("PLS shaders compiled successfully, handle=${ResourceManager.plsShaderHandle}")
         } catch (e: Exception) {
-            TDBRLogger.log("Error loading MRT shaders: ${e.message}")
+            TDBRLogger.log("Error loading PLS shaders: ${e.message}")
         }
     }
 
     override fun onRegisterPipeline(pipeline: RenderPipeline) {
-        pipeline.onGeometryPass {
-            if (PLSManager.enabled)      PLSManager.beginGeometryPass()
-            else if (MRTManager.enabled) MRTManager.beginGeometryPass()
-        }
-        pipeline.onLightingPass {
-            if (PLSManager.enabled) {
-                PLSManager.endGeometryPass()
-                PLSManager.beginLightingPass()
-            } else if (MRTManager.enabled) {
-                MRTManager.endGeometryPass()
-                MRTManager.beginLightingPass()
-            }
-        }
         pipeline.onEndFrame {
+            PLSManager.renderOutput()
             DiscardHandler.discardAfterLighting()
         }
         TDBRLogger.log("Pipeline registado")
