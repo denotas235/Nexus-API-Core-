@@ -12,7 +12,7 @@ group = providers.gradleProperty("maven_group").get()
 repositories {
     mavenLocal()
     mavenCentral()
-    flatDir { dirs(rootProject.file("libs")) }
+    flatDir { dirs(file("../libs")) }
 }
 
 loom {
@@ -27,16 +27,16 @@ dependencies {
     modImplementation("net.fabricmc.fabric-api:fabric-api:${providers.gradleProperty("fabric_api_version").get()}")
     modImplementation("net.fabricmc:fabric-language-kotlin:${providers.gradleProperty("fabric_kotlin_version").get()}")
 
-    // Bibliotecas GLES/EGL/ShaderC/SPIRV-Cross (extraídas do ESCraft, na raiz libs/)
+    // Bibliotecas GLES/EGL/ShaderC/SPIRV-Cross — directas, sem depender da API Core
     val localGroup = "local"
     val localVer = "3.3.3"
-    listOf("lwjgl-opengles", "lwjgl-egl", "lwjgl-shaderc", "lwjgl-spvc").forEach { artifact ->
-        implementation("${localGroup}:${artifact}:${localVer}")
-    }
-    // Nativas (ARM64 necessária)
-    listOf("lwjgl-opengles-natives-linux-arm64", "lwjgl-shaderc-natives-linux-arm64", "lwjgl-spvc-natives-linux-arm64").forEach { artifact ->
-        implementation("${localGroup}:${artifact}:${localVer}")
-    }
+    implementation("${localGroup}:lwjgl-opengles:${localVer}")
+    implementation("${localGroup}:lwjgl-egl:${localVer}")
+    implementation("${localGroup}:lwjgl-shaderc:${localVer}")
+    implementation("${localGroup}:lwjgl-spvc:${localVer}")
+    implementation("${localGroup}:lwjgl-opengles-natives-linux-arm64:${localVer}")
+    implementation("${localGroup}:lwjgl-shaderc-natives-linux-arm64:${localVer}")
+    implementation("${localGroup}:lwjgl-spvc-natives-linux-arm64:${localVer}")
 }
 
 tasks.processResources {
