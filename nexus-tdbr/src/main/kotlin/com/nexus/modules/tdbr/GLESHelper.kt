@@ -1,7 +1,6 @@
 package com.nexus.modules.tdbr
 
 import org.lwjgl.opengles.GLES20
-import org.lwjgl.opengles.GLES30
 
 object GLESHelper {
     fun glCompileShader(type: Int, src: String): Int {
@@ -9,9 +8,8 @@ object GLESHelper {
         if (shader == 0) return 0
         GLES20.glShaderSource(shader, src)
         GLES20.glCompileShader(shader)
-        val status = IntArray(1)
-        GLES20.glGetShaderiv(shader, GLES20.GL_COMPILE_STATUS, status, 0)
-        if (status[0] == GLES20.GL_FALSE) {
+        val status = GLES20.glGetShaderi(shader, GLES20.GL_COMPILE_STATUS)
+        if (status == GLES20.GL_FALSE) {
             val log = GLES20.glGetShaderInfoLog(shader, 4096)
             System.err.println("[GLESHelper] Shader compile FAILED (type=$type):\n$log")
             GLES20.glDeleteShader(shader)
@@ -27,9 +25,8 @@ object GLESHelper {
         GLES20.glAttachShader(prog, vs)
         GLES20.glAttachShader(prog, fs)
         GLES20.glLinkProgram(prog)
-        val status = IntArray(1)
-        GLES20.glGetProgramiv(prog, GLES20.GL_LINK_STATUS, status, 0)
-        if (status[0] == GLES20.GL_FALSE) {
+        val status = GLES20.glGetProgrami(prog, GLES20.GL_LINK_STATUS)
+        if (status == GLES20.GL_FALSE) {
             val log = GLES20.glGetProgramInfoLog(prog, 4096)
             System.err.println("[GLESHelper] Program link FAILED:\n$log")
             GLES20.glDeleteProgram(prog)
@@ -38,12 +35,11 @@ object GLESHelper {
         println("[GLESHelper] Program linked OK: id=$prog")
         return prog
     }
-}
 
-// Constantes OpenGL ES
-const val GL_VERTEX_SHADER = 0x8B31
-const val GL_FRAGMENT_SHADER = 0x8B30
-const val GL_COMPILE_STATUS = 0x8B81
-const val GL_LINK_STATUS = 0x8B82
-const val GL_COLOR_BUFFER_BIT = 0x4000
-const val GL_DEPTH_BUFFER_BIT = 0x0100
+    const val GL_VERTEX_SHADER = 0x8B31
+    const val GL_FRAGMENT_SHADER = 0x8B30
+    const val GL_COMPILE_STATUS = 0x8B81
+    const val GL_LINK_STATUS = 0x8B82
+    const val GL_COLOR_BUFFER_BIT = 0x4000
+    const val GL_DEPTH_BUFFER_BIT = 0x0100
+}

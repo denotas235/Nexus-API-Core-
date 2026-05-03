@@ -44,8 +44,12 @@ class TDBRModule : NexusModule {
         outputTex = texArr[0]
 
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, outputTex)
-        GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES30.GL_RGBA8,
-            screenW, screenH, 0, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, null)
+        GLES20.glTexImage2D(
+            GLES20.GL_TEXTURE_2D, 0, GLES30.GL_RGBA8,
+            screenW, screenH, 0,
+            GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE,
+            null as java.nio.ByteBuffer?
+        )
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR)
 
         GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, outputFbo)
@@ -63,21 +67,22 @@ class TDBRModule : NexusModule {
         try {
             val vertSrc = ShaderLoader.load("assets/nexus-tdbr/shaders/pls_gbuffer.vsh")
             val fragSrc = ShaderLoader.load("assets/nexus-tdbr/shaders/pls_lighting.fsh")
-            ResourceManager.compilePLSShaders(vertSrc, fragSrc)
-            TDBRLogger.log("PLS shaders loaded: handle=${ResourceManager.plsShaderHandle}")
+            if (vertSrc != null && fragSrc != null) {
+                ResourceManager.compilePLSShaders(vertSrc, fragSrc)
+                TDBRLogger.log("PLS shaders loaded: handle=${ResourceManager.plsShaderHandle}")
+            } else {
+                TDBRLogger.log("Erro: PLS shaders not found")
+            }
         } catch (e: Exception) {
             TDBRLogger.log("Erro ao carregar shaders PLS: ${e.message}")
         }
 
-        // Registar no companion para acesso pelo mixin
         companionModule = this
     }
 
     fun bindFboAndClear() {
         if (outputFbo == 0) return
-        val prev = IntArray(1)
-        GLES20.glGetIntegerv(GLES30.GL_FRAMEBUFFER_BINDING, prev, 0)
-        prevFbo = prev[0]
+        prevFbo = GLES20.glGetInteger(GLES30.GL_FRAMEBUFFER_BINDING)
         GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, outputFbo)
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT or GLES20.GL_DEPTH_BUFFER_BIT)
     }

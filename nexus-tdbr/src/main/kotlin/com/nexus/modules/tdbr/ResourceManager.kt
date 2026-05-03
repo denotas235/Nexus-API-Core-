@@ -1,5 +1,6 @@
 package com.nexus.modules.tdbr
 
+import com.nexus.modules.tdbr.util.ShaderLoader
 import org.lwjgl.opengles.GLES20
 
 object ResourceManager {
@@ -21,18 +22,31 @@ object ResourceManager {
         println("[ResourceManager] PLS program linked: $plsShaderHandle")
     }
 
-    fun compileMRTShaders(gVert: String, gFrag: String, lVert: String, lFrag: String) {
-        val gvs = compileShader(GLES20.GL_VERTEX_SHADER, gVert)
-        val gfs = compileShader(GLES20.GL_FRAGMENT_SHADER, gFrag)
-        val lvs = compileShader(GLES20.GL_VERTEX_SHADER, lVert)
-        val lfs = compileShader(GLES20.GL_FRAGMENT_SHADER, lFrag)
-        if (gvs != 0 && gfs != 0) {
-            mrtGBufferHandle = linkProgram(gvs, gfs)
-            println("[ResourceManager] MRT G-buffer program linked: $mrtGBufferHandle")
+    fun getMRTGBufferHandle(): Int = mrtGBufferHandle
+    fun getMRTLightingHandle(): Int = mrtLightingHandle
+
+    fun compileMRTShaders() {
+        val vertSrc = ShaderLoader.load("assets/nexus-tdbr/shaders/mrt_quad.vsh")
+        val gBufSrc = ShaderLoader.load("assets/nexus-tdbr/shaders/mrt_gbuffer.fsh")
+        val lightSrc = ShaderLoader.load("assets/nexus-tdbr/shaders/mrt_lighting.fsh")
+
+        if (vertSrc == null || gBufSrc == null || lightSrc == null) {
+            println("[ResourceManager] MRT shaders not found in classpath")
+            return
         }
-        if (lvs != 0 && lfs != 0) {
-            mrtLightingHandle = linkProgram(lvs, lfs)
-            println("[ResourceManager] MRT lighting program linked: $mrtLightingHandle")
+
+        val gBufVert = compileShader(GLES20.GL_VERTEX_SHADER, vertSrc)
+        val gBufFrag = compileShader(GLES20.GL_FRAGMENT_SHADER, gBufSrc)
+        mrtGBufferHandle = linkProgram(gBufVert, gBufFrag)
+
+        val lightVert = compileShader(GLES20.GL_VERTEX_SHADER, vertSrc)
+        val lightFrag = compileShader(GLES20.GL_FRAGMENT_SHADER, lightSrc)
+        mrtLightingHandle = linkProgram(lightVert, lightFrag)
+
+        if (mrtGBufferHandle != 0 && mrtLightingHandle != 0) {
+            println("[ResourceManager] MRT shaders compiled OK")
+        } else {
+            println("[ResourceManager] MRT shader compile failed")
         }
     }
 
@@ -40,9 +54,8 @@ object ResourceManager {
         val shader = GLES20.glCreateShader(type)
         GLES20.glShaderSource(shader, src)
         GLES20.glCompileShader(shader)
-        val status = IntArray(1)
-        GLES20.glGetShaderiv(shader, GLES20.GL_COMPILE_STATUS, status, 0)
-        if (status[0] == GLES20.GL_FALSE) {
+        val status = GLES20.glGetShaderi(shader, GLES20.GL_COMPILE_STATUS)
+        if (status == GLES20.GL_FALSE) {
             val log = GLES20.glGetShaderInfoLog(shader, 4096)
             println("[ResourceManager] Shader compile error (type=$type): $log")
             GLES20.glDeleteShader(shader)
@@ -56,9 +69,8 @@ object ResourceManager {
         GLES20.glAttachShader(prog, vs)
         GLES20.glAttachShader(prog, fs)
         GLES20.glLinkProgram(prog)
-        val status = IntArray(1)
-        GLES20.glGetProgramiv(prog, GLES20.GL_LINK_STATUS, status, 0)
-        if (status[0] == GLES20.GL_FALSE) {
+        val status = GLES20.glGetProgrami(prog, GLES20.GL_LINK_STATUS)
+        if (status == GLES20.GL_FALSE) {
             val log = GLES20.glGetProgramInfoLog(prog, 4096)
             println("[ResourceManager] Program link error: $log")
             GLES20.glDeleteProgram(prog)

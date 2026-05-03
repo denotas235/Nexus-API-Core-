@@ -1,153 +1,36 @@
 package com.nexus.modules.tdbr
 
-import com.nexuapicore.core.ResourceManager
-import org.lwjgl.opengl.GL11
-import org.lwjgl.opengl.GL20
-import org.lwjgl.opengl.GL30
+import org.lwjgl.opengles.GLES20
+import org.lwjgl.opengles.GLES30
 
 object MRTManager {
     var enabled = false
         private set
 
-    private var fbo         = 0
-    private var texAlbedo   = 0
-    private var texNormal   = 0
-    private var texMaterial = 0
-    private var rboDepth    = 0
-
-    private var width  = 0
-    private var height = 0
-
-    private var lightDirX = 0.6f;  private var lightDirY = 1.0f;  private var lightDirZ = 0.8f
-    private var lightR    = 1.0f;  private var lightG    = 0.95f; private var lightB    = 0.85f
-    private var ambient   = 0.35f
-
-    fun setup(w: Int, h: Int) {
-        width = w; height = h
-
-        val vsh         = loadShader("pls_gbuffer.vsh")
-        val gbufferFsh  = loadShader("mrt_gbuffer.fsh")
-        val quadVsh     = loadShader("pls_quad.vsh")
-        val lightingFsh = loadShader("mrt_lighting.fsh")
-
-        if (vsh == null || gbufferFsh == null || quadVsh == null || lightingFsh == null) {
-            println("[MRT] Falha ao carregar shaders, desativando")
-            return
-        }
-
-        println("[MRT] vsh[0..60]:  ${vsh.take(60)}")
-        println("[MRT] fsh[0..60]:  ${gbufferFsh.take(60)}")
-
-        ResourceManager.compileMRTShaders(vsh, gbufferFsh, quadVsh, lightingFsh)
-        createFramebuffer(w, h)
-
+    fun setup(width: Int, height: Int) {
         enabled = true
-        println("[MRT] G-buffer MRT configurado [$w x $h] — FBO=$fbo")
-    }
-
-    private fun createFramebuffer(w: Int, h: Int) {
-        fbo = GL30.glGenFramebuffers()
-        GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, fbo)
-
-        texAlbedo   = createTexture(w, h)
-        texNormal   = createTexture(w, h)
-        texMaterial = createTexture(w, h)
-
-        GL30.glFramebufferTexture2D(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, texAlbedo,   0)
-        GL30.glFramebufferTexture2D(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT1, GL11.GL_TEXTURE_2D, texNormal,   0)
-        GL30.glFramebufferTexture2D(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT2, GL11.GL_TEXTURE_2D, texMaterial, 0)
-
-        rboDepth = GL30.glGenRenderbuffers()
-        GL30.glBindRenderbuffer(GL30.GL_RENDERBUFFER, rboDepth)
-        GL30.glRenderbufferStorage(GL30.GL_RENDERBUFFER, GL30.GL_DEPTH24_STENCIL8, w, h)
-        GL30.glFramebufferRenderbuffer(GL30.GL_FRAMEBUFFER, GL30.GL_DEPTH_STENCIL_ATTACHMENT, GL30.GL_RENDERBUFFER, rboDepth)
-
-        val drawBuffers = intArrayOf(GL30.GL_COLOR_ATTACHMENT0, GL30.GL_COLOR_ATTACHMENT1, GL30.GL_COLOR_ATTACHMENT2)
-        GL30.glDrawBuffers(drawBuffers)
-
-        val status = GL30.glCheckFramebufferStatus(GL30.GL_FRAMEBUFFER)
-        if (status != GL30.GL_FRAMEBUFFER_COMPLETE)
-            println("[MRT] AVISO: Framebuffer incompleto — status=0x${status.toString(16)}")
-
-        GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0)
-    }
-
-    private fun createTexture(w: Int, h: Int): Int {
-        val id = GL11.glGenTextures()
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, id)
-        GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL30.GL_RGBA8, w, h, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, 0)
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST)
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST)
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0)
-        return id
+        println("[MRTManager] MRT setup: ${width}x${height}")
     }
 
     fun beginGeometryPass() {
         if (!enabled) return
-        GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, fbo)
-        GL11.glDepthMask(true)
-        GL11.glClear(GL11.GL_COLOR_BUFFER_BIT or GL11.GL_DEPTH_BUFFER_BIT)
-        val prog = ResourceManager.getMRTGBufferHandle()
-        if (prog != 0) GL20.glUseProgram(prog)
+        val handle = ResourceManager.getMRTGBufferHandle()
+        if (handle != 0) {
+            GLES20.glUseProgram(handle)
+            GLES20.glDepthMask(true)
+            GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT or GLES20.GL_DEPTH_BUFFER_BIT)
+        }
     }
 
-    fun endGeometryPass() {
-        GL20.glUseProgram(0)
-        GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0)
-    }
+    fun endGeometryPass() { if (!enabled) return }
 
     fun beginLightingPass() {
         if (!enabled) return
-        val prog = ResourceManager.getMRTLightingHandle()
-        if (prog == 0) return
-
-        GL20.glUseProgram(prog)
-
-        GL30.glActiveTexture(GL30.GL_TEXTURE0)
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, texAlbedo)
-        GL20.glUniform1i(GL20.glGetUniformLocation(prog, "uAlbedo"), 0)
-
-        GL30.glActiveTexture(GL30.GL_TEXTURE1)
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, texNormal)
-        GL20.glUniform1i(GL20.glGetUniformLocation(prog, "uNormal"), 1)
-
-        GL30.glActiveTexture(GL30.GL_TEXTURE2)
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, texMaterial)
-        GL20.glUniform1i(GL20.glGetUniformLocation(prog, "uMaterial"), 2)
-
-        GL20.glUniform3f(GL20.glGetUniformLocation(prog, "uLightDir"),   lightDirX, lightDirY, lightDirZ)
-        GL20.glUniform3f(GL20.glGetUniformLocation(prog, "uLightColor"), lightR, lightG, lightB)
-        GL20.glUniform1f(GL20.glGetUniformLocation(prog, "uAmbient"),    ambient)
-
-        GL11.glDisable(GL11.GL_DEPTH_TEST)
-        GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, 3)
-        GL11.glEnable(GL11.GL_DEPTH_TEST)
-
-        GL20.glUseProgram(0)
-    }
-
-    fun updateLight(dirX: Float, dirY: Float, dirZ: Float,
-                    r: Float, g: Float, b: Float, amb: Float) {
-        lightDirX = dirX; lightDirY = dirY; lightDirZ = dirZ
-        lightR = r; lightG = g; lightB = b; ambient = amb
-    }
-
-    private fun loadShader(name: String): String? {
-        val path = "assets/nexus-tdbr/shaders/$name"
-        return try {
-            val stream =
-                Thread.currentThread().contextClassLoader.getResourceAsStream(path)
-                ?: MRTManager::class.java.classLoader.getResourceAsStream(path)
-                ?: run { println("[MRT] Shader não encontrado: $path"); return null }
-            val text = stream.bufferedReader().readText()
-            if (text.isBlank()) {
-                println("[MRT] Shader vazio: $path")
-                return null
-            }
-            text
-        } catch (e: Exception) {
-            println("[MRT] Erro ao carregar $name: ${e.message}")
-            null
+        val handle = ResourceManager.getMRTLightingHandle()
+        if (handle != 0) {
+            GLES20.glUseProgram(handle)
         }
     }
+
+    fun endLightingPass() { if (!enabled) return }
 }
