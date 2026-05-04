@@ -27,9 +27,9 @@ dependencies {
     modImplementation("net.fabricmc.fabric-api:fabric-api:${providers.gradleProperty("fabric_api_version").get()}")
     modImplementation("net.fabricmc:fabric-language-kotlin:${providers.gradleProperty("fabric_kotlin_version").get()}")
 
-    // Apenas as classes GLES, sem natives (o Android fornece libGLESv2.so)
-    compileOnly("local:lwjgl-opengles:3.3.3")
-    compileOnly("local:lwjgl-egl:3.3.3")
+    // SÓ as CLASSES — os natives vêm do sistema / LTW
+    compileOnly(files("../libs/lwjgl-opengles-3.3.3.jar"))
+    compileOnly(files("../libs/lwjgl-egl-3.3.3.jar"))
 }
 
 tasks.processResources {
