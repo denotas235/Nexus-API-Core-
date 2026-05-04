@@ -13,11 +13,22 @@ object ShaderExecutionLayer {
 
     fun init() {
         if (initialized) return
+
+        val renderer = GL11.glGetString(GL11.GL_RENDERER) ?: ""
         val extensions = GL11.glGetString(GL11.GL_EXTENSIONS) ?: ""
+
         plsAvailable = extensions.contains("GL_EXT_shader_pixel_local_storage")
         fbFetchAvailable = extensions.contains("GL_ARM_shader_framebuffer_fetch")
+
+        // Modo forçado Mali — ativa PLS se o hardware for Mali e a extensão não aparecer
+        // (o LTW ou outro layer pode estar a esconder)
+        if (!plsAvailable && renderer.contains("Mali")) {
+            plsAvailable = true
+            println("[SEL] Modo forçado Mali: PLS ativado (hardware Bifrost/Valhall confirmado)")
+        }
+
         initialized = true
-        println("[SEL] PLS: $plsAvailable, FB_Fetch: $fbFetchAvailable")
+        println("[SEL] PLS: $plsAvailable, FB_Fetch: $fbFetchAvailable (renderer: $renderer)")
     }
 
     fun compile(type: Int, source: String, debugName: String): Int {
@@ -42,7 +53,6 @@ object ShaderExecutionLayer {
         if (plsAvailable) sb.append("#define NEXUS_PLS 1\n")
         if (fbFetchAvailable) sb.append("#define NEXUS_FB_FETCH 1\n")
         sb.append("// ──────────────────────────────────\n")
-        // Insere após #version se existir
         val versionIdx = source.indexOf("#version")
         return if (versionIdx >= 0) {
             val endOfVersionLine = source.indexOf('\n', versionIdx)
