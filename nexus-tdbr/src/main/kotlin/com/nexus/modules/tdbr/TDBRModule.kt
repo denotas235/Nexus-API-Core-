@@ -24,17 +24,22 @@ class TDBRModule : NexusModule {
     private var prevFbo = 0
     private var screenW = 0
     private var screenH = 0
+    private var glesReady = false
 
     override fun onInitialize(registry: FeatureRegistry) {
         TDBRLogger.log("Initializing TDBR Module")
 
-        // Verifica se o GLES está realmente utilizável
-        val glesAvailable = try {
-            GLES20.glGetString(GLES20.GL_VERSION) != null
-        } catch (e: Exception) { false }
+        // Verifica se o GLES responde (sem crash)
+        glesReady = try {
+            GLES20.glGetError()
+            true
+        } catch (e: Throwable) {
+            TDBRLogger.log("GLES não disponível: ${e.message}")
+            false
+        }
 
-        if (!glesAvailable) {
-            TDBRLogger.log("GLES não disponível — módulo TDBR desativado")
+        if (!glesReady) {
+            TDBRLogger.log("Abortando inicialização do TDBR")
             return
         }
 
@@ -48,7 +53,6 @@ class TDBRModule : NexusModule {
 
         if (PLSManager.enabled) {
             TDBRLogger.log("Path: Pixel Local Storage (on-chip)")
-            // Criar FBO de output
             val fboArr = IntArray(1)
             val texArr = IntArray(1)
             GLES30.glGenFramebuffers(fboArr)
