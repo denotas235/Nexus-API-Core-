@@ -23,9 +23,7 @@ loom {
     }
 }
 
-fabricApi {
-    configureDataGeneration { client = true }
-}
+fabricApi { configureDataGeneration { client = true } }
 
 dependencies {
     minecraft("com.mojang:minecraft:${providers.gradleProperty("minecraft_version").get()}")
@@ -35,28 +33,9 @@ dependencies {
     modImplementation("net.fabricmc:fabric-language-kotlin:${providers.gradleProperty("fabric_kotlin_version").get()}")
     implementation("com.google.code.gson:gson:2.10.1")
 
-    // Bibliotecas GLES/EGL/ShaderC/SPIRV-Cross extraídas do ESCraft
-    val localGroup = "local"
-    val localLibVersion = "3.3.3"
-
-    listOf("lwjgl-opengles", "lwjgl-egl", "lwjgl-shaderc", "lwjgl-spvc").forEach { artifact ->
-        implementation("${localGroup}:${artifact}:${localLibVersion}")
-        include("${localGroup}:${artifact}:${localLibVersion}")
-    }
-
-    listOf(
-        "lwjgl-opengles-natives-linux-arm64",
-        "lwjgl-opengles-natives-linux",
-        "lwjgl-opengles-natives-windows",
-        "lwjgl-shaderc-natives-linux-arm64",
-        "lwjgl-shaderc-natives-linux",
-        "lwjgl-shaderc-natives-windows",
-        "lwjgl-spvc-natives-linux-arm64",
-        "lwjgl-spvc-natives-linux",
-        "lwjgl-spvc-natives-windows"
-    ).forEach { artifact ->
-        include("${localGroup}:${artifact}:${localLibVersion}")
-    }
+    // APENAS as classes GLES para compilação – SEM os natives
+    compileOnly(files("libs/lwjgl-opengles-3.3.3.jar"))
+    compileOnly(files("libs/lwjgl-egl-3.3.3.jar"))
 }
 
 tasks.processResources {
@@ -82,8 +61,6 @@ tasks.jar {
 }
 
 publishing {
-    publications {
-        register<MavenPublication>("mavenJava") { from(components["java"]) }
-    }
+    publications { register<MavenPublication>("mavenJava") { from(components["java"]) } }
     repositories { }
 }

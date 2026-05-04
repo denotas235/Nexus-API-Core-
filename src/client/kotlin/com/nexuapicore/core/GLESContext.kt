@@ -1,23 +1,22 @@
 package com.nexuapicore.core
 
-import org.lwjgl.opengles.GLES
-import org.lwjgl.opengles.GLES20
-
 object GLESContext {
-    var available = false
-        private set
+    private var initialized = false
 
     fun init() {
+        if (initialized) return
+
+        // Define o nome correto ANTES de qualquer referência ao GLES
+        System.setProperty("org.lwjgl.opengles.libname", "libGLESv2.so")
+        initialized = true
+
+        // Verifica o contexto que o LTW já disponibilizou
         try {
-            // Apenas verifica se o contexto GLES já está ativo (LTW, Zink, etc.)
-            val caps = GLES.getCapabilities()
-            if (caps != null) {
-                available = true
-                val renderer = GLES20.glGetString(GLES20.GL_RENDERER)
-                println("[GLESContext] Contexto GLES já ativo. Renderer: $renderer")
-            }
+            val renderer = org.lwjgl.opengl.GL11
+                .glGetString(org.lwjgl.opengl.GL11.GL_RENDERER)
+            println("[GLESContext] LTW renderer ativo: $renderer")
         } catch (e: Exception) {
-            println("[GLESContext] Contexto GLES não disponível: ${e.message}")
+            println("[GLESContext] Verificação GL: ${e.message}")
         }
     }
 }
