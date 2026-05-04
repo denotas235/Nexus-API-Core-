@@ -12,6 +12,7 @@ group = providers.gradleProperty("maven_group").get()
 repositories {
     mavenLocal()
     mavenCentral()
+    flatDir { dirs(file("../libs")) }
 }
 
 loom {
@@ -26,7 +27,8 @@ dependencies {
     modImplementation("net.fabricmc.fabric-api:fabric-api:${providers.gradleProperty("fabric_api_version").get()}")
     modImplementation("net.fabricmc:fabric-language-kotlin:${providers.gradleProperty("fabric_kotlin_version").get()}")
 
-    // Bibliotecas GLES/EGL/ShaderC/SPIRV-Cross — directas, sem depender da API Core
+    implementation("local:lwjgl-opengles:3.3.3")
+    implementation("local:lwjgl-egl:3.3.3")
 }
 
 tasks.processResources {
