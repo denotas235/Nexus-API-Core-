@@ -12,7 +12,6 @@ group = providers.gradleProperty("maven_group").get()
 repositories {
     mavenLocal()
     mavenCentral()
-    flatDir { dirs(file("../libs")) }
 }
 
 loom {
@@ -26,10 +25,6 @@ dependencies {
     modImplementation("net.fabricmc:fabric-loader:${providers.gradleProperty("loader_version").get()}")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${providers.gradleProperty("fabric_api_version").get()}")
     modImplementation("net.fabricmc:fabric-language-kotlin:${providers.gradleProperty("fabric_kotlin_version").get()}")
-
-    // SÓ as CLASSES — os natives vêm do sistema / LTW
-    compileOnly(files("../libs/lwjgl-opengles-3.3.3.jar"))
-    compileOnly(files("../libs/lwjgl-egl-3.3.3.jar"))
 }
 
 tasks.processResources {
