@@ -2,6 +2,7 @@ package com.nexus.modules.tdbr
 
 import com.nexus.modules.tdbr.shader.ShaderExecutionLayer
 import org.lwjgl.opengl.GL11
+import org.lwjgl.opengl.GL13
 import org.lwjgl.opengl.GL20
 import org.lwjgl.opengl.GL30
 
@@ -92,7 +93,7 @@ void main() {
         GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, outputFbo)
         GL11.glViewport(0, 0, w, h)
         GL20.glUseProgram(program)
-        GL11.glActiveTexture(GL11.GL_TEXTURE0)
+        GL13.glActiveTexture(GL13.GL_TEXTURE0)
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, sceneTexture)
         GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, 3)
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0)

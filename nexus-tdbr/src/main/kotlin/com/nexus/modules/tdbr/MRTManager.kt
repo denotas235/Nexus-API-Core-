@@ -1,7 +1,8 @@
 package com.nexus.modules.tdbr
 
-import org.lwjgl.opengles.GLES20
-import org.lwjgl.opengles.GLES30
+import org.lwjgl.opengl.GL11
+import org.lwjgl.opengl.GL20
+import org.lwjgl.opengl.GL30
 
 object MRTManager {
     var enabled = false
@@ -14,22 +15,15 @@ object MRTManager {
 
     fun beginGeometryPass() {
         if (!enabled) return
-        val handle = ResourceManager.getMRTGBufferHandle()
-        if (handle != 0) {
-            GLES20.glUseProgram(handle)
-            GLES20.glDepthMask(true)
-            GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT or GLES20.GL_DEPTH_BUFFER_BIT)
-        }
+        GL20.glDepthMask(true)
+        GL11.glClear(GL11.GL_COLOR_BUFFER_BIT or GL11.GL_DEPTH_BUFFER_BIT)
     }
 
     fun endGeometryPass() { if (!enabled) return }
 
     fun beginLightingPass() {
         if (!enabled) return
-        val handle = ResourceManager.getMRTLightingHandle()
-        if (handle != 0) {
-            GLES20.glUseProgram(handle)
-        }
+        // Placeholder — MRT lighting pass será implementado futuramente
     }
 
     fun endLightingPass() { if (!enabled) return }
