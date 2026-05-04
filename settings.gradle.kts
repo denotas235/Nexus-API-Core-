@@ -12,3 +12,4 @@ pluginManagement {
     }
 }
 rootProject.name = "nexus-api-core"
+include(":nexus-maliopt")
