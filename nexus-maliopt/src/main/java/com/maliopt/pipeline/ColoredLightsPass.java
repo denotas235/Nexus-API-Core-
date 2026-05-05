@@ -6,7 +6,6 @@ import com.maliopt.performance.PerformanceGuard;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.lwjgl.opengl.*;
 import java.nio.ByteBuffer;

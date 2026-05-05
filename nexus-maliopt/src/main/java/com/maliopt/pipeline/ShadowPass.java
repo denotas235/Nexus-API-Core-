@@ -148,8 +148,6 @@ public class ShadowPass {
             GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, shadowFbos[i]);
             GL30.glFramebufferTexture2D(GL30.GL_FRAMEBUFFER, GL30.GL_DEPTH_ATTACHMENT,
                 GL11.GL_TEXTURE_2D, shadowTexs[i], 0);
-            GL11.glDrawBuffer(GL11.GL_NONE);
-            GL11.glReadBuffer(GL11.GL_NONE);
             GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
         }
     }
