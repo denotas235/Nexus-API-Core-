@@ -159,15 +159,15 @@ public class MaliOptMod implements ClientModInitializer {
     // ════════════════════════════════════════════════════════════════
 
     private static void forceDistances(MinecraftClient client) {
-        if (client == null || client.field_1690 == null) return;
+        if (client == null || client.options == null) return;
         try {
             boolean changed = false;
-            GameOptionsAccessor acc = (GameOptionsAccessor)(Object) client.field_1690;
+            GameOptionsAccessor acc = (GameOptionsAccessor)(Object) client.options;
 
             SimpleOption<Integer> viewDist = acc.maliopt_getViewDistance();
-            int currentRender = viewDist.method_41753();
+            int currentRender = viewDist.getValue();
             if (currentRender > MAX_RENDER_DISTANCE) {
-                viewDist.method_41748(MAX_RENDER_DISTANCE);
+                viewDist.setValue(MAX_RENDER_DISTANCE);
                 LOGGER.info("[MaliOpt] Render distance: {} → {} ✅",
                     currentRender, MAX_RENDER_DISTANCE);
                 changed = true;
@@ -177,9 +177,9 @@ public class MaliOptMod implements ClientModInitializer {
             }
 
             SimpleOption<Integer> simDist = acc.maliopt_getSimulationDistance();
-            int currentSim = simDist.method_41753();
+            int currentSim = simDist.getValue();
             if (currentSim > MAX_SIMULATION_DISTANCE) {
-                simDist.method_41748(MAX_SIMULATION_DISTANCE);
+                simDist.setValue(MAX_SIMULATION_DISTANCE);
                 LOGGER.info("[MaliOpt] Simulation distance: {} → {} ✅",
                     currentSim, MAX_SIMULATION_DISTANCE);
                 changed = true;
@@ -189,7 +189,7 @@ public class MaliOptMod implements ClientModInitializer {
             }
 
             if (changed) {
-                client.field_1690.method_1640();
+                client.options.write();
                 LOGGER.info("[MaliOpt] Distâncias guardadas em options.txt ✅");
             }
 

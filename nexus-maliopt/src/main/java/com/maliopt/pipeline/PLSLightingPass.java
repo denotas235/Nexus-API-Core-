@@ -188,12 +188,12 @@ public class PLSLightingPass {
     // ── RENDER ───────────────────────────────────────────────────────
 
     public static void render(MinecraftClient mc) {
-        if (!ready || program == 0 || mc.field_1687 == null) return;
+        if (!ready || program == 0 || mc.world == null) return;
         if (!PerformanceGuard.lightingPassEnabled()) return;
 
         Framebuffer fb = mc.getFramebuffer();
-        int w = fb.field_1482;
-        int h = fb.field_1481;
+        int w = fb.textureWidth;
+        int h = fb.textureHeight;
 
         if (w <= 0 || h <= 0) return;
 
@@ -222,7 +222,7 @@ public class PLSLightingPass {
 
         // Lê a cena actual do framebuffer do Minecraft
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, fb.method_30277());
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, fb.getColorAttachment());
 
         GL30.glBindVertexArray(quadVao);
         GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, 3);
@@ -231,7 +231,7 @@ public class PLSLightingPass {
 
         // Blit resultado → framebuffer principal do Minecraft
         GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, outputFbo);
-        GL30.glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, fb.field_1476);
+        GL30.glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, fb.fbo);
         GL30.glBlitFramebuffer(0, 0, w, h, 0, 0, w, h,
             GL11.GL_COLOR_BUFFER_BIT, GL11.GL_NEAREST);
 

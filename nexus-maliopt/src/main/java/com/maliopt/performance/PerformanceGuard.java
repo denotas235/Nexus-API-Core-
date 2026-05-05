@@ -27,7 +27,7 @@ public final class PerformanceGuard {
 
     public static void update(MinecraftClient mc) {
         if (mc == null) return;
-        int fps = mc.method_47599();
+        int fps = mc.getCurrentFps();
 
         sampleSum += fps;
         sampleCount++;
