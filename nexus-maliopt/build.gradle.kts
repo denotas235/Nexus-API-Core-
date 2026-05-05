@@ -19,7 +19,7 @@ loom {
 }
 
 dependencies {
-    implementation(project(":"))
+    implementation(project(":", configuration = "namedElements"))
     minecraft("com.mojang:minecraft:${providers.gradleProperty("minecraft_version").get()}")
     mappings("net.fabricmc:yarn:${providers.gradleProperty("yarn_mappings").get()}:v2")
     modImplementation("net.fabricmc:fabric-loader:${providers.gradleProperty("loader_version").get()}")
