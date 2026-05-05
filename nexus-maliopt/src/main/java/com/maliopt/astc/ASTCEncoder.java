@@ -1,12 +1,8 @@
 package com.maliopt.astc;
 
 import com.maliopt.MaliOptMod;
+import java.io.*;
 
-/**
- * ASTCEncoder — compressão PNG → ASTC via libastc_bridge_64.so
- *
- * Usa a .so que já está em natives/arm64-v8a/libastc_bridge_64.so
- */
 public final class ASTCEncoder {
 
     private static boolean nativeAvailable = false;
@@ -15,12 +11,35 @@ public final class ASTCEncoder {
 
     public static void init() {
         try {
+            // Tenta carregar do sistema primeiro (mod nativo instalado)
             System.loadLibrary("astc_bridge_64");
             nativeAvailable = true;
-            MaliOptMod.LOGGER.info("[ASTCEncoder] libastc_bridge_64.so carregada");
+            MaliOptMod.LOGGER.info("[ASTCEncoder] libastc_bridge_64.so carregada do sistema");
         } catch (UnsatisfiedLinkError e) {
-            nativeAvailable = false;
-            MaliOptMod.LOGGER.warn("[ASTCEncoder] libastc_bridge_64.so não disponível");
+            // Fallback: extrair do JAR
+            try {
+                String arch = System.getProperty("os.arch", "").contains("64") ? "arm64-v8a" : "armeabi-v7a";
+                String libName = "libastc_bridge_64.so";
+                String resourcePath = "/natives/" + arch + "/" + libName;
+                InputStream in = ASTCEncoder.class.getResourceAsStream(resourcePath);
+                if (in != null) {
+                    File tmpDir = new File(System.getProperty("java.io.tmpdir"));
+                    File tmpLib = new File(tmpDir, libName);
+                    try (FileOutputStream out = new FileOutputStream(tmpLib)) {
+                        byte[] buf = new byte[8192];
+                        int n;
+                        while ((n = in.read(buf)) >= 0) out.write(buf, 0, n);
+                    }
+                    in.close();
+                    System.load(tmpLib.getAbsolutePath());
+                    nativeAvailable = true;
+                    MaliOptMod.LOGGER.info("[ASTCEncoder] libastc_bridge_64.so extraída do JAR");
+                } else {
+                    MaliOptMod.LOGGER.warn("[ASTCEncoder] libastc_bridge_64.so não encontrada no classpath");
+                }
+            } catch (Exception ex) {
+                MaliOptMod.LOGGER.warn("[ASTCEncoder] Falha ao extrair lib: {}", ex.getMessage());
+            }
         }
     }
 
@@ -28,7 +47,6 @@ public final class ASTCEncoder {
         return nativeAvailable;
     }
 
-    // Métodos nativos (implementados na libastc_bridge_64.so)
     public static native boolean initASTC();
     public static native byte[] compressASTC(
         int width, int height,

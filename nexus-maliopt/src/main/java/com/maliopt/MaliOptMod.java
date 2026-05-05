@@ -69,6 +69,7 @@ public class MaliOptMod implements ClientModInitializer {
 
                 // ── 1. Extensões hardware ────────────────────────────
                 ExtensionActivator.activateAll();
+                ASTCSubsystem.init();
 
                 // ── 2. Capacidades de shader ─────────────────────────
                 // Passa o flag nativo — ShaderCapabilities escolhe
