@@ -114,16 +114,16 @@ public final class PerformanceGuard {
         switch (current) {
             case DEGRADED: return 0.0f;
             case LOW:      return 0.04f;
-            default:       return 0.06f;
+            default:       return 0.20f;
         }
     }
 
     public static float ambientOcclusion() {
         switch (current) {
             case DEGRADED: return 0.0f;
-            case LOW:      return 0.06f;
+            case LOW:      return 0.20f;
             case MEDIUM:   return 0.10f;
-            default:       return 0.12f;
+            default:       return 0.20f;
         }
     }
 
