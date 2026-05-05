@@ -64,7 +64,7 @@ public class ExtensionActivator {
         // Quando MobileGlues está a limitar as extensões expostas (menos de 50),
         // aplica capacidades conhecidas do hardware Bifrost/Valhall.
         int detected = GPUDetector.getAllExtensions().size();
-        if (GPUDetector.isMaliGPU()) {
+        if (detected < 50 && (GPUDetector.isBifrost() || GPUDetector.isValhall())) {
             applyForcedMaliMode(detected);
         }
 
@@ -152,18 +152,6 @@ public class ExtensionActivator {
         if (!hasFramebufferFetch) {
             hasFramebufferFetch = true;
             MaliOptMod.LOGGER.info("[MaliOpt]   ✅ hasFramebufferFetch         [forçado — hardware Bifrost confirmado]");
-        }
-        if (!hasAstcLdr) {
-            hasAstcLdr = true;
-            MaliOptMod.LOGGER.info("[MaliOpt]   ✅ hasAstcLdr                 [forçado — hardware Mali confirmado]");
-        }
-        if (!hasAstcHdr) {
-            hasAstcHdr = true;
-            MaliOptMod.LOGGER.info("[MaliOpt]   ✅ hasAstcHdr                 [forçado — hardware Mali confirmado]");
-        }
-        if (!hasMultisampledRenderToTexture) {
-            hasMultisampledRenderToTexture = true;
-            MaliOptMod.LOGGER.info("[MaliOpt]   ✅ hasMultisampledRenderToTexture [forçado — hardware Mali confirmado]");
         }
         if (!hasFramebufferFetchDepth) {
             hasFramebufferFetchDepth = true;
