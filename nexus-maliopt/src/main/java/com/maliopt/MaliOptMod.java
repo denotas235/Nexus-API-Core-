@@ -7,6 +7,8 @@ import com.maliopt.performance.PerformanceGuard;
 import com.maliopt.pipeline.FBFetchBloomPass;
 import com.maliopt.pipeline.MaliPipelineOptimizer;
 import com.maliopt.pipeline.PLSLightingPass;
+import com.maliopt.pipeline.ShadowPass;
+import com.maliopt.pipeline.ColoredLightsPass;
 import com.maliopt.pipeline.ShaderCacheManager;
 import com.maliopt.shader.ShaderCache;
 import com.maliopt.shader.ShaderCapabilities;
@@ -74,6 +76,8 @@ public class MaliOptMod implements ClientModInitializer {
 
                 // ── 5. Passes de post-processing ─────────────────────
                 PLSLightingPass.init();
+                ShadowPass.init();
+                ColoredLightsPass.init();
                 FBFetchBloomPass.init();
 
             } else {
@@ -89,6 +93,8 @@ public class MaliOptMod implements ClientModInitializer {
 
             if (PLSLightingPass.isReady() && PerformanceGuard.lightingPassEnabled()) {
                 PLSLightingPass.render(mc);
+                ShadowPass.render(mc);
+                ColoredLightsPass.render(mc);
             }
 
             if (FBFetchBloomPass.isReady() && PerformanceGuard.bloomEnabled()) {
@@ -98,6 +104,8 @@ public class MaliOptMod implements ClientModInitializer {
 
         ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
             PLSLightingPass.cleanup();
+            ShadowPass.cleanup();
+            ColoredLightsPass.cleanup();
             FBFetchBloomPass.cleanup();
         });
     }
