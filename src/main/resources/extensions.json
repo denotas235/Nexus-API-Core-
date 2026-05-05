@@ -1,216 +1,1716 @@
 {
   "extensions": [
-    {"name":"GL_EXT_base_instance","group":"GL_EXT","functions":[],"capabilities":["BASE_INSTANCE"]},
-    {"name":"GL_EXT_blend_func_extended","group":"GL_EXT","functions":[],"capabilities":["BLEND_FUNC_EXTENDED"]},
-    {"name":"GL_EXT_clear_texture","group":"GL_EXT","functions":[],"capabilities":["CLEAR_TEXTURE"]},
-    {"name":"GL_EXT_clip_control","group":"GL_EXT","functions":[],"capabilities":["CLIP_CONTROL"]},
-    {"name":"GL_EXT_clip_cull_distance","group":"GL_EXT","functions":[],"capabilities":["CLIP_CULL_DISTANCE"]},
-    {"name":"GL_EXT_conservative_depth","group":"GL_EXT","functions":[],"capabilities":["CONSERVATIVE_DEPTH"]},
-    {"name":"GL_EXT_EGL_image_external_wrap_modes","group":"GL_EXT","functions":[],"capabilities":["EGL_IMAGE_EXTERNAL_WRAP_MODES"]},
-    {"name":"GL_EXT_EGL_image_storage","group":"GL_EXT","functions":[],"capabilities":["EGL_IMAGE_STORAGE"]},
-    {"name":"GL_EXT_geometry_point_size","group":"GL_EXT","functions":[],"capabilities":["GEOMETRY_POINT_SIZE"]},
-    {"name":"GL_EXT_instanced_arrays","group":"GL_EXT","functions":[],"capabilities":["INSTANCED_ARRAYS"]},
-    {"name":"GL_EXT_map_buffer_range","group":"GL_EXT","functions":[],"capabilities":["MAP_BUFFER_RANGE"]},
-    {"name":"GL_EXT_multi_draw_indirect","group":"GL_EXT","functions":[],"capabilities":["MULTI_DRAW_INDIRECT"]},
-    {"name":"GL_EXT_polygon_offset_clamp","group":"GL_EXT","functions":[],"capabilities":["POLYGON_OFFSET_CLAMP"]},
-    {"name":"GL_EXT_render_snorm","group":"GL_EXT","functions":[],"capabilities":["RENDER_SNORM"]},
-    {"name":"GL_EXT_separate_shader_objects","group":"GL_EXT","functions":[],"capabilities":["SEPARATE_SHADER_OBJECTS"]},
-    {"name":"GL_EXT_shader_group_vote","group":"GL_EXT","functions":[],"capabilities":["SHADER_GROUP_VOTE"]},
-    {"name":"GL_EXT_shader_implicit_conversions","group":"GL_EXT","functions":[],"capabilities":["SHADER_IMPLICIT_CONVERSIONS"]},
-    {"name":"GL_EXT_shader_integer_mix","group":"GL_EXT","functions":[],"capabilities":["SHADER_INTEGER_MIX"]},
-    {"name":"GL_EXT_shader_pixel_local_storage2","group":"GL_EXT","functions":[],"capabilities":["PIXEL_LOCAL_STORAGE2"]},
-    {"name":"GL_EXT_shader_samples_identical","group":"GL_EXT","functions":[],"capabilities":["SHADER_SAMPLES_IDENTICAL"]},
-    {"name":"GL_EXT_shader_texture_lod","group":"GL_EXT","functions":[],"capabilities":["SHADER_TEXTURE_LOD"]},
-    {"name":"GL_EXT_texture_compression_dxt1","group":"GL_EXT","functions":[],"capabilities":["TEXTURE_COMPRESSION_DXT1"]},
-    {"name":"GL_EXT_texture_compression_s3tc_srgb","group":"GL_EXT","functions":[],"capabilities":["TEXTURE_COMPRESSION_S3TC_SRGB"]},
-    {"name":"GL_EXT_texture_norm16","group":"GL_EXT","functions":[],"capabilities":["TEXTURE_NORM16"]},
-    {"name":"GL_EXT_texture_view","group":"GL_EXT","functions":[],"capabilities":["TEXTURE_VIEW"]},
-    {"name":"GL_EXT_tessellation_point_size","group":"GL_EXT","functions":[],"capabilities":["TESSELLATION_POINT_SIZE"]},
-    {"name":"GL_EXT_window_rectangles","group":"GL_EXT","functions":[],"capabilities":["WINDOW_RECTANGLES"]},
-    {"name":"GL_KHR_no_error","group":"GL_KHR","functions":[],"capabilities":["NO_ERROR"]},
-    {"name":"GL_KHR_parallel_shader_compile","group":"GL_KHR","functions":[],"capabilities":["PARALLEL_SHADER_COMPILE"]},
-    {"name":"GL_KHR_shader_subgroup","group":"GL_KHR","functions":[],"capabilities":["SHADER_SUBGROUP"]},
-    {"name":"GL_OES_geometry_point_size","group":"GL_OES","functions":[],"capabilities":["GEOMETRY_POINT_SIZE"]},
-    {"name":"GL_OES_geometry_shader","group":"GL_OES","functions":[],"capabilities":["GEOMETRY_SHADER"]},
-    {"name":"GL_OES_tessellation_point_size","group":"GL_OES","functions":[],"capabilities":["TESSELLATION_POINT_SIZE"]}
-    {"name":"EGL_NV_context_priority_realtime","group":"EGL_NV","functions":[],"capabilities":["CONTEXT_PRIORITY_REALTIME"]},
-    {"name":"GL_OVR_multiview_multisampled_render_to_texture","group":"GL_OVR","functions":[],"capabilities":["MULTIVIEW_MULTISAMPLED_RENDER_TO_TEXTURE"]},
-    {"name":"AAudio_MMap","group":"AUDIO_AAUDIO","functions":["AAudioStream_isMMapUsed","AAudio_setMMapPolicy","AAudio_getMMapPolicy"],"capabilities":["AUDIO_MMAP"]},
-    {"name":"AAudio_Performance","group":"AUDIO_AAUDIO","functions":["AAudioStreamBuilder_setPerformanceMode","AAudioStream_getPerformanceMode","AAudioStream_getTimestamp"],"capabilities":["AUDIO_PERFORMANCE_MODE","AUDIO_TIMESTAMP"]},
-    {"name":"MTK_AudioDump","group":"AUDIO_MTK","functions":["MTK_GET_AUDIO_DUMP_FILE_LIST","MTK_GET_AUDIO_DUMP_FILE_CONTENT","MTK_DEL_AUDIO_DUMP_FILE","readAudioHalDumpFileContent"],"capabilities":["AUDIO_HAL_DUMP"]},
-    {"name":"AudioToolKit","group":"AUDIO_NATIVE","functions":["AudioToolKit_GetDecodedData"],"capabilities":["AUDIO_DECODED_DATA"]},
-    {"name":"GL_ARM_EGL_image_storage_compression","group":"GL_ARM","functions":[],"capabilities":["EGL_IMAGE_STORAGE_COMPRESSION"]},
-    {"name":"GL_ARM_all_samples_equal","group":"GL_ARM","functions":[],"capabilities":["FAST_MSAA"]},
-    {"name":"GL_ARM_explicit_attribute_access","group":"GL_ARM","functions":[],"capabilities":["EXPLICIT_ATTRIBUTE_ACCESS"]},
-    {"name":"GL_ARM_explicit_memory_access","group":"GL_ARM","functions":[],"capabilities":["EXPLICIT_MEMORY_ACCESS"]},
-    {"name":"GL_ARM_framebuffer_write","group":"GL_ARM","functions":[],"capabilities":["FRAMEBUFFER_WRITE"]},
-    {"name":"GL_ARM_increased_rt","group":"GL_ARM","functions":[],"capabilities":["INCREASED_RT"]},
-    {"name":"GL_ARM_internal","group":"GL_ARM","functions":[],"capabilities":[]},
-    {"name":"GL_ARM_jump","group":"GL_ARM","functions":[],"capabilities":[]},
-    {"name":"GL_ARM_mali_program_binary","group":"GL_ARM","functions":[],"capabilities":["MALI_PROGRAM_BINARY"]},
-    {"name":"GL_ARM_mali_shader_binary","group":"GL_ARM","functions":[],"capabilities":["MALI_SHADER_BINARY"]},
-    {"name":"GL_ARM_packed_arithmetic","group":"GL_ARM","functions":[],"capabilities":["PACKED_ARITHMETIC"]},
-    {"name":"GL_ARM_rgba8","group":"GL_ARM","functions":[],"capabilities":["RGBA8"]},
-    {"name":"GL_ARM_shader_framebuffer_fetch","group":"GL_ARM","functions":["glFramebufferFetchARM"],"capabilities":["FRAMEBUFFER_FETCH"]},
-    {"name":"GL_ARM_shader_framebuffer_fetch_depth_stencil","group":"GL_ARM","functions":[],"capabilities":["FRAMEBUFFER_FETCH_DEPTH_STENCIL"]},
-    {"name":"GL_ARM_shader_framebuffer_fetch_raw_explicit","group":"GL_ARM","functions":[],"capabilities":["FRAMEBUFFER_FETCH_RAW_EXPLICIT"]},
-    {"name":"GL_ARM_texture_storage_compression","group":"GL_ARM","functions":[],"capabilities":["TEXTURE_STORAGE_COMPRESSION"]},
-    {"name":"GL_ARM_texture_storage_compression_fixed_rate_16","group":"GL_ARM","functions":[],"capabilities":["TEXTURE_STORAGE_COMPRESSION_FIXED_RATE_16"]},
-    {"name":"GL_ARM_texture_storage_compression_fixed_rate_24","group":"GL_ARM","functions":[],"capabilities":["TEXTURE_STORAGE_COMPRESSION_FIXED_RATE_24"]},
-    {"name":"GL_ARM_texture_storage_compression_fixed_rate_32","group":"GL_ARM","functions":[],"capabilities":["TEXTURE_STORAGE_COMPRESSION_FIXED_RATE_32"]},
-    {"name":"GL_ARM_texture_unnormalized_coordinates","group":"GL_ARM","functions":[],"capabilities":["TEXTURE_UNNORMALIZED_COORDINATES"]},
-    {"name":"GL_EXT_EGL_image_array","group":"GL_EXT","functions":[],"capabilities":["EGL_IMAGE_ARRAY"]},
-    {"name":"GL_EXT_YUV_target","group":"GL_EXT","functions":[],"capabilities":["YUV_TARGET"]},
-    {"name":"GL_EXT_blend_minmax","group":"GL_EXT","functions":[],"capabilities":["BLEND_MINMAX"]},
-    {"name":"GL_EXT_buffer_storage","group":"GL_EXT","functions":[],"capabilities":["BUFFER_STORAGE"]},
-    {"name":"GL_EXT_color_buffer_float","group":"GL_EXT","functions":[],"capabilities":["COLOR_BUFFER_FLOAT"]},
-    {"name":"GL_EXT_color_buffer_half_float","group":"GL_EXT","functions":[],"capabilities":["COLOR_BUFFER_HALF_FLOAT"]},
-    {"name":"GL_EXT_copy_image","group":"GL_EXT","functions":[],"capabilities":["COPY_IMAGE"]},
-    {"name":"GL_EXT_discard_framebuffer","group":"GL_EXT","functions":[],"capabilities":["DISCARD_FRAMEBUFFER"]},
-    {"name":"GL_EXT_disjoint_timer_query","group":"GL_EXT","functions":[],"capabilities":["DISJOINT_TIMER_QUERY"]},
-    {"name":"GL_EXT_draw_buffers_indexed","group":"GL_EXT","functions":[],"capabilities":["DRAW_BUFFERS_INDEXED"]},
-    {"name":"GL_EXT_draw_elements_base_vertex","group":"GL_EXT","functions":[],"capabilities":["DRAW_ELEMENTS_BASE_VERTEX"]},
-    {"name":"GL_EXT_external_buffer","group":"GL_EXT","functions":[],"capabilities":["EXTERNAL_BUFFER"]},
-    {"name":"GL_EXT_float_blend","group":"GL_EXT","functions":[],"capabilities":["FLOAT_BLEND"]},
-    {"name":"GL_EXT_geometry_shader","group":"GL_EXT","functions":[],"capabilities":["GEOMETRY_SHADER"]},
-    {"name":"GL_EXT_gpu_shader5","group":"GL_EXT","functions":[],"capabilities":["GPU_SHADER5"]},
-    {"name":"GL_EXT_multisampled_render_to_texture","group":"GL_EXT","functions":[],"capabilities":["MULTISAMPLED_RENDER_TO_TEXTURE"]},
-    {"name":"GL_EXT_multisampled_render_to_texture2","group":"GL_EXT","functions":[],"capabilities":["MULTISAMPLED_RENDER_TO_TEXTURE2"]},
-    {"name":"GL_EXT_occlusion_query_boolean","group":"GL_EXT","functions":[],"capabilities":["OCCLUSION_QUERY_BOOLEAN"]},
-    {"name":"GL_EXT_primitive_bounding_box","group":"GL_EXT","functions":[],"capabilities":["PRIMITIVE_BOUNDING_BOX"]},
-    {"name":"GL_EXT_protected_textures","group":"GL_EXT","functions":[],"capabilities":["PROTECTED_TEXTURES"]},
-    {"name":"GL_EXT_read_format_bgra","group":"GL_EXT","functions":[],"capabilities":["READ_FORMAT_BGRA"]},
-    {"name":"GL_EXT_robustness","group":"GL_EXT","functions":[],"capabilities":["ROBUSTNESS"]},
-    {"name":"GL_EXT_sRGB","group":"GL_EXT","functions":[],"capabilities":["SRGB"]},
-    {"name":"GL_EXT_sRGB_write_control","group":"GL_EXT","functions":[],"capabilities":["SRGB_WRITE_CONTROL"]},
-    {"name":"GL_EXT_shader_framebuffer_fetch","group":"GL_EXT","functions":["glFramebufferFetchEXT"],"capabilities":["FRAMEBUFFER_FETCH"]},
-    {"name":"GL_EXT_shader_io_blocks","group":"GL_EXT","functions":[],"capabilities":["SHADER_IO_BLOCKS"]},
-    {"name":"GL_EXT_shader_non_constant_global_initializers","group":"GL_EXT","functions":[],"capabilities":["SHADER_NON_CONSTANT_GLOBAL_INITIALIZERS"]},
-    {"name":"GL_EXT_shader_pixel_local_storage","group":"GL_EXT","functions":[],"capabilities":["PIXEL_LOCAL_STORAGE"]},
-    {"name":"GL_EXT_shadow_samplers","group":"GL_EXT","functions":[],"capabilities":["SHADOW_SAMPLERS"]},
-    {"name":"GL_EXT_tessellation_shader","group":"GL_EXT","functions":[],"capabilities":["TESSELLATION_SHADER"]},
-    {"name":"GL_EXT_texture_border_clamp","group":"GL_EXT","functions":[],"capabilities":["TEXTURE_BORDER_CLAMP"]},
-    {"name":"GL_EXT_texture_buffer","group":"GL_EXT","functions":[],"capabilities":["TEXTURE_BUFFER"]},
-    {"name":"GL_EXT_texture_compression_astc_decode_mode","group":"GL_EXT","functions":[],"capabilities":["ASTC_DECODE_MODE"]},
-    {"name":"GL_EXT_texture_compression_astc_decode_mode_rgb9e5","group":"GL_EXT","functions":[],"capabilities":["ASTC_DECODE_MODE_RGB9E5"]},
-    {"name":"GL_EXT_texture_cube_map_array","group":"GL_EXT","functions":[],"capabilities":["TEXTURE_CUBE_MAP_ARRAY"]},
-    {"name":"GL_EXT_texture_filter_anisotropic","group":"GL_EXT","functions":[],"capabilities":["TEXTURE_FILTER_ANISOTROPIC"]},
-    {"name":"GL_EXT_texture_format_BGRA8888","group":"GL_EXT","functions":[],"capabilities":["TEXTURE_FORMAT_BGRA8888"]},
-    {"name":"GL_EXT_texture_rg","group":"GL_EXT","functions":[],"capabilities":["TEXTURE_RG"]},
-    {"name":"GL_EXT_texture_sRGB_R8","group":"GL_EXT","functions":[],"capabilities":["TEXTURE_SRGB_R8"]},
-    {"name":"GL_EXT_texture_sRGB_RG8","group":"GL_EXT","functions":[],"capabilities":["TEXTURE_SRGB_RG8"]},
-    {"name":"GL_EXT_texture_sRGB_decode","group":"GL_EXT","functions":[],"capabilities":["TEXTURE_SRGB_DECODE"]},
-    {"name":"GL_EXT_texture_storage","group":"GL_EXT","functions":[],"capabilities":["TEXTURE_STORAGE"]},
-    {"name":"GL_EXT_texture_type_2_10_10_10_REV","group":"GL_EXT","functions":[],"capabilities":["TEXTURE_TYPE_2_10_10_10_REV"]},
-    {"name":"GL_EXT_unpack_subimage","group":"GL_EXT","functions":[],"capabilities":["UNPACK_SUBIMAGE"]},
-    {"name":"GL_KHR_blend_equation_advanced","group":"GL_KHR","functions":[],"capabilities":["BLEND_EQUATION_ADVANCED"]},
-    {"name":"GL_KHR_blend_equation_advanced_coherent","group":"GL_KHR","functions":[],"capabilities":["BLEND_EQUATION_ADVANCED_COHERENT"]},
-    {"name":"GL_KHR_debug","group":"GL_KHR","functions":[],"capabilities":["DEBUG"]},
-    {"name":"GL_KHR_robust_buffer_access_behavior","group":"GL_KHR","functions":[],"capabilities":["ROBUST_BUFFER_ACCESS_BEHAVIOR"]},
-    {"name":"GL_KHR_robustness","group":"GL_KHR","functions":[],"capabilities":["ROBUSTNESS"]},
-    {"name":"GL_KHR_texture_compression_astc_hdr","group":"GL_KHR","functions":[],"capabilities":["ASTC_HDR"]},
-    {"name":"GL_KHR_texture_compression_astc_ldr","group":"GL_KHR","functions":[],"capabilities":["ASTC_LDR"]},
-    {"name":"GL_KHR_texture_compression_astc_sliced_3d","group":"GL_KHR","functions":[],"capabilities":["ASTC_SLICED_3D"]},
-    {"name":"GL_OES_EGL_image","group":"GL_OES","functions":[],"capabilities":["EGL_IMAGE"]},
-    {"name":"GL_OES_EGL_image_external","group":"GL_OES","functions":[],"capabilities":["EGL_IMAGE_EXTERNAL"]},
-    {"name":"GL_OES_EGL_image_external_essl3","group":"GL_OES","functions":[],"capabilities":["EGL_IMAGE_EXTERNAL_ESSL3"]},
-    {"name":"GL_OES_EGL_sync","group":"GL_OES","functions":[],"capabilities":["EGL_SYNC"]},
-    {"name":"GL_OES_blend_equation_separate","group":"GL_OES","functions":[],"capabilities":["BLEND_EQUATION_SEPARATE"]},
-    {"name":"GL_OES_blend_func_separate","group":"GL_OES","functions":[],"capabilities":["BLEND_FUNC_SEPARATE"]},
-    {"name":"GL_OES_blend_subtract","group":"GL_OES","functions":[],"capabilities":["BLEND_SUBTRACT"]},
-    {"name":"GL_OES_byte_coordinates","group":"GL_OES","functions":[],"capabilities":["BYTE_COORDINATES"]},
-    {"name":"GL_OES_compressed_ETC1_RGB8_texture","group":"GL_OES","functions":[],"capabilities":["ETC1_COMPRESSION"]},
-    {"name":"GL_OES_compressed_paletted_texture","group":"GL_OES","functions":[],"capabilities":["COMPRESSED_PALETTED_TEXTURE"]},
-    {"name":"GL_OES_copy_image","group":"GL_OES","functions":[],"capabilities":["COPY_IMAGE"]},
-    {"name":"GL_OES_depth24","group":"GL_OES","functions":[],"capabilities":["DEPTH24"]},
-    {"name":"GL_OES_depth_texture","group":"GL_OES","functions":[],"capabilities":["DEPTH_TEXTURE"]},
-    {"name":"GL_OES_depth_texture_cube_map","group":"GL_OES","functions":[],"capabilities":["DEPTH_TEXTURE_CUBE_MAP"]},
-    {"name":"GL_OES_draw_buffers_indexed","group":"GL_OES","functions":[],"capabilities":["DRAW_BUFFERS_INDEXED"]},
-    {"name":"GL_OES_draw_elements_base_vertex","group":"GL_OES","functions":[],"capabilities":["DRAW_ELEMENTS_BASE_VERTEX"]},
-    {"name":"GL_OES_draw_texture","group":"GL_OES","functions":[],"capabilities":["DRAW_TEXTURE"]},
-    {"name":"GL_OES_element_index_uint","group":"GL_OES","functions":[],"capabilities":["ELEMENT_INDEX_UINT"]},
-    {"name":"GL_OES_extended_matrix_palette","group":"GL_OES","functions":[],"capabilities":["EXTENDED_MATRIX_PALETTE"]},
-    {"name":"GL_OES_fbo_render_mipmap","group":"GL_OES","functions":[],"capabilities":["FBO_RENDER_MIPMAP"]},
-    {"name":"GL_OES_fixed_point","group":"GL_OES","functions":[],"capabilities":["FIXED_POINT"]},
-    {"name":"GL_OES_framebuffer_object","group":"GL_OES","functions":[],"capabilities":["FRAMEBUFFER_OBJECT"]},
-    {"name":"GL_OES_geometry_shader","group":"GL_OES","functions":[],"capabilities":["GEOMETRY_SHADER"]},
-    {"name":"GL_OES_get_program_binary","group":"GL_OES","functions":[],"capabilities":["GET_PROGRAM_BINARY"]},
-    {"name":"GL_OES_gpu_shader5","group":"GL_OES","functions":[],"capabilities":["GPU_SHADER5"]},
-    {"name":"GL_OES_mapbuffer","group":"GL_OES","functions":[],"capabilities":["MAPBUFFER"]},
-    {"name":"GL_OES_matrix_get","group":"GL_OES","functions":[],"capabilities":["MATRIX_GET"]},
-    {"name":"GL_OES_matrix_palette","group":"GL_OES","functions":[],"capabilities":["MATRIX_PALETTE"]},
-    {"name":"GL_OES_packed_depth_stencil","group":"GL_OES","functions":[],"capabilities":["PACKED_DEPTH_STENCIL"]},
-    {"name":"GL_OES_point_size_array","group":"GL_OES","functions":[],"capabilities":["POINT_SIZE_ARRAY"]},
-    {"name":"GL_OES_point_sprite","group":"GL_OES","functions":[],"capabilities":["POINT_SPRITE"]},
-    {"name":"GL_OES_primitive_bounding_box","group":"GL_OES","functions":[],"capabilities":["PRIMITIVE_BOUNDING_BOX"]},
-    {"name":"GL_OES_query_matrix","group":"GL_OES","functions":[],"capabilities":["QUERY_MATRIX"]},
-    {"name":"GL_OES_read_format","group":"GL_OES","functions":[],"capabilities":["READ_FORMAT"]},
-    {"name":"GL_OES_required_internalformat","group":"GL_OES","functions":[],"capabilities":["REQUIRED_INTERNALFORMAT"]},
-    {"name":"GL_OES_rgb8_rgba8","group":"GL_OES","functions":[],"capabilities":["RGB8_RGBA8"]},
-    {"name":"GL_OES_sample_shading","group":"GL_OES","functions":[],"capabilities":["SAMPLE_SHADING"]},
-    {"name":"GL_OES_sample_variables","group":"GL_OES","functions":[],"capabilities":["SAMPLE_VARIABLES"]},
-    {"name":"GL_OES_shader_image_atomic","group":"GL_OES","functions":[],"capabilities":["SHADER_IMAGE_ATOMIC"]},
-    {"name":"GL_OES_shader_io_blocks","group":"GL_OES","functions":[],"capabilities":["SHADER_IO_BLOCKS"]},
-    {"name":"GL_OES_shader_multisample_interpolation","group":"GL_OES","functions":[],"capabilities":["SHADER_MULTISAMPLE_INTERPOLATION"]},
-    {"name":"GL_OES_single_precision","group":"GL_OES","functions":[],"capabilities":["SINGLE_PRECISION"]},
-    {"name":"GL_OES_standard_derivatives","group":"GL_OES","functions":[],"capabilities":["STANDARD_DERIVATIVES"]},
-    {"name":"GL_OES_stencil8","group":"GL_OES","functions":[],"capabilities":["STENCIL8"]},
-    {"name":"GL_OES_stencil_wrap","group":"GL_OES","functions":[],"capabilities":["STENCIL_WRAP"]},
-    {"name":"GL_OES_surfaceless_context","group":"GL_OES","functions":[],"capabilities":["SURFACELESS_CONTEXT"]},
-    {"name":"GL_OES_tessellation_shader","group":"GL_OES","functions":[],"capabilities":["TESSELLATION_SHADER"]},
-    {"name":"GL_OES_texture_3D","group":"GL_OES","functions":[],"capabilities":["TEXTURE_3D"]},
-    {"name":"GL_OES_texture_border_clamp","group":"GL_OES","functions":[],"capabilities":["TEXTURE_BORDER_CLAMP"]},
-    {"name":"GL_OES_texture_buffer","group":"GL_OES","functions":[],"capabilities":["TEXTURE_BUFFER"]},
-    {"name":"GL_OES_texture_compression_astc","group":"GL_OES","functions":[],"capabilities":["ASTC_LDR"]},
-    {"name":"GL_OES_texture_cube_map","group":"GL_OES","functions":[],"capabilities":["TEXTURE_CUBE_MAP"]},
-    {"name":"GL_OES_texture_cube_map_array","group":"GL_OES","functions":[],"capabilities":["TEXTURE_CUBE_MAP_ARRAY"]},
-    {"name":"GL_OES_texture_float_linear","group":"GL_OES","functions":[],"capabilities":["TEXTURE_FLOAT_LINEAR"]},
-    {"name":"GL_OES_texture_mirrored_repeat","group":"GL_OES","functions":[],"capabilities":["TEXTURE_MIRRORED_REPEAT"]},
-    {"name":"GL_OES_texture_npot","group":"GL_OES","functions":[],"capabilities":["TEXTURE_NPOT"]},
-    {"name":"GL_OES_texture_stencil8","group":"GL_OES","functions":[],"capabilities":["TEXTURE_STENCIL8"]},
-    {"name":"GL_OES_texture_storage_multisample_2d_array","group":"GL_OES","functions":[],"capabilities":["TEXTURE_STORAGE_MULTISAMPLE_2D_ARRAY"]},
-    {"name":"GL_OES_vertex_array_object","group":"GL_OES","functions":[],"capabilities":["VERTEX_ARRAY_OBJECT"]},
-    {"name":"GL_OES_vertex_half_float","group":"GL_OES","functions":[],"capabilities":["VERTEX_HALF_FLOAT"]},
-    {"name":"EGL_ANDROID_blob_cache","group":"EGL_ANDROID","functions":[],"capabilities":["BLOB_CACHE"]},
-    {"name":"EGL_ANDROID_framebuffer_target","group":"EGL_ANDROID","functions":[],"capabilities":["FRAMEBUFFER_TARGET"]},
-    {"name":"EGL_ANDROID_image_crop","group":"EGL_ANDROID","functions":[],"capabilities":["IMAGE_CROP"]},
-    {"name":"EGL_ANDROID_image_native_buffer","group":"EGL_ANDROID","functions":[],"capabilities":["IMAGE_NATIVE_BUFFER"]},
-    {"name":"EGL_ANDROID_native_fence_sync","group":"EGL_ANDROID","functions":[],"capabilities":["NATIVE_FENCE_SYNC"]},
-    {"name":"EGL_ANDROID_recordable","group":"EGL_ANDROID","functions":[],"capabilities":["RECORDABLE"]},
-    {"name":"EGL_ARM_image_format","group":"EGL_ARM","functions":[],"capabilities":["IMAGE_FORMAT"]},
-    {"name":"EGL_ARM_implicit_external_sync","group":"EGL_ARM","functions":[],"capabilities":["IMPLICIT_EXTERNAL_SYNC"]},
-    {"name":"EGL_ARM_pixmap_multisample_discard","group":"EGL_ARM","functions":[],"capabilities":["PIXMAP_MULTISAMPLE_DISCARD"]},
-    {"name":"EGL_ARM_surface_compression","group":"EGL_ARM","functions":[],"capabilities":["SURFACE_COMPRESSION"]},
-    {"name":"EGL_ARM_surface_compression_fixed_rate_16","group":"EGL_ARM","functions":[],"capabilities":["SURFACE_COMPRESSION_FIXED_RATE_16"]},
-    {"name":"EGL_ARM_surface_compression_fixed_rate_24","group":"EGL_ARM","functions":[],"capabilities":["SURFACE_COMPRESSION_FIXED_RATE_24"]},
-    {"name":"EGL_ARM_surface_compression_fixed_rate_32","group":"EGL_ARM","functions":[],"capabilities":["SURFACE_COMPRESSION_FIXED_RATE_32"]},
-    {"name":"EGL_EXT_client_extensions","group":"EGL_EXT","functions":[],"capabilities":["CLIENT_EXTENSIONS"]},
-    {"name":"EGL_EXT_create_context_robustness","group":"EGL_EXT","functions":[],"capabilities":["CREATE_CONTEXT_ROBUSTNESS"]},
-    {"name":"EGL_EXT_image_dma_buf_import","group":"EGL_EXT","functions":[],"capabilities":["IMAGE_DMA_BUF_IMPORT"]},
-    {"name":"EGL_EXT_image_dma_buf_import_modifiers","group":"EGL_EXT","functions":[],"capabilities":["IMAGE_DMA_BUF_IMPORT_MODIFIERS"]},
-    {"name":"EGL_EXT_image_gl_colorspace","group":"EGL_EXT","functions":[],"capabilities":["IMAGE_GL_COLORSPACE"]},
-    {"name":"EGL_EXT_pixel_format_float","group":"EGL_EXT","functions":[],"capabilities":["PIXEL_FORMAT_FLOAT"]},
-    {"name":"EGL_EXT_platform_base","group":"EGL_EXT","functions":[],"capabilities":["PLATFORM_BASE"]},
-    {"name":"EGL_EXT_protected_content","group":"EGL_EXT","functions":[],"capabilities":["PROTECTED_CONTENT"]},
-    {"name":"EGL_EXT_protected_surface","group":"EGL_EXT","functions":[],"capabilities":["PROTECTED_SURFACE"]},
-    {"name":"EGL_EXT_yuv_surface","group":"EGL_EXT","functions":[],"capabilities":["YUV_SURFACE"]},
-    {"name":"EGL_IMG_context_priority","group":"EGL_IMG","functions":[],"capabilities":["CONTEXT_PRIORITY"]},
-    {"name":"EGL_KHR_client_get_all_proc_addresses","group":"EGL_KHR","functions":[],"capabilities":["CLIENT_GET_ALL_PROC_ADDRESSES"]},
-    {"name":"EGL_KHR_config_attribs","group":"EGL_KHR","functions":[],"capabilities":["CONFIG_ATTRIBS"]},
-    {"name":"EGL_KHR_create_context","group":"EGL_KHR","functions":[],"capabilities":["CREATE_CONTEXT"]},
-    {"name":"EGL_KHR_fence_sync","group":"EGL_KHR","functions":[],"capabilities":["FENCE_SYNC"]},
-    {"name":"EGL_KHR_get_all_proc_addresses","group":"EGL_KHR","functions":[],"capabilities":["GET_ALL_PROC_ADDRESSES"]},
-    {"name":"EGL_KHR_gl_colorspace","group":"EGL_KHR","functions":[],"capabilities":["GL_COLORSPACE"]},
-    {"name":"EGL_KHR_gl_renderbuffer_image","group":"EGL_KHR","functions":[],"capabilities":["GL_RENDERBUFFER_IMAGE"]},
-    {"name":"EGL_KHR_gl_texture_2D_image","group":"EGL_KHR","functions":[],"capabilities":["GL_TEXTURE_2D_IMAGE"]},
-    {"name":"EGL_KHR_gl_texture_cubemap_image","group":"EGL_KHR","functions":[],"capabilities":["GL_TEXTURE_CUBEMAP_IMAGE"]},
-    {"name":"EGL_KHR_image","group":"EGL_KHR","functions":[],"capabilities":["IMAGE"]},
-    {"name":"EGL_KHR_image_base","group":"EGL_KHR","functions":[],"capabilities":["IMAGE_BASE"]},
-    {"name":"EGL_KHR_mutable_render_buffer","group":"EGL_KHR","functions":[],"capabilities":["MUTABLE_RENDER_BUFFER"]},
-    {"name":"EGL_KHR_no_config_context","group":"EGL_KHR","functions":[],"capabilities":["NO_CONFIG_CONTEXT"]},
-    {"name":"EGL_KHR_partial_update","group":"EGL_KHR","functions":[],"capabilities":["PARTIAL_UPDATE"]},
-    {"name":"EGL_KHR_platform_android","group":"EGL_KHR","functions":[],"capabilities":["PLATFORM_ANDROID"]},
-    {"name":"EGL_KHR_surfaceless_context","group":"EGL_KHR","functions":[],"capabilities":["SURFACELESS_CONTEXT"]},
-    {"name":"EGL_KHR_wait_sync","group":"EGL_KHR","functions":[],"capabilities":["WAIT_SYNC"]}
+    {
+      "name": "EGL_NV_context_priority_realtime",
+      "group": "EGL_NV",
+      "functions": [],
+      "capabilities": [
+        "CONTEXT_PRIORITY_REALTIME"
+      ]
+    },
+    {
+      "name": "GL_OVR_multiview_multisampled_render_to_texture",
+      "group": "GL_OVR",
+      "functions": [],
+      "capabilities": [
+        "MULTIVIEW_MULTISAMPLED_RENDER_TO_TEXTURE"
+      ]
+    },
+    {
+      "name": "AAudio_MMap",
+      "group": "AUDIO_AAUDIO",
+      "functions": [
+        "AAudioStream_isMMapUsed",
+        "AAudio_setMMapPolicy",
+        "AAudio_getMMapPolicy"
+      ],
+      "capabilities": [
+        "AUDIO_MMAP"
+      ]
+    },
+    {
+      "name": "AAudio_Performance",
+      "group": "AUDIO_AAUDIO",
+      "functions": [
+        "AAudioStreamBuilder_setPerformanceMode",
+        "AAudioStream_getPerformanceMode",
+        "AAudioStream_getTimestamp"
+      ],
+      "capabilities": [
+        "AUDIO_PERFORMANCE_MODE",
+        "AUDIO_TIMESTAMP"
+      ]
+    },
+    {
+      "name": "MTK_AudioDump",
+      "group": "AUDIO_MTK",
+      "functions": [
+        "MTK_GET_AUDIO_DUMP_FILE_LIST",
+        "MTK_GET_AUDIO_DUMP_FILE_CONTENT",
+        "MTK_DEL_AUDIO_DUMP_FILE",
+        "readAudioHalDumpFileContent"
+      ],
+      "capabilities": [
+        "AUDIO_HAL_DUMP"
+      ]
+    },
+    {
+      "name": "AudioToolKit",
+      "group": "AUDIO_NATIVE",
+      "functions": [
+        "AudioToolKit_GetDecodedData"
+      ],
+      "capabilities": [
+        "AUDIO_DECODED_DATA"
+      ]
+    },
+    {
+      "name": "GL_ARM_EGL_image_storage_compression",
+      "group": "GL_ARM",
+      "functions": [],
+      "capabilities": [
+        "EGL_IMAGE_STORAGE_COMPRESSION"
+      ]
+    },
+    {
+      "name": "GL_ARM_all_samples_equal",
+      "group": "GL_ARM",
+      "functions": [],
+      "capabilities": [
+        "FAST_MSAA"
+      ]
+    },
+    {
+      "name": "GL_ARM_explicit_attribute_access",
+      "group": "GL_ARM",
+      "functions": [],
+      "capabilities": [
+        "EXPLICIT_ATTRIBUTE_ACCESS"
+      ]
+    },
+    {
+      "name": "GL_ARM_explicit_memory_access",
+      "group": "GL_ARM",
+      "functions": [],
+      "capabilities": [
+        "EXPLICIT_MEMORY_ACCESS"
+      ]
+    },
+    {
+      "name": "GL_ARM_framebuffer_write",
+      "group": "GL_ARM",
+      "functions": [],
+      "capabilities": [
+        "FRAMEBUFFER_WRITE"
+      ]
+    },
+    {
+      "name": "GL_ARM_increased_rt",
+      "group": "GL_ARM",
+      "functions": [],
+      "capabilities": [
+        "INCREASED_RT"
+      ]
+    },
+    {
+      "name": "GL_ARM_internal",
+      "group": "GL_ARM",
+      "functions": [],
+      "capabilities": []
+    },
+    {
+      "name": "GL_ARM_jump",
+      "group": "GL_ARM",
+      "functions": [],
+      "capabilities": []
+    },
+    {
+      "name": "GL_ARM_mali_program_binary",
+      "group": "GL_ARM",
+      "functions": [],
+      "capabilities": [
+        "MALI_PROGRAM_BINARY"
+      ]
+    },
+    {
+      "name": "GL_ARM_mali_shader_binary",
+      "group": "GL_ARM",
+      "functions": [],
+      "capabilities": [
+        "MALI_SHADER_BINARY"
+      ]
+    },
+    {
+      "name": "GL_ARM_packed_arithmetic",
+      "group": "GL_ARM",
+      "functions": [],
+      "capabilities": [
+        "PACKED_ARITHMETIC"
+      ]
+    },
+    {
+      "name": "GL_ARM_rgba8",
+      "group": "GL_ARM",
+      "functions": [],
+      "capabilities": [
+        "RGBA8"
+      ]
+    },
+    {
+      "name": "GL_ARM_shader_framebuffer_fetch",
+      "group": "GL_ARM",
+      "functions": [
+        "glFramebufferFetchARM"
+      ],
+      "capabilities": [
+        "FRAMEBUFFER_FETCH"
+      ]
+    },
+    {
+      "name": "GL_ARM_shader_framebuffer_fetch_depth_stencil",
+      "group": "GL_ARM",
+      "functions": [],
+      "capabilities": [
+        "FRAMEBUFFER_FETCH_DEPTH_STENCIL"
+      ]
+    },
+    {
+      "name": "GL_ARM_shader_framebuffer_fetch_raw_explicit",
+      "group": "GL_ARM",
+      "functions": [],
+      "capabilities": [
+        "FRAMEBUFFER_FETCH_RAW_EXPLICIT"
+      ]
+    },
+    {
+      "name": "GL_ARM_texture_storage_compression",
+      "group": "GL_ARM",
+      "functions": [],
+      "capabilities": [
+        "TEXTURE_STORAGE_COMPRESSION"
+      ]
+    },
+    {
+      "name": "GL_ARM_texture_storage_compression_fixed_rate_16",
+      "group": "GL_ARM",
+      "functions": [],
+      "capabilities": [
+        "TEXTURE_STORAGE_COMPRESSION_FIXED_RATE_16"
+      ]
+    },
+    {
+      "name": "GL_ARM_texture_storage_compression_fixed_rate_24",
+      "group": "GL_ARM",
+      "functions": [],
+      "capabilities": [
+        "TEXTURE_STORAGE_COMPRESSION_FIXED_RATE_24"
+      ]
+    },
+    {
+      "name": "GL_ARM_texture_storage_compression_fixed_rate_32",
+      "group": "GL_ARM",
+      "functions": [],
+      "capabilities": [
+        "TEXTURE_STORAGE_COMPRESSION_FIXED_RATE_32"
+      ]
+    },
+    {
+      "name": "GL_ARM_texture_unnormalized_coordinates",
+      "group": "GL_ARM",
+      "functions": [],
+      "capabilities": [
+        "TEXTURE_UNNORMALIZED_COORDINATES"
+      ]
+    },
+    {
+      "name": "GL_EXT_EGL_image_array",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "EGL_IMAGE_ARRAY"
+      ]
+    },
+    {
+      "name": "GL_EXT_YUV_target",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "YUV_TARGET"
+      ]
+    },
+    {
+      "name": "GL_EXT_blend_minmax",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "BLEND_MINMAX"
+      ]
+    },
+    {
+      "name": "GL_EXT_buffer_storage",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "BUFFER_STORAGE"
+      ]
+    },
+    {
+      "name": "GL_EXT_color_buffer_float",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "COLOR_BUFFER_FLOAT"
+      ]
+    },
+    {
+      "name": "GL_EXT_color_buffer_half_float",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "COLOR_BUFFER_HALF_FLOAT"
+      ]
+    },
+    {
+      "name": "GL_EXT_copy_image",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "COPY_IMAGE"
+      ]
+    },
+    {
+      "name": "GL_EXT_discard_framebuffer",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "DISCARD_FRAMEBUFFER"
+      ]
+    },
+    {
+      "name": "GL_EXT_disjoint_timer_query",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "DISJOINT_TIMER_QUERY"
+      ]
+    },
+    {
+      "name": "GL_EXT_draw_buffers_indexed",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "DRAW_BUFFERS_INDEXED"
+      ]
+    },
+    {
+      "name": "GL_EXT_draw_elements_base_vertex",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "DRAW_ELEMENTS_BASE_VERTEX"
+      ]
+    },
+    {
+      "name": "GL_EXT_external_buffer",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "EXTERNAL_BUFFER"
+      ]
+    },
+    {
+      "name": "GL_EXT_float_blend",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "FLOAT_BLEND"
+      ]
+    },
+    {
+      "name": "GL_EXT_geometry_shader",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "GEOMETRY_SHADER"
+      ]
+    },
+    {
+      "name": "GL_EXT_gpu_shader5",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "GPU_SHADER5"
+      ]
+    },
+    {
+      "name": "GL_EXT_multisampled_render_to_texture",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "MULTISAMPLED_RENDER_TO_TEXTURE"
+      ]
+    },
+    {
+      "name": "GL_EXT_multisampled_render_to_texture2",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "MULTISAMPLED_RENDER_TO_TEXTURE2"
+      ]
+    },
+    {
+      "name": "GL_EXT_occlusion_query_boolean",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "OCCLUSION_QUERY_BOOLEAN"
+      ]
+    },
+    {
+      "name": "GL_EXT_primitive_bounding_box",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "PRIMITIVE_BOUNDING_BOX"
+      ]
+    },
+    {
+      "name": "GL_EXT_protected_textures",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "PROTECTED_TEXTURES"
+      ]
+    },
+    {
+      "name": "GL_EXT_read_format_bgra",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "READ_FORMAT_BGRA"
+      ]
+    },
+    {
+      "name": "GL_EXT_robustness",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "ROBUSTNESS"
+      ]
+    },
+    {
+      "name": "GL_EXT_sRGB",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "SRGB"
+      ]
+    },
+    {
+      "name": "GL_EXT_sRGB_write_control",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "SRGB_WRITE_CONTROL"
+      ]
+    },
+    {
+      "name": "GL_EXT_shader_framebuffer_fetch",
+      "group": "GL_EXT",
+      "functions": [
+        "glFramebufferFetchEXT"
+      ],
+      "capabilities": [
+        "FRAMEBUFFER_FETCH"
+      ]
+    },
+    {
+      "name": "GL_EXT_shader_io_blocks",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "SHADER_IO_BLOCKS"
+      ]
+    },
+    {
+      "name": "GL_EXT_shader_non_constant_global_initializers",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "SHADER_NON_CONSTANT_GLOBAL_INITIALIZERS"
+      ]
+    },
+    {
+      "name": "GL_EXT_shader_pixel_local_storage",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "PIXEL_LOCAL_STORAGE"
+      ]
+    },
+    {
+      "name": "GL_EXT_shadow_samplers",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "SHADOW_SAMPLERS"
+      ]
+    },
+    {
+      "name": "GL_EXT_tessellation_shader",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "TESSELLATION_SHADER"
+      ]
+    },
+    {
+      "name": "GL_EXT_texture_border_clamp",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "TEXTURE_BORDER_CLAMP"
+      ]
+    },
+    {
+      "name": "GL_EXT_texture_buffer",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "TEXTURE_BUFFER"
+      ]
+    },
+    {
+      "name": "GL_EXT_texture_compression_astc_decode_mode",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "ASTC_DECODE_MODE"
+      ]
+    },
+    {
+      "name": "GL_EXT_texture_compression_astc_decode_mode_rgb9e5",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "ASTC_DECODE_MODE_RGB9E5"
+      ]
+    },
+    {
+      "name": "GL_EXT_texture_cube_map_array",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "TEXTURE_CUBE_MAP_ARRAY"
+      ]
+    },
+    {
+      "name": "GL_EXT_texture_filter_anisotropic",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "TEXTURE_FILTER_ANISOTROPIC"
+      ]
+    },
+    {
+      "name": "GL_EXT_texture_format_BGRA8888",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "TEXTURE_FORMAT_BGRA8888"
+      ]
+    },
+    {
+      "name": "GL_EXT_texture_rg",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "TEXTURE_RG"
+      ]
+    },
+    {
+      "name": "GL_EXT_texture_sRGB_R8",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "TEXTURE_SRGB_R8"
+      ]
+    },
+    {
+      "name": "GL_EXT_texture_sRGB_RG8",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "TEXTURE_SRGB_RG8"
+      ]
+    },
+    {
+      "name": "GL_EXT_texture_sRGB_decode",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "TEXTURE_SRGB_DECODE"
+      ]
+    },
+    {
+      "name": "GL_EXT_texture_storage",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "TEXTURE_STORAGE"
+      ]
+    },
+    {
+      "name": "GL_EXT_texture_type_2_10_10_10_REV",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "TEXTURE_TYPE_2_10_10_10_REV"
+      ]
+    },
+    {
+      "name": "GL_EXT_unpack_subimage",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "UNPACK_SUBIMAGE"
+      ]
+    },
+    {
+      "name": "GL_KHR_blend_equation_advanced",
+      "group": "GL_KHR",
+      "functions": [],
+      "capabilities": [
+        "BLEND_EQUATION_ADVANCED"
+      ]
+    },
+    {
+      "name": "GL_KHR_blend_equation_advanced_coherent",
+      "group": "GL_KHR",
+      "functions": [],
+      "capabilities": [
+        "BLEND_EQUATION_ADVANCED_COHERENT"
+      ]
+    },
+    {
+      "name": "GL_KHR_debug",
+      "group": "GL_KHR",
+      "functions": [],
+      "capabilities": [
+        "DEBUG"
+      ]
+    },
+    {
+      "name": "GL_KHR_robust_buffer_access_behavior",
+      "group": "GL_KHR",
+      "functions": [],
+      "capabilities": [
+        "ROBUST_BUFFER_ACCESS_BEHAVIOR"
+      ]
+    },
+    {
+      "name": "GL_KHR_robustness",
+      "group": "GL_KHR",
+      "functions": [],
+      "capabilities": [
+        "ROBUSTNESS"
+      ]
+    },
+    {
+      "name": "GL_KHR_texture_compression_astc_hdr",
+      "group": "GL_KHR",
+      "functions": [],
+      "capabilities": [
+        "ASTC_HDR"
+      ]
+    },
+    {
+      "name": "GL_KHR_texture_compression_astc_ldr",
+      "group": "GL_KHR",
+      "functions": [],
+      "capabilities": [
+        "ASTC_LDR"
+      ]
+    },
+    {
+      "name": "GL_KHR_texture_compression_astc_sliced_3d",
+      "group": "GL_KHR",
+      "functions": [],
+      "capabilities": [
+        "ASTC_SLICED_3D"
+      ]
+    },
+    {
+      "name": "GL_OES_EGL_image",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "EGL_IMAGE"
+      ]
+    },
+    {
+      "name": "GL_OES_EGL_image_external",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "EGL_IMAGE_EXTERNAL"
+      ]
+    },
+    {
+      "name": "GL_OES_EGL_image_external_essl3",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "EGL_IMAGE_EXTERNAL_ESSL3"
+      ]
+    },
+    {
+      "name": "GL_OES_EGL_sync",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "EGL_SYNC"
+      ]
+    },
+    {
+      "name": "GL_OES_blend_equation_separate",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "BLEND_EQUATION_SEPARATE"
+      ]
+    },
+    {
+      "name": "GL_OES_blend_func_separate",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "BLEND_FUNC_SEPARATE"
+      ]
+    },
+    {
+      "name": "GL_OES_blend_subtract",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "BLEND_SUBTRACT"
+      ]
+    },
+    {
+      "name": "GL_OES_byte_coordinates",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "BYTE_COORDINATES"
+      ]
+    },
+    {
+      "name": "GL_OES_compressed_ETC1_RGB8_texture",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "ETC1_COMPRESSION"
+      ]
+    },
+    {
+      "name": "GL_OES_compressed_paletted_texture",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "COMPRESSED_PALETTED_TEXTURE"
+      ]
+    },
+    {
+      "name": "GL_OES_copy_image",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "COPY_IMAGE"
+      ]
+    },
+    {
+      "name": "GL_OES_depth24",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "DEPTH24"
+      ]
+    },
+    {
+      "name": "GL_OES_depth_texture",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "DEPTH_TEXTURE"
+      ]
+    },
+    {
+      "name": "GL_OES_depth_texture_cube_map",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "DEPTH_TEXTURE_CUBE_MAP"
+      ]
+    },
+    {
+      "name": "GL_OES_draw_buffers_indexed",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "DRAW_BUFFERS_INDEXED"
+      ]
+    },
+    {
+      "name": "GL_OES_draw_elements_base_vertex",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "DRAW_ELEMENTS_BASE_VERTEX"
+      ]
+    },
+    {
+      "name": "GL_OES_draw_texture",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "DRAW_TEXTURE"
+      ]
+    },
+    {
+      "name": "GL_OES_element_index_uint",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "ELEMENT_INDEX_UINT"
+      ]
+    },
+    {
+      "name": "GL_OES_extended_matrix_palette",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "EXTENDED_MATRIX_PALETTE"
+      ]
+    },
+    {
+      "name": "GL_OES_fbo_render_mipmap",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "FBO_RENDER_MIPMAP"
+      ]
+    },
+    {
+      "name": "GL_OES_fixed_point",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "FIXED_POINT"
+      ]
+    },
+    {
+      "name": "GL_OES_framebuffer_object",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "FRAMEBUFFER_OBJECT"
+      ]
+    },
+    {
+      "name": "GL_OES_geometry_shader",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "GEOMETRY_SHADER"
+      ]
+    },
+    {
+      "name": "GL_OES_get_program_binary",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "GET_PROGRAM_BINARY"
+      ]
+    },
+    {
+      "name": "GL_OES_gpu_shader5",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "GPU_SHADER5"
+      ]
+    },
+    {
+      "name": "GL_OES_mapbuffer",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "MAPBUFFER"
+      ]
+    },
+    {
+      "name": "GL_OES_matrix_get",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "MATRIX_GET"
+      ]
+    },
+    {
+      "name": "GL_OES_matrix_palette",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "MATRIX_PALETTE"
+      ]
+    },
+    {
+      "name": "GL_OES_packed_depth_stencil",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "PACKED_DEPTH_STENCIL"
+      ]
+    },
+    {
+      "name": "GL_OES_point_size_array",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "POINT_SIZE_ARRAY"
+      ]
+    },
+    {
+      "name": "GL_OES_point_sprite",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "POINT_SPRITE"
+      ]
+    },
+    {
+      "name": "GL_OES_primitive_bounding_box",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "PRIMITIVE_BOUNDING_BOX"
+      ]
+    },
+    {
+      "name": "GL_OES_query_matrix",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "QUERY_MATRIX"
+      ]
+    },
+    {
+      "name": "GL_OES_read_format",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "READ_FORMAT"
+      ]
+    },
+    {
+      "name": "GL_OES_required_internalformat",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "REQUIRED_INTERNALFORMAT"
+      ]
+    },
+    {
+      "name": "GL_OES_rgb8_rgba8",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "RGB8_RGBA8"
+      ]
+    },
+    {
+      "name": "GL_OES_sample_shading",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "SAMPLE_SHADING"
+      ]
+    },
+    {
+      "name": "GL_OES_sample_variables",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "SAMPLE_VARIABLES"
+      ]
+    },
+    {
+      "name": "GL_OES_shader_image_atomic",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "SHADER_IMAGE_ATOMIC"
+      ]
+    },
+    {
+      "name": "GL_OES_shader_io_blocks",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "SHADER_IO_BLOCKS"
+      ]
+    },
+    {
+      "name": "GL_OES_shader_multisample_interpolation",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "SHADER_MULTISAMPLE_INTERPOLATION"
+      ]
+    },
+    {
+      "name": "GL_OES_single_precision",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "SINGLE_PRECISION"
+      ]
+    },
+    {
+      "name": "GL_OES_standard_derivatives",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "STANDARD_DERIVATIVES"
+      ]
+    },
+    {
+      "name": "GL_OES_stencil8",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "STENCIL8"
+      ]
+    },
+    {
+      "name": "GL_OES_stencil_wrap",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "STENCIL_WRAP"
+      ]
+    },
+    {
+      "name": "GL_OES_surfaceless_context",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "SURFACELESS_CONTEXT"
+      ]
+    },
+    {
+      "name": "GL_OES_tessellation_shader",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "TESSELLATION_SHADER"
+      ]
+    },
+    {
+      "name": "GL_OES_texture_3D",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "TEXTURE_3D"
+      ]
+    },
+    {
+      "name": "GL_OES_texture_border_clamp",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "TEXTURE_BORDER_CLAMP"
+      ]
+    },
+    {
+      "name": "GL_OES_texture_buffer",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "TEXTURE_BUFFER"
+      ]
+    },
+    {
+      "name": "GL_OES_texture_compression_astc",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "ASTC_LDR"
+      ]
+    },
+    {
+      "name": "GL_OES_texture_cube_map",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "TEXTURE_CUBE_MAP"
+      ]
+    },
+    {
+      "name": "GL_OES_texture_cube_map_array",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "TEXTURE_CUBE_MAP_ARRAY"
+      ]
+    },
+    {
+      "name": "GL_OES_texture_float_linear",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "TEXTURE_FLOAT_LINEAR"
+      ]
+    },
+    {
+      "name": "GL_OES_texture_mirrored_repeat",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "TEXTURE_MIRRORED_REPEAT"
+      ]
+    },
+    {
+      "name": "GL_OES_texture_npot",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "TEXTURE_NPOT"
+      ]
+    },
+    {
+      "name": "GL_OES_texture_stencil8",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "TEXTURE_STENCIL8"
+      ]
+    },
+    {
+      "name": "GL_OES_texture_storage_multisample_2d_array",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "TEXTURE_STORAGE_MULTISAMPLE_2D_ARRAY"
+      ]
+    },
+    {
+      "name": "GL_OES_vertex_array_object",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "VERTEX_ARRAY_OBJECT"
+      ]
+    },
+    {
+      "name": "GL_OES_vertex_half_float",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "VERTEX_HALF_FLOAT"
+      ]
+    },
+    {
+      "name": "EGL_ANDROID_blob_cache",
+      "group": "EGL_ANDROID",
+      "functions": [],
+      "capabilities": [
+        "BLOB_CACHE"
+      ]
+    },
+    {
+      "name": "EGL_ANDROID_framebuffer_target",
+      "group": "EGL_ANDROID",
+      "functions": [],
+      "capabilities": [
+        "FRAMEBUFFER_TARGET"
+      ]
+    },
+    {
+      "name": "EGL_ANDROID_image_crop",
+      "group": "EGL_ANDROID",
+      "functions": [],
+      "capabilities": [
+        "IMAGE_CROP"
+      ]
+    },
+    {
+      "name": "EGL_ANDROID_image_native_buffer",
+      "group": "EGL_ANDROID",
+      "functions": [],
+      "capabilities": [
+        "IMAGE_NATIVE_BUFFER"
+      ]
+    },
+    {
+      "name": "EGL_ANDROID_native_fence_sync",
+      "group": "EGL_ANDROID",
+      "functions": [],
+      "capabilities": [
+        "NATIVE_FENCE_SYNC"
+      ]
+    },
+    {
+      "name": "EGL_ANDROID_recordable",
+      "group": "EGL_ANDROID",
+      "functions": [],
+      "capabilities": [
+        "RECORDABLE"
+      ]
+    },
+    {
+      "name": "EGL_ARM_image_format",
+      "group": "EGL_ARM",
+      "functions": [],
+      "capabilities": [
+        "IMAGE_FORMAT"
+      ]
+    },
+    {
+      "name": "EGL_ARM_implicit_external_sync",
+      "group": "EGL_ARM",
+      "functions": [],
+      "capabilities": [
+        "IMPLICIT_EXTERNAL_SYNC"
+      ]
+    },
+    {
+      "name": "EGL_ARM_pixmap_multisample_discard",
+      "group": "EGL_ARM",
+      "functions": [],
+      "capabilities": [
+        "PIXMAP_MULTISAMPLE_DISCARD"
+      ]
+    },
+    {
+      "name": "EGL_ARM_surface_compression",
+      "group": "EGL_ARM",
+      "functions": [],
+      "capabilities": [
+        "SURFACE_COMPRESSION"
+      ]
+    },
+    {
+      "name": "EGL_ARM_surface_compression_fixed_rate_16",
+      "group": "EGL_ARM",
+      "functions": [],
+      "capabilities": [
+        "SURFACE_COMPRESSION_FIXED_RATE_16"
+      ]
+    },
+    {
+      "name": "EGL_ARM_surface_compression_fixed_rate_24",
+      "group": "EGL_ARM",
+      "functions": [],
+      "capabilities": [
+        "SURFACE_COMPRESSION_FIXED_RATE_24"
+      ]
+    },
+    {
+      "name": "EGL_ARM_surface_compression_fixed_rate_32",
+      "group": "EGL_ARM",
+      "functions": [],
+      "capabilities": [
+        "SURFACE_COMPRESSION_FIXED_RATE_32"
+      ]
+    },
+    {
+      "name": "EGL_EXT_client_extensions",
+      "group": "EGL_EXT",
+      "functions": [],
+      "capabilities": [
+        "CLIENT_EXTENSIONS"
+      ]
+    },
+    {
+      "name": "EGL_EXT_create_context_robustness",
+      "group": "EGL_EXT",
+      "functions": [],
+      "capabilities": [
+        "CREATE_CONTEXT_ROBUSTNESS"
+      ]
+    },
+    {
+      "name": "EGL_EXT_image_dma_buf_import",
+      "group": "EGL_EXT",
+      "functions": [],
+      "capabilities": [
+        "IMAGE_DMA_BUF_IMPORT"
+      ]
+    },
+    {
+      "name": "EGL_EXT_image_dma_buf_import_modifiers",
+      "group": "EGL_EXT",
+      "functions": [],
+      "capabilities": [
+        "IMAGE_DMA_BUF_IMPORT_MODIFIERS"
+      ]
+    },
+    {
+      "name": "EGL_EXT_image_gl_colorspace",
+      "group": "EGL_EXT",
+      "functions": [],
+      "capabilities": [
+        "IMAGE_GL_COLORSPACE"
+      ]
+    },
+    {
+      "name": "EGL_EXT_pixel_format_float",
+      "group": "EGL_EXT",
+      "functions": [],
+      "capabilities": [
+        "PIXEL_FORMAT_FLOAT"
+      ]
+    },
+    {
+      "name": "EGL_EXT_platform_base",
+      "group": "EGL_EXT",
+      "functions": [],
+      "capabilities": [
+        "PLATFORM_BASE"
+      ]
+    },
+    {
+      "name": "EGL_EXT_protected_content",
+      "group": "EGL_EXT",
+      "functions": [],
+      "capabilities": [
+        "PROTECTED_CONTENT"
+      ]
+    },
+    {
+      "name": "EGL_EXT_protected_surface",
+      "group": "EGL_EXT",
+      "functions": [],
+      "capabilities": [
+        "PROTECTED_SURFACE"
+      ]
+    },
+    {
+      "name": "EGL_EXT_yuv_surface",
+      "group": "EGL_EXT",
+      "functions": [],
+      "capabilities": [
+        "YUV_SURFACE"
+      ]
+    },
+    {
+      "name": "EGL_IMG_context_priority",
+      "group": "EGL_IMG",
+      "functions": [],
+      "capabilities": [
+        "CONTEXT_PRIORITY"
+      ]
+    },
+    {
+      "name": "EGL_KHR_client_get_all_proc_addresses",
+      "group": "EGL_KHR",
+      "functions": [],
+      "capabilities": [
+        "CLIENT_GET_ALL_PROC_ADDRESSES"
+      ]
+    },
+    {
+      "name": "EGL_KHR_config_attribs",
+      "group": "EGL_KHR",
+      "functions": [],
+      "capabilities": [
+        "CONFIG_ATTRIBS"
+      ]
+    },
+    {
+      "name": "EGL_KHR_create_context",
+      "group": "EGL_KHR",
+      "functions": [],
+      "capabilities": [
+        "CREATE_CONTEXT"
+      ]
+    },
+    {
+      "name": "EGL_KHR_fence_sync",
+      "group": "EGL_KHR",
+      "functions": [],
+      "capabilities": [
+        "FENCE_SYNC"
+      ]
+    },
+    {
+      "name": "EGL_KHR_get_all_proc_addresses",
+      "group": "EGL_KHR",
+      "functions": [],
+      "capabilities": [
+        "GET_ALL_PROC_ADDRESSES"
+      ]
+    },
+    {
+      "name": "EGL_KHR_gl_colorspace",
+      "group": "EGL_KHR",
+      "functions": [],
+      "capabilities": [
+        "GL_COLORSPACE"
+      ]
+    },
+    {
+      "name": "EGL_KHR_gl_renderbuffer_image",
+      "group": "EGL_KHR",
+      "functions": [],
+      "capabilities": [
+        "GL_RENDERBUFFER_IMAGE"
+      ]
+    },
+    {
+      "name": "EGL_KHR_gl_texture_2D_image",
+      "group": "EGL_KHR",
+      "functions": [],
+      "capabilities": [
+        "GL_TEXTURE_2D_IMAGE"
+      ]
+    },
+    {
+      "name": "EGL_KHR_gl_texture_cubemap_image",
+      "group": "EGL_KHR",
+      "functions": [],
+      "capabilities": [
+        "GL_TEXTURE_CUBEMAP_IMAGE"
+      ]
+    },
+    {
+      "name": "EGL_KHR_image",
+      "group": "EGL_KHR",
+      "functions": [],
+      "capabilities": [
+        "IMAGE"
+      ]
+    },
+    {
+      "name": "EGL_KHR_image_base",
+      "group": "EGL_KHR",
+      "functions": [],
+      "capabilities": [
+        "IMAGE_BASE"
+      ]
+    },
+    {
+      "name": "EGL_KHR_mutable_render_buffer",
+      "group": "EGL_KHR",
+      "functions": [],
+      "capabilities": [
+        "MUTABLE_RENDER_BUFFER"
+      ]
+    },
+    {
+      "name": "EGL_KHR_no_config_context",
+      "group": "EGL_KHR",
+      "functions": [],
+      "capabilities": [
+        "NO_CONFIG_CONTEXT"
+      ]
+    },
+    {
+      "name": "EGL_KHR_partial_update",
+      "group": "EGL_KHR",
+      "functions": [],
+      "capabilities": [
+        "PARTIAL_UPDATE"
+      ]
+    },
+    {
+      "name": "EGL_KHR_platform_android",
+      "group": "EGL_KHR",
+      "functions": [],
+      "capabilities": [
+        "PLATFORM_ANDROID"
+      ]
+    },
+    {
+      "name": "EGL_KHR_surfaceless_context",
+      "group": "EGL_KHR",
+      "functions": [],
+      "capabilities": [
+        "SURFACELESS_CONTEXT"
+      ]
+    },
+    {
+      "name": "EGL_KHR_wait_sync",
+      "group": "EGL_KHR",
+      "functions": [],
+      "capabilities": [
+        "WAIT_SYNC"
+      ]
+    },
+    {
+      "name": "GL_EXT_base_instance",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "BASE_INSTANCE"
+      ]
+    },
+    {
+      "name": "GL_EXT_blend_func_extended",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "BLEND_FUNC_EXTENDED"
+      ]
+    },
+    {
+      "name": "GL_EXT_clear_texture",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "CLEAR_TEXTURE"
+      ]
+    },
+    {
+      "name": "GL_EXT_clip_control",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "CLIP_CONTROL"
+      ]
+    },
+    {
+      "name": "GL_EXT_clip_cull_distance",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "CLIP_CULL_DISTANCE"
+      ]
+    },
+    {
+      "name": "GL_EXT_conservative_depth",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "CONSERVATIVE_DEPTH"
+      ]
+    },
+    {
+      "name": "GL_EXT_EGL_image_external_wrap_modes",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "EGL_IMAGE_EXTERNAL_WRAP_MODES"
+      ]
+    },
+    {
+      "name": "GL_EXT_EGL_image_storage",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "EGL_IMAGE_STORAGE"
+      ]
+    },
+    {
+      "name": "GL_EXT_geometry_point_size",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "GEOMETRY_POINT_SIZE"
+      ]
+    },
+    {
+      "name": "GL_EXT_instanced_arrays",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "INSTANCED_ARRAYS"
+      ]
+    },
+    {
+      "name": "GL_EXT_map_buffer_range",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "MAP_BUFFER_RANGE"
+      ]
+    },
+    {
+      "name": "GL_EXT_multi_draw_indirect",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "MULTI_DRAW_INDIRECT"
+      ]
+    },
+    {
+      "name": "GL_EXT_polygon_offset_clamp",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "POLYGON_OFFSET_CLAMP"
+      ]
+    },
+    {
+      "name": "GL_EXT_render_snorm",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "RENDER_SNORM"
+      ]
+    },
+    {
+      "name": "GL_EXT_separate_shader_objects",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "SEPARATE_SHADER_OBJECTS"
+      ]
+    },
+    {
+      "name": "GL_EXT_shader_group_vote",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "SHADER_GROUP_VOTE"
+      ]
+    },
+    {
+      "name": "GL_EXT_shader_implicit_conversions",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "SHADER_IMPLICIT_CONVERSIONS"
+      ]
+    },
+    {
+      "name": "GL_EXT_shader_integer_mix",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "SHADER_INTEGER_MIX"
+      ]
+    },
+    {
+      "name": "GL_EXT_shader_pixel_local_storage2",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "PIXEL_LOCAL_STORAGE2"
+      ]
+    },
+    {
+      "name": "GL_EXT_shader_samples_identical",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "SHADER_SAMPLES_IDENTICAL"
+      ]
+    },
+    {
+      "name": "GL_EXT_shader_texture_lod",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "SHADER_TEXTURE_LOD"
+      ]
+    },
+    {
+      "name": "GL_EXT_texture_compression_dxt1",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "TEXTURE_COMPRESSION_DXT1"
+      ]
+    },
+    {
+      "name": "GL_EXT_texture_compression_s3tc_srgb",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "TEXTURE_COMPRESSION_S3TC_SRGB"
+      ]
+    },
+    {
+      "name": "GL_EXT_texture_norm16",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "TEXTURE_NORM16"
+      ]
+    },
+    {
+      "name": "GL_EXT_texture_view",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "TEXTURE_VIEW"
+      ]
+    },
+    {
+      "name": "GL_EXT_tessellation_point_size",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "TESSELLATION_POINT_SIZE"
+      ]
+    },
+    {
+      "name": "GL_EXT_window_rectangles",
+      "group": "GL_EXT",
+      "functions": [],
+      "capabilities": [
+        "WINDOW_RECTANGLES"
+      ]
+    },
+    {
+      "name": "GL_KHR_no_error",
+      "group": "GL_KHR",
+      "functions": [],
+      "capabilities": [
+        "NO_ERROR"
+      ]
+    },
+    {
+      "name": "GL_KHR_parallel_shader_compile",
+      "group": "GL_KHR",
+      "functions": [],
+      "capabilities": [
+        "PARALLEL_SHADER_COMPILE"
+      ]
+    },
+    {
+      "name": "GL_KHR_shader_subgroup",
+      "group": "GL_KHR",
+      "functions": [],
+      "capabilities": [
+        "SHADER_SUBGROUP"
+      ]
+    },
+    {
+      "name": "GL_OES_geometry_point_size",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "GEOMETRY_POINT_SIZE"
+      ]
+    },
+    {
+      "name": "GL_OES_geometry_shader",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "GEOMETRY_SHADER"
+      ]
+    },
+    {
+      "name": "GL_OES_tessellation_point_size",
+      "group": "GL_OES",
+      "functions": [],
+      "capabilities": [
+        "TESSELLATION_POINT_SIZE"
+      ]
+    }
   ]
 }
