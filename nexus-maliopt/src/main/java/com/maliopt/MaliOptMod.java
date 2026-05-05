@@ -17,8 +17,8 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.class_310;
-import net.minecraft.class_7172;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.option.SimpleOption;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,7 +69,6 @@ public class MaliOptMod implements ClientModInitializer {
 
                 // ── 1. Extensões hardware ────────────────────────────
                 ExtensionActivator.activateAll();
-                ASTCSubsystem.init();
 
                 // ── 2. Capacidades de shader ─────────────────────────
                 // Passa o flag nativo — ShaderCapabilities escolhe
@@ -103,7 +102,7 @@ public class MaliOptMod implements ClientModInitializer {
 
         // ── Post-process pipeline ─────────────────────────────────
         WorldRenderEvents.LAST.register(context -> {
-            class_310 mc = class_310.method_1551();
+            MinecraftClient mc = MinecraftClient.getInstance();
 
             // 0. Atualiza monitor de performance (uma vez por frame)
             PerformanceGuard.update(mc);
@@ -159,13 +158,13 @@ public class MaliOptMod implements ClientModInitializer {
 
     // ════════════════════════════════════════════════════════════════
 
-    private static void forceDistances(class_310 client) {
+    private static void forceDistances(MinecraftClient client) {
         if (client == null || client.field_1690 == null) return;
         try {
             boolean changed = false;
             GameOptionsAccessor acc = (GameOptionsAccessor)(Object) client.field_1690;
 
-            class_7172<Integer> viewDist = acc.maliopt_getViewDistance();
+            SimpleOption<Integer> viewDist = acc.maliopt_getViewDistance();
             int currentRender = viewDist.method_41753();
             if (currentRender > MAX_RENDER_DISTANCE) {
                 viewDist.method_41748(MAX_RENDER_DISTANCE);
@@ -177,7 +176,7 @@ public class MaliOptMod implements ClientModInitializer {
                     currentRender);
             }
 
-            class_7172<Integer> simDist = acc.maliopt_getSimulationDistance();
+            SimpleOption<Integer> simDist = acc.maliopt_getSimulationDistance();
             int currentSim = simDist.method_41753();
             if (currentSim > MAX_SIMULATION_DISTANCE) {
                 simDist.method_41748(MAX_SIMULATION_DISTANCE);

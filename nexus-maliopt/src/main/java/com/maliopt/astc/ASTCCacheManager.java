@@ -16,6 +16,7 @@ public final class ASTCCacheManager {
     private static boolean ready = false;
 
     private ASTCCacheManager() {}
+    public static boolean isReady() { return ready; }
 
     public static void init() {
         try {

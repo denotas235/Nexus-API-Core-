@@ -2,8 +2,8 @@ package com.maliopt.pipeline;
 
 import com.maliopt.MaliOptMod;
 import com.maliopt.shader.ShaderExecutionLayer;
-import net.minecraft.class_276;
-import net.minecraft.class_310;
+import net.minecraft.client.gl.Framebuffer;
+import net.minecraft.client.MinecraftClient;
 import com.maliopt.performance.PerformanceGuard;
 import org.lwjgl.opengl.*;
 
@@ -187,11 +187,11 @@ public class PLSLightingPass {
 
     // ── RENDER ───────────────────────────────────────────────────────
 
-    public static void render(class_310 mc) {
+    public static void render(MinecraftClient mc) {
         if (!ready || program == 0 || mc.field_1687 == null) return;
         if (!PerformanceGuard.lightingPassEnabled()) return;
 
-        class_276 fb = mc.method_1522();
+        Framebuffer fb = mc.getFramebuffer();
         int w = fb.field_1482;
         int h = fb.field_1481;
 

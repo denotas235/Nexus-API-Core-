@@ -2,8 +2,8 @@ package com.maliopt.pipeline;
 
 import com.maliopt.MaliOptMod;
 import com.maliopt.shader.ShaderExecutionLayer;
-import net.minecraft.class_276;
-import net.minecraft.class_310;
+import net.minecraft.client.gl.Framebuffer;
+import net.minecraft.client.MinecraftClient;
 import com.maliopt.performance.PerformanceGuard;
 import org.lwjgl.opengl.*;
 
@@ -144,11 +144,11 @@ public class FBFetchBloomPass {
         }
     }
 
-    public static void render(class_310 mc) {
+    public static void render(MinecraftClient mc) {
         if (!ready || mc.field_1687 == null) return;
         if (!PerformanceGuard.bloomEnabled()) return;
 
-        class_276 fb = mc.method_1522();
+        Framebuffer fb = mc.getFramebuffer();
         int w = fb.field_1482;
         int h = fb.field_1481;
 
@@ -175,7 +175,7 @@ public class FBFetchBloomPass {
         if (blend) GL11.glEnable(GL11.GL_BLEND);
     }
 
-    private static void phaseExtract(class_276 fb, int w, int h) {
+    private static void phaseExtract(Framebuffer fb, int w, int h) {
         GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, fb.field_1476);
         GL30.glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, sceneCopyFbo);
         GL30.glBlitFramebuffer(0, 0, w, h, 0, 0, w, h, GL11.GL_COLOR_BUFFER_BIT, GL11.GL_NEAREST);
@@ -208,7 +208,7 @@ public class FBFetchBloomPass {
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
     }
 
-    private static void phaseComposite(class_276 fb, int w, int h) {
+    private static void phaseComposite(Framebuffer fb, int w, int h) {
         GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, fb.field_1476);
         GL11.glViewport(0, 0, w, h);
         GL20.glUseProgram(progComposite);

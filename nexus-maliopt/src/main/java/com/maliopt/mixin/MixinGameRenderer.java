@@ -5,20 +5,20 @@ import com.maliopt.gpu.GPUDetector;
 import com.maliopt.pipeline.MaliPipelineOptimizer;
 import com.maliopt.pipeline.ShaderCacheManager;
 import com.maliopt.pipeline.TileBasedOptimizer;
-import net.minecraft.class_757;
-import net.minecraft.class_9779;
+import net.minecraft.client.render.GameRenderer;
+import net.minecraft.client.render.RenderTickCounter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(class_757.class)
+@Mixin(GameRenderer.class)
 public class MixinGameRenderer {
 
     private static boolean lateInitDone = false;
 
     @Inject(method = "render", at = @At("HEAD"))
-    private void maliopt$onRenderHead(class_9779 tickCounter,
+    private void maliopt$onRenderHead(RenderTickCounter tickCounter,
                                       boolean tick,
                                       CallbackInfo ci) {
         if (!GPUDetector.isMaliGPU()) return;
@@ -32,7 +32,7 @@ public class MixinGameRenderer {
     }
 
     @Inject(method = "render", at = @At("TAIL"))
-    private void maliopt$onRenderTail(class_9779 tickCounter,
+    private void maliopt$onRenderTail(RenderTickCounter tickCounter,
                                       boolean tick,
                                       CallbackInfo ci) {
         if (!GPUDetector.isMaliGPU()) return;

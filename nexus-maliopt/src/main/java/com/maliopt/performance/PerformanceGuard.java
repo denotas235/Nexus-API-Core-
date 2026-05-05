@@ -1,7 +1,7 @@
 package com.maliopt.performance;
 
 import com.maliopt.MaliOptMod;
-import net.minecraft.class_310;
+import net.minecraft.client.MinecraftClient;
 
 public final class PerformanceGuard {
 
@@ -25,7 +25,7 @@ public final class PerformanceGuard {
 
     private PerformanceGuard() {}
 
-    public static void update(class_310 mc) {
+    public static void update(MinecraftClient mc) {
         if (mc == null) return;
         int fps = mc.method_47599();
 
