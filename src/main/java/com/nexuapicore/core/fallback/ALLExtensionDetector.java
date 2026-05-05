@@ -5,12 +5,13 @@ import com.nexuapicore.core.ExtensionDef;
 import com.nexuapicore.core.nativelink.NexusNativeLoader;
 import org.lwjgl.opengl.*;
 
+import java.io.*;
 import java.util.*;
 
 /**
  * ALLExtensionDetector 2.0 — PRIME PRO MAX ULTRA
  *
- * Deteta TODAS as extensões do dispositivo através de todas as fontes possíveis.
+ * Detecta TODAS as extensões do dispositivo através de todas as fontes possíveis.
  * Para cada fonte, mostra:
  *   - Nome da fonte
  *   - Número de extensões encontradas
@@ -19,17 +20,17 @@ import java.util.*;
  * Fontes consultadas (por ordem):
  *   1. GL Nativo (libnexus_mali_core.so → glGetString directo no driver)
  *   2. EGL Nativo (libnexus_mali_core.so → eglQueryString)
- *   3. GL via LTW/Wrapper (glGetString via OpenGL)
- *   4. EGL via GL (glGetString com prefixo EGL_ — algumas extensões EGL aparecem aqui)
- *   5. Vulkan Nativo (libnexus_mali_core.so → vkEnumerateInstanceExtensionProperties)
- *   6. Áudio Nativo (libnexus_mali_core.so → AAudio + OpenAL)
+ *   3. GL via LTW/Wrapper (glGetStringi via OpenGL)
+ *   4. Vulkan Nativo (libnexus_mali_core.so → vkEnumerateInstanceExtensionProperties)
+ *   5. Áudio Nativo (libnexus_mali_core.so → AAudio + OpenAL)
+ *   6. EGL via sistema (java property "egl.extensions")
+ *   7. Strings da libGLES_mali.so (extração directa do driver Mali)
  *
  * Cada extensão da base de dados é verificada em cada fonte e o resultado é
  * exibido num relatório completo no log.
  */
 public class ALLExtensionDetector {
 
-    // ── Estrutura de dados para tracking ──────────────────────────────
     private static final Map<String, Set<String>> extensionSources = new LinkedHashMap<>();
 
     public static List<String> detectExtensions() {
@@ -72,7 +73,6 @@ public class ALLExtensionDetector {
                 registerSource("GL via LTW/Wrapper (glGetStringi, " + count + " extensões)", ltwExts, allAvailable);
             }
         } catch (Exception e) {
-            // Fallback: string plana
             try {
                 String flat = GL11.glGetString(GL11.GL_EXTENSIONS);
                 if (flat != null && !flat.isEmpty()) {
@@ -115,6 +115,12 @@ public class ALLExtensionDetector {
             }
         } catch (Exception ignored) {}
 
+        // ── FONTE 7: Strings da libGLES_mali.so ──────────────────────
+        Set<String> maliDriverExts = loadMaliDriverExtensions();
+        if (!maliDriverExts.isEmpty()) {
+            registerSource("Mali Driver (strings libGLES_mali.so)", maliDriverExts, allAvailable);
+        }
+
         // ── SCAN COMPLETO CONTRA A BASE DE DADOS ─────────────────────
         List<ExtensionDef> allKnown = ExtensionDatabase.INSTANCE.getAllExtensions();
         System.out.println("[Nexus] ");
@@ -124,7 +130,6 @@ public class ALLExtensionDetector {
         System.out.println("[Nexus] Total combinado de extensões detectadas: " + allAvailable.size());
         System.out.println("[Nexus] ");
 
-        // Agrupar por grupo (GL_ARM, GL_EXT, etc.)
         Map<String, List<ExtensionDef>> byGroup = new LinkedHashMap<>();
         for (ExtensionDef def : allKnown) {
             byGroup.computeIfAbsent(def.getGroup(), k -> new ArrayList<>()).add(def);
@@ -137,7 +142,6 @@ public class ALLExtensionDetector {
             for (ExtensionDef def : defs) {
                 boolean found = allAvailable.contains(def.getName());
                 String symbol = found ? "✅" : "❌";
-                // Encontrar qual fonte forneceu esta extensão
                 String source = findSource(def.getName());
                 String sourceInfo = found ? "  ← " + source : "";
                 System.out.println("[Nexus]   " + symbol + " " + def.getName() + sourceInfo);
@@ -148,8 +152,7 @@ public class ALLExtensionDetector {
         System.out.println("[Nexus] ╔══════════════════════════════════════════════════════════╗");
         System.out.println("[Nexus] ║   RESUMO FINAL                                           ║");
         System.out.println("[Nexus] ╚══════════════════════════════════════════════════════════╝");
-        int totalOK = 0;
-        int totalERR = 0;
+        int totalOK = 0, totalERR = 0;
         for (ExtensionDef def : allKnown) {
             if (allAvailable.contains(def.getName())) totalOK++; else totalERR++;
         }
@@ -180,5 +183,40 @@ public class ALLExtensionDetector {
             }
         }
         return sources.isEmpty() ? "—" : String.join(" | ", sources);
+    }
+
+    /**
+     * FONTE 7 — Extrai extensões diretamente das strings da libGLES_mali.so.
+     * Isto garante que vemos o que o driver Mali realmente suporta,
+     * independentemente da camada de tradução (LTW, MobileGlues, etc.).
+     */
+    private static Set<String> loadMaliDriverExtensions() {
+        Set<String> exts = new LinkedHashSet<>();
+        try {
+            String maliLibPath = "/vendor/lib64/egl/libGLES_mali.so";
+            File maliLib = new File(maliLibPath);
+            if (!maliLib.exists()) {
+                System.out.println("[Nexus] FONTE 7: libGLES_mali.so não encontrada em " + maliLibPath);
+                return exts;
+            }
+
+            ProcessBuilder pb = new ProcessBuilder("strings", maliLibPath);
+            Process p = pb.start();
+            java.io.InputStream is = p.getInputStream();
+            java.util.Scanner scanner = new java.util.Scanner(is).useDelimiter("\\A");
+            String output = scanner.hasNext() ? scanner.next() : "";
+            String[] lines = output.split("\\n");
+
+            for (String line : lines) {
+                line = line.trim();
+                // Filtra apenas linhas que sejam nomes de extensão GL/EGL/VK
+                if (line.matches("^(GL_|EGL_|VK_)[A-Za-z0-9_]+$")) {
+                    exts.add(line);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("[Nexus] FONTE 7: erro ao ler libGLES_mali.so: " + e.getMessage());
+        }
+        return exts;
     }
 }
