@@ -1711,6 +1711,606 @@
       "capabilities": [
         "TESSELLATION_POINT_SIZE"
       ]
+    },
+    {
+      "name": "VK_KHR_android_surface",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_ANDROID_SURFACE"
+      ]
+    },
+    {
+      "name": "VK_KHR_device_group_creation",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_DEVICE_GROUP_CREATION"
+      ]
+    },
+    {
+      "name": "VK_KHR_external_fence_capabilities",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_EXTERNAL_FENCE_CAPABILITIES"
+      ]
+    },
+    {
+      "name": "VK_KHR_external_memory_capabilities",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_EXTERNAL_MEMORY_CAPABILITIES"
+      ]
+    },
+    {
+      "name": "VK_KHR_external_semaphore_capabilities",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_EXTERNAL_SEMAPHORE_CAPABILITIES"
+      ]
+    },
+    {
+      "name": "VK_KHR_get_display_properties2",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_GET_DISPLAY_PROPERTIES2"
+      ]
+    },
+    {
+      "name": "VK_KHR_get_physical_device_properties2",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_GET_PHYSICAL_DEVICE_PROPERTIES2"
+      ]
+    },
+    {
+      "name": "VK_KHR_surface",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_SURFACE"
+      ]
+    },
+    {
+      "name": "VK_EXT_debug_report",
+      "group": "VK_EXT",
+      "functions": [],
+      "capabilities": [
+        "VK_DEBUG_REPORT"
+      ]
+    },
+    {
+      "name": "VK_EXT_debug_utils",
+      "group": "VK_EXT",
+      "functions": [],
+      "capabilities": [
+        "VK_DEBUG_UTILS"
+      ]
+    },
+    {
+      "name": "VK_KHR_16bit_storage",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_16BIT_STORAGE"
+      ]
+    },
+    {
+      "name": "VK_KHR_8bit_storage",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_8BIT_STORAGE"
+      ]
+    },
+    {
+      "name": "VK_KHR_bind_memory2",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_BIND_MEMORY2"
+      ]
+    },
+    {
+      "name": "VK_KHR_create_renderpass2",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_CREATE_RENDERPASS2"
+      ]
+    },
+    {
+      "name": "VK_KHR_dedicated_allocation",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_DEDICATED_ALLOCATION"
+      ]
+    },
+    {
+      "name": "VK_KHR_descriptor_update_template",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_DESCRIPTOR_UPDATE_TEMPLATE"
+      ]
+    },
+    {
+      "name": "VK_KHR_device_group",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_DEVICE_GROUP"
+      ]
+    },
+    {
+      "name": "VK_KHR_driver_properties",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_DRIVER_PROPERTIES"
+      ]
+    },
+    {
+      "name": "VK_KHR_external_fence",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_EXTERNAL_FENCE"
+      ]
+    },
+    {
+      "name": "VK_KHR_external_fence_fd",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_EXTERNAL_FENCE_FD"
+      ]
+    },
+    {
+      "name": "VK_KHR_external_memory",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_EXTERNAL_MEMORY"
+      ]
+    },
+    {
+      "name": "VK_KHR_external_memory_fd",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_EXTERNAL_MEMORY_FD"
+      ]
+    },
+    {
+      "name": "VK_KHR_external_semaphore",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_EXTERNAL_SEMAPHORE"
+      ]
+    },
+    {
+      "name": "VK_KHR_external_semaphore_fd",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_EXTERNAL_SEMAPHORE_FD"
+      ]
+    },
+    {
+      "name": "VK_KHR_get_memory_requirements2",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_GET_MEMORY_REQUIREMENTS2"
+      ]
+    },
+    {
+      "name": "VK_KHR_image_format_list",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_IMAGE_FORMAT_LIST"
+      ]
+    },
+    {
+      "name": "VK_KHR_imageless_framebuffer",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_IMAGELESS_FRAMEBUFFER"
+      ]
+    },
+    {
+      "name": "VK_KHR_incremental_present",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_INCREMENTAL_PRESENT"
+      ]
+    },
+    {
+      "name": "VK_KHR_maintenance1",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_MAINTENANCE1"
+      ]
+    },
+    {
+      "name": "VK_KHR_maintenance2",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_MAINTENANCE2"
+      ]
+    },
+    {
+      "name": "VK_KHR_maintenance3",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_MAINTENANCE3"
+      ]
+    },
+    {
+      "name": "VK_KHR_multiview",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_MULTIVIEW"
+      ]
+    },
+    {
+      "name": "VK_KHR_relaxed_block_layout",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_RELAXED_BLOCK_LAYOUT"
+      ]
+    },
+    {
+      "name": "VK_KHR_sampler_mirror_clamp_to_edge",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_SAMPLER_MIRROR_CLAMP_TO_EDGE"
+      ]
+    },
+    {
+      "name": "VK_KHR_sampler_ycbcr_conversion",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_SAMPLER_YCBCR_CONVERSION"
+      ]
+    },
+    {
+      "name": "VK_KHR_separate_depth_stencil_layouts",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_SEPARATE_DEPTH_STENCIL_LAYOUTS"
+      ]
+    },
+    {
+      "name": "VK_KHR_shader_atomic_int64",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_SHADER_ATOMIC_INT64"
+      ]
+    },
+    {
+      "name": "VK_KHR_shader_draw_parameters",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_SHADER_DRAW_PARAMETERS"
+      ]
+    },
+    {
+      "name": "VK_KHR_shader_float16_int8",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_SHADER_FLOAT16_INT8"
+      ]
+    },
+    {
+      "name": "VK_KHR_shader_float_controls",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_SHADER_FLOAT_CONTROLS"
+      ]
+    },
+    {
+      "name": "VK_KHR_shader_subgroup_extended_types",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_SHADER_SUBGROUP_EXTENDED_TYPES"
+      ]
+    },
+    {
+      "name": "VK_KHR_shared_presentable_image",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_SHARED_PRESENTABLE_IMAGE"
+      ]
+    },
+    {
+      "name": "VK_KHR_storage_buffer_storage_class",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_STORAGE_BUFFER_STORAGE_CLASS"
+      ]
+    },
+    {
+      "name": "VK_KHR_swapchain",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_SWAPCHAIN"
+      ]
+    },
+    {
+      "name": "VK_KHR_swapchain_mutable_format",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_SWAPCHAIN_MUTABLE_FORMAT"
+      ]
+    },
+    {
+      "name": "VK_KHR_uniform_buffer_standard_layout",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_UNIFORM_BUFFER_STANDARD_LAYOUT"
+      ]
+    },
+    {
+      "name": "VK_KHR_variable_pointers",
+      "group": "VK_KHR",
+      "functions": [],
+      "capabilities": [
+        "VK_VARIABLE_POINTERS"
+      ]
+    },
+    {
+      "name": "VK_EXT_astc_decode_mode",
+      "group": "VK_EXT",
+      "functions": [],
+      "capabilities": [
+        "VK_ASTC_DECODE_MODE"
+      ]
+    },
+    {
+      "name": "VK_EXT_buffer_device_address",
+      "group": "VK_EXT",
+      "functions": [],
+      "capabilities": [
+        "VK_BUFFER_DEVICE_ADDRESS"
+      ]
+    },
+    {
+      "name": "VK_EXT_calibrated_timestamps",
+      "group": "VK_EXT",
+      "functions": [],
+      "capabilities": [
+        "VK_CALIBRATED_TIMESTAMPS"
+      ]
+    },
+    {
+      "name": "VK_EXT_color_write_enable",
+      "group": "VK_EXT",
+      "functions": [],
+      "capabilities": [
+        "VK_COLOR_WRITE_ENABLE"
+      ]
+    },
+    {
+      "name": "VK_EXT_depth_clip_enable",
+      "group": "VK_EXT",
+      "functions": [],
+      "capabilities": [
+        "VK_DEPTH_CLIP_ENABLE"
+      ]
+    },
+    {
+      "name": "VK_EXT_depth_range_unrestricted",
+      "group": "VK_EXT",
+      "functions": [],
+      "capabilities": [
+        "VK_DEPTH_RANGE_UNRESTRICTED"
+      ]
+    },
+    {
+      "name": "VK_EXT_descriptor_indexing",
+      "group": "VK_EXT",
+      "functions": [],
+      "capabilities": [
+        "VK_DESCRIPTOR_INDEXING"
+      ]
+    },
+    {
+      "name": "VK_EXT_host_query_reset",
+      "group": "VK_EXT",
+      "functions": [],
+      "capabilities": [
+        "VK_HOST_QUERY_RESET"
+      ]
+    },
+    {
+      "name": "VK_EXT_image_robustness",
+      "group": "VK_EXT",
+      "functions": [],
+      "capabilities": [
+        "VK_IMAGE_ROBUSTNESS"
+      ]
+    },
+    {
+      "name": "VK_EXT_index_type_uint8",
+      "group": "VK_EXT",
+      "functions": [],
+      "capabilities": [
+        "VK_INDEX_TYPE_UINT8"
+      ]
+    },
+    {
+      "name": "VK_EXT_inline_uniform_block",
+      "group": "VK_EXT",
+      "functions": [],
+      "capabilities": [
+        "VK_INLINE_UNIFORM_BLOCK"
+      ]
+    },
+    {
+      "name": "VK_EXT_line_rasterization",
+      "group": "VK_EXT",
+      "functions": [],
+      "capabilities": [
+        "VK_LINE_RASTERIZATION"
+      ]
+    },
+    {
+      "name": "VK_EXT_memory_budget",
+      "group": "VK_EXT",
+      "functions": [],
+      "capabilities": [
+        "VK_MEMORY_BUDGET"
+      ]
+    },
+    {
+      "name": "VK_EXT_pci_bus_info",
+      "group": "VK_EXT",
+      "functions": [],
+      "capabilities": [
+        "VK_PCI_BUS_INFO"
+      ]
+    },
+    {
+      "name": "VK_EXT_pipeline_creation_cache_control",
+      "group": "VK_EXT",
+      "functions": [],
+      "capabilities": [
+        "VK_PIPELINE_CREATION_CACHE_CONTROL"
+      ]
+    },
+    {
+      "name": "VK_EXT_pipeline_creation_feedback",
+      "group": "VK_EXT",
+      "functions": [],
+      "capabilities": [
+        "VK_PIPELINE_CREATION_FEEDBACK"
+      ]
+    },
+    {
+      "name": "VK_EXT_private_data",
+      "group": "VK_EXT",
+      "functions": [],
+      "capabilities": [
+        "VK_PRIVATE_DATA"
+      ]
+    },
+    {
+      "name": "VK_EXT_queue_family_foreign",
+      "group": "VK_EXT",
+      "functions": [],
+      "capabilities": [
+        "VK_QUEUE_FAMILY_FOREIGN"
+      ]
+    },
+    {
+      "name": "VK_EXT_robustness2",
+      "group": "VK_EXT",
+      "functions": [],
+      "capabilities": [
+        "VK_ROBUSTNESS2"
+      ]
+    },
+    {
+      "name": "VK_EXT_scalar_block_layout",
+      "group": "VK_EXT",
+      "functions": [],
+      "capabilities": [
+        "VK_SCALAR_BLOCK_LAYOUT"
+      ]
+    },
+    {
+      "name": "VK_EXT_separate_stencil_usage",
+      "group": "VK_EXT",
+      "functions": [],
+      "capabilities": [
+        "VK_SEPARATE_STENCIL_USAGE"
+      ]
+    },
+    {
+      "name": "VK_EXT_shader_demote_to_helper_invocation",
+      "group": "VK_EXT",
+      "functions": [],
+      "capabilities": [
+        "VK_SHADER_DEMOTE_TO_HELPER_INVOCATION"
+      ]
+    },
+    {
+      "name": "VK_EXT_shader_viewport_index_layer",
+      "group": "VK_EXT",
+      "functions": [],
+      "capabilities": [
+        "VK_SHADER_VIEWPORT_INDEX_LAYER"
+      ]
+    },
+    {
+      "name": "VK_EXT_subgroup_size_control",
+      "group": "VK_EXT",
+      "functions": [],
+      "capabilities": [
+        "VK_SUBGROUP_SIZE_CONTROL"
+      ]
+    },
+    {
+      "name": "VK_EXT_texel_buffer_alignment",
+      "group": "VK_EXT",
+      "functions": [],
+      "capabilities": [
+        "VK_TEXEL_BUFFER_ALIGNMENT"
+      ]
+    },
+    {
+      "name": "VK_EXT_texture_compression_astc_hdr",
+      "group": "VK_EXT",
+      "functions": [],
+      "capabilities": [
+        "VK_TEXTURE_COMPRESSION_ASTC_HDR"
+      ]
+    },
+    {
+      "name": "VK_EXT_tooling_info",
+      "group": "VK_EXT",
+      "functions": [],
+      "capabilities": [
+        "VK_TOOLING_INFO"
+      ]
+    },
+    {
+      "name": "VK_GOOGLE_display_timing",
+      "group": "VK_GOOGLE",
+      "functions": [],
+      "capabilities": [
+        "VK_DISPLAY_TIMING"
+      ]
     }
   ]
 }
