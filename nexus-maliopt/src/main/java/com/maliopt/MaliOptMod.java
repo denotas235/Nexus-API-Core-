@@ -16,6 +16,7 @@ import com.maliopt.pipeline.ColoredLightsPass;
 import com.maliopt.pipeline.ShaderCacheManager;
 import com.maliopt.shader.ShaderCache;
 import com.maliopt.shader.ShaderCapabilities;
+import com.maliopt.astc.ASTCSubsystem;
 import com.maliopt.shader.ShaderExecutionLayer;
 import com.nexuapicore.NexusAPI;
 import com.nexuapicore.core.FeatureRegistry;
@@ -76,6 +77,7 @@ public class MaliOptMod implements ClientModInitializer {
         if (!GPUDetector.isMaliGPU()) return;
 
         ShaderCapabilities.init(registry);
+        if (ShaderCapabilities.ASTC) ASTCSubsystem.init();
         var caps = registry.getActiveCapabilities();
         LOGGER.info("[MaliOpt] Capabilities recebidas: {}", caps);
     }
