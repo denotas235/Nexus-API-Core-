@@ -71,12 +71,17 @@ public class MaliOptMod implements ClientModInitializer {
         Path shaderCachePath = FabricLoader.getInstance().getGameDir().resolve("shader_cache");
         ShaderCache.init(shaderCachePath);
 
+        // Inicializar ShaderCapabilities com o registry antes de qualquer shader
+        ShaderCapabilities.init(registry);
         ShaderExecutionLayer.init();
 
         PLSLightingPass.init();
         FBFetchBloomPass.init();
 
-        ASTCSubsystem.init();
+        // ASTC desativado temporariamente: libastc_bridge_64.so requer libEGL.so.1 (desktop)
+        // Para ativar, compilar uma versão Android da lib ou usar texturas ASTC offline.
+        // ASTCSubsystem.init(); 
+        LOGGER.info("[MaliOpt] ASTC desativado (lib nativa incompatível). Plano B: texturas pré-comprimidas.");
 
         LOGGER.info("[MaliOpt] ✅ Optimizações aplicadas com sucesso.");
     }
