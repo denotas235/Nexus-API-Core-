@@ -58,7 +58,8 @@ public class TreeGenerator {
             GL20.glLinkProgram(tessProgram);
             GL20.glDeleteShader(tc); GL20.glDeleteShader(te);
 
-            ready = true;
+            // Tessellation não é suportada em GLES — desactivar
+            // ready = true;
             MaliOptMod.LOGGER.info("[TreeGen] L‑System GPU tree generator pronto (geom + tess)");
         } catch (Exception e) {
             MaliOptMod.LOGGER.error("[TreeGen] init falhou: {}", e.getMessage());
