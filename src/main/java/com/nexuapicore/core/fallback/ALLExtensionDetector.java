@@ -8,30 +8,21 @@ import org.lwjgl.opengl.*;
 import java.io.*;
 import java.util.*;
 
-/**
- * ALLExtensionDetector 2.0 — PRIME PRO MAX ULTRA
- *
- * Detecta TODAS as extensões do dispositivo através de todas as fontes possíveis.
- * Para cada fonte, mostra:
- *   - Nome da fonte
- *   - Número de extensões encontradas
- *   - Lista completa com ✅ (presente) ou ❌ (ausente) para cada extensão da base de dados
- *
- * Fontes consultadas (por ordem):
- *   1. GL Nativo (libnexus_mali_core.so → glGetString directo no driver)
- *   2. EGL Nativo (libnexus_mali_core.so → eglQueryString)
- *   3. GL via LTW/Wrapper (glGetStringi via OpenGL)
- *   4. Vulkan Nativo (libnexus_mali_core.so → vkEnumerateInstanceExtensionProperties)
- *   5. Áudio Nativo (libnexus_mali_core.so → AAudio + OpenAL)
- *   6. EGL via sistema (java property "egl.extensions")
- *   7. Strings da libGLES_mali.so (extração directa do driver Mali)
- *
- * Cada extensão da base de dados é verificada em cada fonte e o resultado é
- * exibido num relatório completo no log.
- */
 public class ALLExtensionDetector {
 
     private static final Map<String, Set<String>> extensionSources = new LinkedHashMap<>();
+
+    // Bibliotecas gráficas do sistema que podemos ler com "strings"
+    private static final String[] GRAPHICS_LIB_PATHS = {
+        "/vendor/lib64/egl/libEGL.so",
+        "/vendor/lib64/egl/libGLESv1_CM.so",
+        "/vendor/lib64/egl/libGLESv2.so",
+        "/vendor/lib64/egl/libGLESv3.so",
+        "/vendor/lib64/egl/libGLES_mali.so",
+        "/vendor/lib64/egl/libGLES_meow.so",
+        "/vendor/lib64/hw/vulkan.mt6768.so",     // Vulkan HAL típico em MediaTek
+        "/system/lib64/libvulkan.so"
+    };
 
     public static List<String> detectExtensions() {
         extensionSources.clear();
@@ -115,10 +106,10 @@ public class ALLExtensionDetector {
             }
         } catch (Exception ignored) {}
 
-        // ── FONTE 7: Strings da libGLES_mali.so ──────────────────────
-        Set<String> maliDriverExts = loadMaliDriverExtensions();
+        // ── FONTE 7: Strings de múltiplas bibliotecas gráficas ───────
+        Set<String> maliDriverExts = loadGraphicsDriverExtensions();
         if (!maliDriverExts.isEmpty()) {
-            registerSource("Mali Driver (strings libGLES_mali.so)", maliDriverExts, allAvailable);
+            registerSource("Mali/Graphics Driver (strings de libs do sistema)", maliDriverExts, allAvailable);
         }
 
         // ── SCAN COMPLETO CONTRA A BASE DE DADOS ─────────────────────
@@ -186,36 +177,34 @@ public class ALLExtensionDetector {
     }
 
     /**
-     * FONTE 7 — Extrai extensões diretamente das strings da libGLES_mali.so.
-     * Isto garante que vemos o que o driver Mali realmente suporta,
-     * independentemente da camada de tradução (LTW, MobileGlues, etc.).
+     * FONTE 7 (melhorada) — Lê strings de todas as bibliotecas gráficas
+     * conhecidas do sistema, não apenas da libGLES_mali.so.
      */
-    private static Set<String> loadMaliDriverExtensions() {
+    private static Set<String> loadGraphicsDriverExtensions() {
         Set<String> exts = new LinkedHashSet<>();
-        try {
-            String maliLibPath = "/vendor/lib64/egl/libGLES_mali.so";
-            File maliLib = new File(maliLibPath);
-            if (!maliLib.exists()) {
-                System.out.println("[Nexus] FONTE 7: libGLES_mali.so não encontrada em " + maliLibPath);
-                return exts;
+        for (String libPath : GRAPHICS_LIB_PATHS) {
+            File libFile = new File(libPath);
+            if (!libFile.exists()) {
+                System.out.println("[Nexus] FONTE 7: " + libPath + " não encontrada, ignorando.");
+                continue;
             }
-
-            ProcessBuilder pb = new ProcessBuilder("strings", maliLibPath);
-            Process p = pb.start();
-            java.io.InputStream is = p.getInputStream();
-            java.util.Scanner scanner = new java.util.Scanner(is).useDelimiter("\\A");
-            String output = scanner.hasNext() ? scanner.next() : "";
-            String[] lines = output.split("\\n");
-
-            for (String line : lines) {
-                line = line.trim();
-                // Filtra apenas linhas que sejam nomes de extensão GL/EGL/VK
-                if (line.matches("^(GL_|EGL_|VK_)[A-Za-z0-9_]+$")) {
-                    exts.add(line);
+            try {
+                ProcessBuilder pb = new ProcessBuilder("strings", libPath);
+                Process p = pb.start();
+                InputStream is = p.getInputStream();
+                Scanner scanner = new Scanner(is).useDelimiter("\\A");
+                String output = scanner.hasNext() ? scanner.next() : "";
+                String[] lines = output.split("\\n");
+                for (String line : lines) {
+                    line = line.trim();
+                    if (line.matches("^(GL_|EGL_|VK_)[A-Za-z0-9_]+$")) {
+                        exts.add(line);
+                    }
                 }
+                p.waitFor();
+            } catch (Exception e) {
+                System.err.println("[Nexus] FONTE 7: erro ao ler " + libPath + ": " + e.getMessage());
             }
-        } catch (Exception e) {
-            System.err.println("[Nexus] FONTE 7: erro ao ler libGLES_mali.so: " + e.getMessage());
         }
         return exts;
     }
