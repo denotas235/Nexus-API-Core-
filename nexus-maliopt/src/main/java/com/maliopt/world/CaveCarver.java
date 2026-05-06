@@ -33,7 +33,7 @@ public class CaveCarver {
     public static void init() {
         try {
             String src = COMP.replace("{0}", String.valueOf(SIZE));
-            int s = GL20.glCreateShader(GL43.GL_COMPUTE_SHADER);
+            int s = GL20.glCreateShader(0x91B9);
             GL20.glShaderSource(s, src);
             GL20.glCompileShader(s);
             if (GL20.glGetShaderi(s, GL20.GL_COMPILE_STATUS) == GL11.GL_FALSE) {

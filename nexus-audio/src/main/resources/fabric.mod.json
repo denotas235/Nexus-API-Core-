@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1, "id": "nexus-audio", "version": "1.0.0",
+  "name": "Nexus Audio Engine", "environment": "client",
+  "entrypoints": { "client": ["com.nexus.modules.audio.AudioEntrypoint"] },
+  "depends": { "nexus-api-core": ">=1.0.0" }
+}
