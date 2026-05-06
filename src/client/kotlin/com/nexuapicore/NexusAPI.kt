@@ -13,7 +13,7 @@ object NexusAPI {
 
     private val onReadyCallbacks = mutableListOf<Consumer<FeatureRegistry>>()
 
-    fun isReady(): Boolean = featureRegistry != null
+    @JvmStatic fun isReady(): Boolean = featureRegistry != null
 
     @JvmStatic
     fun getRegistry(): FeatureRegistry =
