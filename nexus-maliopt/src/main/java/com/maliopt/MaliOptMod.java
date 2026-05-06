@@ -50,6 +50,7 @@ public class MaliOptMod implements ClientModInitializer {
             LOGGER.info("[MaliOpt] Version  : " + version);
             MobileGluesDetector.detect();
             gpuDetected = true;
+        NexusAPI.registerModule(new com.nexus.modules.maliopt.MaliOptNexusModule());
             LOGGER.info("[MaliOpt] ✅ GPU Mali detectada — activando optimizações");
         });
 
@@ -68,6 +69,7 @@ public class MaliOptMod implements ClientModInitializer {
             vendor = GL11.glGetString(GL11.GL_VENDOR);
             version = GL11.glGetString(GL11.GL_VERSION);
             gpuDetected = true;
+        NexusAPI.registerModule(new com.nexus.modules.maliopt.MaliOptNexusModule());
         }
         var caps = registry.getActiveCapabilities();
         LOGGER.info("[MaliOpt] Capabilities recebidas: " + caps);
