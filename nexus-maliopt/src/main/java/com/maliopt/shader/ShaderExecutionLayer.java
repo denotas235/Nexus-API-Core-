@@ -1,3 +1,4 @@
+// v2.1 — fixed ShaderQuality switch
 package com.maliopt.shader;
 
 import com.maliopt.MaliOptMod;
