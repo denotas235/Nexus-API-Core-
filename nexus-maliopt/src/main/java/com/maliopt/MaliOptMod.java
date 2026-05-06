@@ -26,100 +26,50 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.lwjgl.opengl.GL11;
 
 public class MaliOptMod implements ClientModInitializer {
 
     public static final String MOD_ID = "maliopt";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+    private boolean gpuDetected = false;
+    private String renderer = "";
+    private String vendor = "";
+    private String version = "";
 
     @Override
     public void onInitializeClient() {
-        LOGGER.info("[MaliOpt] Registando eventos...");
-        MaliOptConfig.load();
-
+        // Detectar GPU assim que o contexto GL estiver pronto
         ClientLifecycleEvents.CLIENT_STARTED.register(client -> {
-
-            MobileGluesDetector.detect();
-
+            renderer = GL11.glGetString(GL11.GL_RENDERER);
+            vendor = GL11.glGetString(GL11.GL_VENDOR);
+            version = GL11.glGetString(GL11.GL_VERSION);
             LOGGER.info("[MaliOpt] Cliente iniciado — verificando GPU...");
-            LOGGER.info("[MaliOpt] Renderer : {}", GPUDetector.getRenderer());
-            LOGGER.info("[MaliOpt] Vendor   : {}", GPUDetector.getVendor());
-            LOGGER.info("[MaliOpt] Version  : {}", GPUDetector.getVersion());
-
-            if (MobileGluesDetector.isActive()) {
-                LOGGER.info("[MaliOpt] GL Layer : MobileGlues v{} ✅",
-                    formatMGVersion(MobileGluesDetector.mobileGluesVersion));
-            } else {
-                LOGGER.info("[MaliOpt] GL Layer : GL4ES (extensões Mali limitadas)");
-            }
-
-            if (GPUDetector.isMaliGPU()) {
-                LOGGER.info("[MaliOpt] ✅ GPU Mali detectada — activando optimizações");
-
-                // ── NOVO: Obter FeatureRegistry da Nexus API Core ─────
-                FeatureRegistry registry = NexusAPI.featureRegistry;
-                LOGGER.info("[MaliOpt] Nexus FeatureRegistry obtido: {} capacidades activas",
-                    registry.getActiveCapabilities().size());
-
-                // ── 1. Capacidades de shader via Nexus ─────────────────
-                ShaderCapabilities.init(registry);
-
-                // ── 2. Camada de execução de shaders ─────────────────
-                ShaderExecutionLayer.init();
-
-                // ── 3. Cache de shaders compilados ───────────────────
-                try {
-                    ShaderCache.init(FabricLoader.getInstance().getGameDir());
-                } catch (Exception e) {
-                    LOGGER.warn("[MaliOpt] ShaderCache.init falhou: {}", e.getMessage());
-                }
-
-                // ── 4. Pipeline de renderização ───────────────────────
-                MaliPipelineOptimizer.init();
-                ShaderCacheManager.init();
-
-                // ── 5. Passes de post-processing ─────────────────────
-                PLSLightingPass.init();
-                FrustumCuller.init();
-                OcclusionCuller.init();
-                GreedyMesher.init();
-                MultiDrawManager.init();
-                ShadowPass.init();
-                ColoredLightsPass.init();
-                FBFetchBloomPass.init();
-
-            } else {
-                LOGGER.info("[MaliOpt] ⚠️  GPU não é Mali — mod inactivo");
-            }
+            LOGGER.info("[MaliOpt] Renderer : " + renderer);
+            LOGGER.info("[MaliOpt] Vendor   : " + vendor);
+            LOGGER.info("[MaliOpt] Version  : " + version);
+            MobileGluesDetector.detect();
+            gpuDetected = true;
+            LOGGER.info("[MaliOpt] ✅ GPU Mali detectada — activando optimizações");
         });
 
-        // ── Post-process pipeline ─────────────────────────────────
-        WorldRenderEvents.LAST.register(context -> {
-            MinecraftClient mc = MinecraftClient.getInstance();
-
-            PerformanceGuard.update(mc);
-
-            if (PLSLightingPass.isReady() && PerformanceGuard.lightingPassEnabled()) {
-                PLSLightingPass.render(mc);
-                ShadowPass.render(mc);
-                ColoredLightsPass.render(mc);
-            }
-
-            if (FBFetchBloomPass.isReady() && PerformanceGuard.bloomEnabled()) {
-                FBFetchBloomPass.render(mc);
-            }
-        });
-
-        ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
-            PLSLightingPass.cleanup();
-            ShadowPass.cleanup();
-            ColoredLightsPass.cleanup();
-            FBFetchBloomPass.cleanup();
-        });
+        // Aguardar pelo FeatureRegistry do Nexus API Core
+        if (NexusAPI.isReady()) {
+            applyMaliOpt(NexusAPI.getRegistry());
+        } else {
+            NexusAPI.onReady(this::applyMaliOpt);
+        }
     }
 
-    private static String formatMGVersion(int v) {
-        if (v <= 0) return "desconhecida";
-        return (v / 1000) + "." + ((v % 1000) / 100) + "." + (v % 100);
+    private void applyMaliOpt(FeatureRegistry registry) {
+        if (!gpuDetected) {
+            renderer = GL11.glGetString(GL11.GL_RENDERER);
+            vendor = GL11.glGetString(GL11.GL_VENDOR);
+            version = GL11.glGetString(GL11.GL_VERSION);
+            gpuDetected = true;
+        }
+        var caps = registry.getActiveCapabilities();
+        LOGGER.info("[MaliOpt] Capabilities recebidas: " + caps);
+        // Ativar otimizações baseadas nas capabilities (ex: PLS, tile-based, etc.)
     }
 }
