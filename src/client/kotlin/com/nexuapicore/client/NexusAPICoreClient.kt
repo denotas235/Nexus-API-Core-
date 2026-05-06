@@ -11,8 +11,9 @@ class NexusAPICoreClient : ClientModInitializer {
     override fun onInitializeClient() {
         ClientLifecycleEvents.CLIENT_STARTED.register {
             println("[Nexus] GL context ready — executando Detetor Infalível 2.0")
-            ALLExtensionDetector.detectExtensions()
-            NexusAPI.init()
+            val detected = ALLExtensionDetector.detectExtensions()
+            println("[Nexus] Detetor concluído — ${detected.size} extensões encontradas.")
+            NexusAPI.init(detected)   // ← agora com a lista real
         }
         WorldRenderEvents.END.register {
             try {

@@ -52,14 +52,18 @@ object NexusAPI {
     var initialized = false
         private set
 
-    fun init() {
+    /** Inicializa o registry com as extensões detetadas (ex: do Detector Infalível). */
+    fun init(detectedExtensions: List<String>) {
         if (initialized) return
         initialized = true
+
+        println("[Nexus] init() chamado com ${detectedExtensions.size} extensões detetadas.")
 
         val allExtensions = ExtensionDatabase.getAllExtensions()
         println("[Nexus] Extension database loaded: ${allExtensions.size} known extensions")
 
-        val resolver = CapabilityResolver(emptyList())
+        // Passa as extensões detetadas (não vazias!) para o CapabilityResolver
+        val resolver = CapabilityResolver(detectedExtensions)
         val capMap = resolver.resolve()
         val registry = FeatureRegistry(capMap)
         featureRegistry = registry
@@ -79,7 +83,7 @@ object NexusAPI {
         RenderPipeline.assemble(modules)
         pipeline = RenderPipeline
 
-        println("[Nexus] API initialized")
+        println("[Nexus] API initialized with ${capMap.size} capabilities")
     }
 
     fun registerModule(module: NexusModule) {
