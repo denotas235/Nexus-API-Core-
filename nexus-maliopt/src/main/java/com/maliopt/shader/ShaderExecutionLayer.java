@@ -187,7 +187,7 @@ public final class ShaderExecutionLayer {
             sb.append("#define MALI_MSRT 1\n");
 
         // Quality level
-        switch (ShaderCapabilities.MEDIUMP_FAST ? ShaderCapabilities.ShaderQuality.MEDIUM : ShaderCapabilities.ShaderQuality.LOW) {
+        switch (ShaderCapabilities.MEDIUMP_FAST ? 1 : 0) {
             case HIGH:
                 sb.append("#define MALI_QUALITY_HIGH 1\n");
                 sb.append("#define MALI_QUALITY 2\n");

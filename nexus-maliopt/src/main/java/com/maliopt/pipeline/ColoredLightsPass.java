@@ -86,7 +86,7 @@ public class ColoredLightsPass {
             GL20.glUniform1i(locScene, 0);
             GL20.glUseProgram(0);
 
-            int blockIndex = GL20.glGetUniformBlockIndex(program, "LightBlock");
+            int blockIndex = GL31.glGetUniformBlockIndex(program, "LightBlock");
             if (blockIndex != GL31.GL_INVALID_INDEX) GL31.glUniformBlockBinding(program, blockIndex, 0);
 
             ubo = GL15.glGenBuffers();

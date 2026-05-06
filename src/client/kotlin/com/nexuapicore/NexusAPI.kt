@@ -9,8 +9,9 @@ import com.nexuapicore.core.pipeline.RenderPipeline
 
 object NexusAPI {
     @JvmStatic
-    lateinit var featureRegistry: FeatureRegistry
-        private set
+            @JvmStatic
+        lateinit var featureRegistry: FeatureRegistry
+        
 
     lateinit var pipeline: RenderPipeline
         private set
