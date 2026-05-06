@@ -86,7 +86,7 @@ object NexusAPI {
         println("[Nexus] API initialized with ${capMap.size} capabilities")
     }
 
-    fun registerModule(module: NexusModule) {
+    @JvmStatic fun registerModule(module: NexusModule) {
         if (initialized) {
             module.onInitialize(featureRegistry!!)
             module.onRegisterPipeline(pipeline)
