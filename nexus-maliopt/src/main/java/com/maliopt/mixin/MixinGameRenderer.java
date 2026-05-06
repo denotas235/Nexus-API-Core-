@@ -4,7 +4,7 @@ import com.maliopt.MaliOptMod;
 import com.maliopt.gpu.GPUDetector;
 import com.maliopt.pipeline.MaliPipelineOptimizer;
 import com.maliopt.pipeline.ShaderCacheManager;
-import com.maliopt.pipeline.TileBasedOptimizer;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.RenderTickCounter;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,7 +17,7 @@ public class MixinGameRenderer {
 
     private static boolean lateInitDone = false;
 
-    @Inject(method = "render", at = @At("HEAD"))
+    @Inject(method = "render(Lnet/minecraft/client/render/RenderTickCounter;Z)V", at = @At("HEAD"))
     private void maliopt$onRenderHead(RenderTickCounter tickCounter,
                                       boolean tick,
                                       CallbackInfo ci) {
@@ -31,12 +31,13 @@ public class MixinGameRenderer {
         }
     }
 
-    @Inject(method = "render", at = @At("TAIL"))
+    @Inject(method = "render(Lnet/minecraft/client/render/RenderTickCounter;Z)V", at = @At("TAIL"))
     private void maliopt$onRenderTail(RenderTickCounter tickCounter,
                                       boolean tick,
                                       CallbackInfo ci) {
         if (!GPUDetector.isMaliGPU()) return;
-        // Fase 2 — delega para TileBasedOptimizer
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc == null || mc.world == null) return;
         MaliPipelineOptimizer.onFrameEnd();
     }
 }

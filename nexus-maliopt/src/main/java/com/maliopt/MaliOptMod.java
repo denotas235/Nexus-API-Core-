@@ -21,39 +21,44 @@ import com.nexuapicore.NexusAPI;
 import com.nexuapicore.core.FeatureRegistry;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.lwjgl.opengl.GL11;
 
 public class MaliOptMod implements ClientModInitializer {
 
     public static final String MOD_ID = "maliopt";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-    private boolean gpuDetected = false;
-    private String renderer = "";
-    private String vendor = "";
-    private String version = "";
+
+    // FeatureRegistry guardado para usar quando GL estiver pronto
+    private static FeatureRegistry pendingRegistry = null;
+    private static boolean glReady = false;
 
     @Override
     public void onInitializeClient() {
-        // Detectar GPU assim que o contexto GL estiver pronto
+        // Contexto GL só está disponível a partir daqui
         ClientLifecycleEvents.CLIENT_STARTED.register(client -> {
-            renderer = GL11.glGetString(GL11.GL_RENDERER);
-            vendor = GL11.glGetString(GL11.GL_VENDOR);
-            version = GL11.glGetString(GL11.GL_VERSION);
+            glReady = true;
             LOGGER.info("[MaliOpt] Cliente iniciado — verificando GPU...");
-            LOGGER.info("[MaliOpt] Renderer : " + renderer);
-            LOGGER.info("[MaliOpt] Vendor   : " + vendor);
-            LOGGER.info("[MaliOpt] Version  : " + version);
+            LOGGER.info("[MaliOpt] Renderer : {}", GPUDetector.getRenderer());
+            LOGGER.info("[MaliOpt] Vendor   : {}", GPUDetector.getVendor());
+            LOGGER.info("[MaliOpt] Version  : {}", GPUDetector.getVersion());
             MobileGluesDetector.detect();
-            gpuDetected = true;
-            LOGGER.info("[MaliOpt] ✅ GPU Mali detectada — activando optimizações");
+
+            if (GPUDetector.isMaliGPU()) {
+                LOGGER.info("[MaliOpt] ✅ GPU Mali detectada — activando optimizações");
+                // Se o registry já chegou antes do GL estar pronto, aplica agora
+                if (pendingRegistry != null) {
+                    applyMaliOpt(pendingRegistry);
+                    pendingRegistry = null;
+                }
+            } else {
+                LOGGER.warn("[MaliOpt] GPU não é Mali — optimizações desactivadas");
+            }
         });
 
-        // Aguardar pelo FeatureRegistry do Nexus API Core
+        // Nexus API pode chamar onReady antes ou depois do CLIENT_STARTED
         if (NexusAPI.isReady()) {
             applyMaliOpt(NexusAPI.getRegistry());
         } else {
@@ -62,14 +67,16 @@ public class MaliOptMod implements ClientModInitializer {
     }
 
     private void applyMaliOpt(FeatureRegistry registry) {
-        if (!gpuDetected) {
-            renderer = GL11.glGetString(GL11.GL_RENDERER);
-            vendor = GL11.glGetString(GL11.GL_VENDOR);
-            version = GL11.glGetString(GL11.GL_VERSION);
-            gpuDetected = true;
+        if (!glReady) {
+            // GL ainda não está pronto — guardar para aplicar no CLIENT_STARTED
+            pendingRegistry = registry;
+            LOGGER.info("[MaliOpt] Registry recebido antes do GL — aguardando CLIENT_STARTED");
+            return;
         }
+        if (!GPUDetector.isMaliGPU()) return;
+
+        ShaderCapabilities.init(registry);
         var caps = registry.getActiveCapabilities();
-        LOGGER.info("[MaliOpt] Capabilities recebidas: " + caps);
-        // Ativar otimizações baseadas nas capabilities (ex: PLS, tile-based, etc.)
+        LOGGER.info("[MaliOpt] Capabilities recebidas: {}", caps);
     }
 }

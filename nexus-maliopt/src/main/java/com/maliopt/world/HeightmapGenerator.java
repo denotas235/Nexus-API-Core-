@@ -1,6 +1,7 @@
 package com.maliopt.world;
 
 import com.maliopt.MaliOptMod;
+import org.lwjgl.opengl.GL43;
 import org.lwjgl.opengl.*;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -39,7 +40,7 @@ public class HeightmapGenerator {
     public static void init() {
         try {
             String src = COMPUTE_SRC.replace("{0}", String.valueOf(TEX_SIZE));
-            int shader = GL20.glCreateShader(0x91B9);
+            int shader = GL43.glCreateShader(GL43.GL_COMPUTE_SHADER);
             GL20.glShaderSource(shader, src);
             GL20.glCompileShader(shader);
             if (GL20.glGetShaderi(shader, GL20.GL_COMPILE_STATUS) == GL11.GL_FALSE) {

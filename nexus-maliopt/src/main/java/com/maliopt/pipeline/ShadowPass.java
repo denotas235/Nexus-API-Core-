@@ -136,7 +136,7 @@ public class ShadowPass {
 
             shadowTexs[i] = GL11.glGenTextures();
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, shadowTexs[i]);
-            GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_DEPTH_COMPONENT,
+            GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL30.GL_DEPTH_COMPONENT16,
                 SHADOW_SIZE, SHADOW_SIZE, 0, GL11.GL_DEPTH_COMPONENT, GL11.GL_UNSIGNED_SHORT, 0L);
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);

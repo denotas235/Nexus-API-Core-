@@ -9,10 +9,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(ChunkBuilder.class)
+@Mixin(ChunkBuilder.BuiltChunk.class)
 public class MixinChunkBuilder {
 
-    @Inject(method = "build", at = @At("HEAD"))
+    @Inject(method = "rebuild", at = @At("HEAD"))
     private void onBuildStart(CallbackInfo ci) {
         FrustumCuller.isEnabled();
         OcclusionCuller.isEnabled();
