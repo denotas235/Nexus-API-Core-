@@ -1,5 +1,6 @@
 package com.maliopt;
 
+import com.maliopt.astc.ASTCSubsystem;
 import com.maliopt.config.MaliOptConfig;
 import com.maliopt.gpu.ExtensionActivator;
 import com.maliopt.gpu.GPUDetector;
@@ -13,10 +14,12 @@ import com.nexuapicore.core.FeatureRegistry;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.lwjgl.opengl.GL11;
+import java.nio.file.Path;
 
 public class MaliOptMod implements ClientModInitializer {
 
@@ -27,7 +30,6 @@ public class MaliOptMod implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        // 1. Detectar GPU assim que o contexto GL existir
         ClientLifecycleEvents.CLIENT_STARTED.register(client -> {
             String renderer = GL11.glGetString(GL11.GL_RENDERER);
             String vendor   = GL11.glGetString(GL11.GL_VENDOR);
@@ -39,18 +41,15 @@ public class MaliOptMod implements ClientModInitializer {
             MobileGluesDetector.detect();
             gpuDetected = true;
             LOGGER.info("[MaliOpt] ✅ GPU Mali detectada — à espera das capabilities...");
-            // Registar o módulo no Nexus (pode ser pending se ainda não tiver arrancado)
             NexusAPI.registerModule(new com.nexus.modules.maliopt.MaliOptNexusModule());
         });
 
-        // 2. Assim que o registry estiver pronto, aplicar optimizações
         if (NexusAPI.isReady()) {
             applyOptimizations(NexusAPI.getRegistry());
         } else {
             NexusAPI.onReady(this::applyOptimizations);
         }
 
-        // 3. Hook de render seguro (só arranca depois de tudo pronto)
         WorldRenderEvents.END.register(ctx -> {
             if (!optimizationsApplied) return;
             MaliPipelineOptimizer.onFrameEnd();
@@ -64,19 +63,19 @@ public class MaliOptMod implements ClientModInitializer {
         var caps = registry.getActiveCapabilities();
         LOGGER.info("[MaliOpt] Capabilities recebidas: {}", caps);
 
-        // Activar as flags do MaliOpt a partir do registry
         ExtensionActivator.activateFromRegistry(registry);
 
-        // Agora que as flags estão corretas, inicializar os componentes
-        TileBasedOptimizer.init();          // TBDR, PLS, FB fetch
-        MaliPipelineOptimizer.init();       // pipeline global
-        ShaderCache.init();
+        TileBasedOptimizer.init();
+        MaliPipelineOptimizer.init();
+
+        Path shaderCachePath = FabricLoader.getInstance().getGameDir().resolve("shader_cache");
+        ShaderCache.init(shaderCachePath);
+
         ShaderExecutionLayer.init();
-        // Inicialização dos passes de render (são seguros porque verificam as capabilities)
+
         PLSLightingPass.init();
         FBFetchBloomPass.init();
 
-        // ASTC subsystem (vai usar EXT_texture_compression_astc_decode_mode e afins)
         ASTCSubsystem.init();
 
         LOGGER.info("[MaliOpt] ✅ Optimizações aplicadas com sucesso.");
