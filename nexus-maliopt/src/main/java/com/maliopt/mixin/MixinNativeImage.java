@@ -11,10 +11,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinNativeImage {
 
     @Inject(
-        method = "upload(IIIIIIZZZZ)V",
+        method = "upload(IIIIIIIZZZZ)V",
         at = @At("HEAD"),
         cancellable = true,
-        require = 0
+        require = 1
     )
     private void onUpload(int level, int x, int y,
                           int skipPixels, int skipRows,
