@@ -49,9 +49,9 @@ public class TreeGenerator {
 
             // Tessellation (placeholder)
             tessProgram = GL20.glCreateProgram();
-            int tc = GL20.glCreateShader(GL32.GL_TESS_CONTROL_SHADER);
+            int tc = GL20.glCreateShader(GL40.GL_TESS_CONTROL_SHADER);
             GL20.glShaderSource(tc, TESS_CONTROL); GL20.glCompileShader(tc);
-            int te = GL20.glCreateShader(GL32.GL_TESS_EVALUATION_SHADER);
+            int te = GL20.glCreateShader(GL40.GL_TESS_EVALUATION_SHADER);
             GL20.glShaderSource(te, TESS_EVAL); GL20.glCompileShader(te);
             GL20.glAttachShader(tessProgram, tc);
             GL20.glAttachShader(tessProgram, te);
