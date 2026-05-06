@@ -1,28 +1,18 @@
 package com.maliopt;
 
 import com.maliopt.config.MaliOptConfig;
+import com.maliopt.gpu.ExtensionActivator;
 import com.maliopt.gpu.GPUDetector;
 import com.maliopt.gpu.MobileGluesDetector;
 import com.maliopt.performance.PerformanceGuard;
-import com.maliopt.pipeline.FBFetchBloomPass;
-import com.maliopt.pipeline.MaliPipelineOptimizer;
-import com.maliopt.pipeline.PLSLightingPass;
-import com.maliopt.geometry.FrustumCuller;
-import com.maliopt.geometry.OcclusionCuller;
-import com.maliopt.geometry.GreedyMesher;
-import com.maliopt.geometry.MultiDrawManager;
-import com.maliopt.pipeline.ShadowPass;
-import com.maliopt.pipeline.ColoredLightsPass;
-import com.maliopt.pipeline.ShaderCacheManager;
-import com.maliopt.shader.ShaderCache;
-import com.maliopt.shader.ShaderCapabilities;
-import com.maliopt.shader.ShaderExecutionLayer;
+import com.maliopt.pipeline.*;
+import com.maliopt.geometry.*;
+import com.maliopt.shader.*;
 import com.nexuapicore.NexusAPI;
 import com.nexuapicore.core.FeatureRegistry;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,46 +23,62 @@ public class MaliOptMod implements ClientModInitializer {
     public static final String MOD_ID = "maliopt";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     private boolean gpuDetected = false;
-    private String renderer = "";
-    private String vendor = "";
-    private String version = "";
+    private boolean optimizationsApplied = false;
 
     @Override
     public void onInitializeClient() {
-        // Detectar GPU assim que o contexto GL estiver pronto
+        // 1. Detectar GPU assim que o contexto GL existir
         ClientLifecycleEvents.CLIENT_STARTED.register(client -> {
-            renderer = GL11.glGetString(GL11.GL_RENDERER);
-            vendor = GL11.glGetString(GL11.GL_VENDOR);
-            version = GL11.glGetString(GL11.GL_VERSION);
+            String renderer = GL11.glGetString(GL11.GL_RENDERER);
+            String vendor   = GL11.glGetString(GL11.GL_VENDOR);
+            String version  = GL11.glGetString(GL11.GL_VERSION);
             LOGGER.info("[MaliOpt] Cliente iniciado — verificando GPU...");
-            LOGGER.info("[MaliOpt] Renderer : " + renderer);
-            LOGGER.info("[MaliOpt] Vendor   : " + vendor);
-            LOGGER.info("[MaliOpt] Version  : " + version);
+            LOGGER.info("[MaliOpt] Renderer : {}", renderer);
+            LOGGER.info("[MaliOpt] Vendor   : {}", vendor);
+            LOGGER.info("[MaliOpt] Version  : {}", version);
             MobileGluesDetector.detect();
             gpuDetected = true;
-        NexusAPI.registerModule(new com.nexus.modules.maliopt.MaliOptNexusModule());
-            LOGGER.info("[MaliOpt] ✅ GPU Mali detectada — activando optimizações");
+            LOGGER.info("[MaliOpt] ✅ GPU Mali detectada — à espera das capabilities...");
+            // Registar o módulo no Nexus (pode ser pending se ainda não tiver arrancado)
+            NexusAPI.registerModule(new com.nexus.modules.maliopt.MaliOptNexusModule());
         });
 
-        // Aguardar pelo FeatureRegistry do Nexus API Core
+        // 2. Assim que o registry estiver pronto, aplicar optimizações
         if (NexusAPI.isReady()) {
-            applyMaliOpt(NexusAPI.getRegistry());
+            applyOptimizations(NexusAPI.getRegistry());
         } else {
-            NexusAPI.onReady(this::applyMaliOpt);
+            NexusAPI.onReady(this::applyOptimizations);
         }
+
+        // 3. Hook de render seguro (só arranca depois de tudo pronto)
+        WorldRenderEvents.END.register(ctx -> {
+            if (!optimizationsApplied) return;
+            MaliPipelineOptimizer.onFrameEnd();
+        });
     }
 
-    private void applyMaliOpt(FeatureRegistry registry) {
-        if (!gpuDetected) {
-            // Já deve ter sido detectada, mas por precaução
-            renderer = GL11.glGetString(GL11.GL_RENDERER);
-            vendor = GL11.glGetString(GL11.GL_VENDOR);
-            version = GL11.glGetString(GL11.GL_VERSION);
-            gpuDetected = true;
-        NexusAPI.registerModule(new com.nexus.modules.maliopt.MaliOptNexusModule());
-        }
+    private void applyOptimizations(FeatureRegistry registry) {
+        if (optimizationsApplied) return;
+        optimizationsApplied = true;
+
         var caps = registry.getActiveCapabilities();
-        LOGGER.info("[MaliOpt] Capabilities recebidas: " + caps);
-        // Ativar otimizações baseadas nas capabilities (ex: PLS, tile-based, etc.)
+        LOGGER.info("[MaliOpt] Capabilities recebidas: {}", caps);
+
+        // Activar as flags do MaliOpt a partir do registry
+        ExtensionActivator.activateFromRegistry(registry);
+
+        // Agora que as flags estão corretas, inicializar os componentes
+        TileBasedOptimizer.init();          // TBDR, PLS, FB fetch
+        MaliPipelineOptimizer.init();       // pipeline global
+        ShaderCache.init();
+        ShaderExecutionLayer.init();
+        // Inicialização dos passes de render (são seguros porque verificam as capabilities)
+        PLSLightingPass.init();
+        FBFetchBloomPass.init();
+
+        // ASTC subsystem (vai usar EXT_texture_compression_astc_decode_mode e afins)
+        ASTCSubsystem.init();
+
+        LOGGER.info("[MaliOpt] ✅ Optimizações aplicadas com sucesso.");
     }
 }
