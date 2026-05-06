@@ -131,18 +131,15 @@ public class PLSLightingPass {
         GL20.glUniform1f(uWarmth, PerformanceGuard.warmth());
         GL20.glUniform1f(uAO,     PerformanceGuard.ambientOcclusion());
 
-        // Bind da cena na unidade 0
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, fb.getColorAttachment());
-        // Bind do shadow map na unidade 1 (primeira cascata)
         GL13.glActiveTexture(GL13.GL_TEXTURE1);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, ShadowPass.getShadowMap(0));
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
 
-        // Matriz MVP da luz (simplificada)
         float[] lightMVP = new float[]{
             1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1
-        }; // placeholder — será substituída pela matriz real do ShadowPass
+        };
         GL20.glUniformMatrix4fv(uLightMVP, false, lightMVP);
 
         GL30.glBindVertexArray(quadVao);
@@ -150,7 +147,6 @@ public class PLSLightingPass {
         GL30.glBindVertexArray(0);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 
-        // Blit → fb principal
         GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, outputFbo);
         GL30.glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, fb.fbo);
         GL30.glBlitFramebuffer(0, 0, w, h, 0, 0, w, h, GL11.GL_COLOR_BUFFER_BIT, GL11.GL_NEAREST);
@@ -162,9 +158,29 @@ public class PLSLightingPass {
         if (blend) GL11.glEnable(GL11.GL_BLEND);
     }
 
-    private static void rebuildOutputFbo(int w, int h) { /* ... igual ao anterior ... */ }
+    private static void rebuildOutputFbo(int w, int h) {
+        if (outputFbo != 0) { GL30.glDeleteFramebuffers(outputFbo); outputFbo = 0; }
+        if (outputTex != 0) { GL11.glDeleteTextures(outputTex); outputTex = 0; }
+        outputTex = GL11.glGenTextures();
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, outputTex);
+        GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, w, h, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, 0L);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+        outputFbo = GL30.glGenFramebuffers();
+        GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, outputFbo);
+        GL30.glFramebufferTexture2D(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, outputTex, 0);
+        GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
+        lastW = w; lastH = h;
+    }
 
-    // métodos auxiliares iguais aos da versão anterior (omitidos por brevidade)
-    public static void cleanup() { /* ... */ }
+    public static void cleanup() {
+        if (program   != 0) { GL20.glDeleteProgram(program);        program   = 0; }
+        if (quadVao   != 0) { GL30.glDeleteVertexArrays(quadVao);   quadVao   = 0; }
+        if (outputFbo != 0) { GL30.glDeleteFramebuffers(outputFbo); outputFbo = 0; }
+        if (outputTex != 0) { GL11.glDeleteTextures(outputTex);     outputTex = 0; }
+        ready = false;
+    }
+
     public static boolean isReady() { return ready; }
 }

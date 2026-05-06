@@ -7,6 +7,10 @@ import com.maliopt.performance.PerformanceGuard;
 import com.maliopt.pipeline.FBFetchBloomPass;
 import com.maliopt.pipeline.MaliPipelineOptimizer;
 import com.maliopt.pipeline.PLSLightingPass;
+import com.maliopt.geometry.FrustumCuller;
+import com.maliopt.geometry.OcclusionCuller;
+import com.maliopt.geometry.GreedyMesher;
+import com.maliopt.geometry.MultiDrawManager;
 import com.maliopt.pipeline.ShadowPass;
 import com.maliopt.pipeline.ColoredLightsPass;
 import com.maliopt.pipeline.ShaderCacheManager;
@@ -76,6 +80,10 @@ public class MaliOptMod implements ClientModInitializer {
 
                 // ── 5. Passes de post-processing ─────────────────────
                 PLSLightingPass.init();
+                FrustumCuller.init();
+                OcclusionCuller.init();
+                GreedyMesher.init();
+                MultiDrawManager.init();
                 ShadowPass.init();
                 ColoredLightsPass.init();
                 FBFetchBloomPass.init();

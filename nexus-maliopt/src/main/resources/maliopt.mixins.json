@@ -5,7 +5,8 @@
   "client": [
     "GameOptionsAccessor",
     "MixinGameRenderer",
-    "MixinNativeImage"
+    "MixinNativeImage",
+    "MixinChunkBuilder"
   ],
   "injectors": {
     "defaultRequire": 1
