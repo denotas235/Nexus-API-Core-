@@ -72,6 +72,8 @@ public class MaliOptMod implements ClientModInitializer {
 
             // Ajuste dinâmico de LOD e qualidade
             NeuralLODController.tick();
+            DirectionalStreaming.update();
+            PredictiveCacheManager.update();
             applyQualityScaler(mc);
         });
 
@@ -115,6 +117,8 @@ public class MaliOptMod implements ClientModInitializer {
         TileBasedOptimizer.init();
         MaliPipelineOptimizer.init();
         WorldCache.init();
+        DirectionalStreaming.update();
+        PredictiveCacheManager.update();
         PerformanceGuard.init();
 
         MinecraftClient mc = MinecraftClient.getInstance();

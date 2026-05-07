@@ -20,7 +20,7 @@ public class WorldCache {
         GL15.glBufferData(GL15.GL_ARRAY_BUFFER, data, GL15.GL_DYNAMIC_DRAW);
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
         chunkBuffers.put(chunkKey, bufferId);
-        MaliOptMod.LOGGER.debug("[WorldCache] Chunk {} armazenado (buffer {})", chunkKey, bufferId);
+        PredictiveCacheManager.update(); // atualizar níveis ao armazenar
         return bufferId;
     }
 
@@ -36,9 +36,7 @@ public class WorldCache {
     }
 
     public static void clearCache() {
-        for (int buf : chunkBuffers.values()) {
-            GL15.glDeleteBuffers(buf);
-        }
+        for (int buf : chunkBuffers.values()) GL15.glDeleteBuffers(buf);
         chunkBuffers.clear();
         MaliOptMod.LOGGER.info("[WorldCache] Cache limpo");
     }
