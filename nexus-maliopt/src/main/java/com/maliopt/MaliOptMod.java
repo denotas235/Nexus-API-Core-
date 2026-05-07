@@ -34,7 +34,6 @@ public class MaliOptMod implements ClientModInitializer {
 
     public static final String MOD_ID = "maliopt";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-    private static final NexusLogger nxLog = NexusLogger.forModule("MaliOpt", "CORE");
     private boolean optimizationsApplied = false;
     private GameOptions gameOptions;
 

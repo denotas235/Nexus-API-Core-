@@ -1,15 +1,14 @@
 package com.maliopt.performance;
 
 import com.maliopt.MaliOptMod;
-import net.minecraft.client.MinecraftClient;
 
 public class PerformanceGuard {
     public enum StressLevel { LOW, MEDIUM, HIGH, CRITICAL }
 
     private static final int TARGET_FPS = 60;
-    private static final int GOOD_FPS = 58;     // acima disto = LOW stress
-    private static final int OK_FPS   = 50;     // 50-58 = MEDIUM
-    private static final int BAD_FPS  = 40;     // 40-50 = HIGH, abaixo = CRITICAL
+    private static final int GOOD_FPS = 59;
+    private static final int OK_FPS   = 55;
+    private static final int BAD_FPS  = 50;
 
     private static long lastCheckTime = System.nanoTime();
     private static int  frameCount    = 0;
@@ -27,12 +26,10 @@ public class PerformanceGuard {
         frameCount++;
         long now = System.nanoTime();
         long elapsedNs = now - lastCheckTime;
-        if (elapsedNs >= 1_000_000_000L) { // 1 segundo
+        if (elapsedNs >= 1_000_000_000L) {
             currentFps = frameCount / (elapsedNs / 1_000_000_000.0);
             frameCount = 0;
             lastCheckTime = now;
-
-            // Determinar nível de stress
             if (currentFps >= GOOD_FPS) {
                 stress = StressLevel.LOW;
             } else if (currentFps >= OK_FPS) {
@@ -42,22 +39,22 @@ public class PerformanceGuard {
             } else {
                 stress = StressLevel.CRITICAL;
             }
-
             if (stress != StressLevel.LOW) {
                 MaliOptMod.LOGGER.warn("[PerfGuard] FPS: {:.1f} — Stress: {}", currentFps, stress);
             }
         }
     }
 
-    public static boolean isFpsHealthy() {
-        return stress == StressLevel.LOW;
-    }
+    public static boolean isFpsHealthy() { return stress == StressLevel.LOW; }
+    public static StressLevel getStressLevel() { return stress; }
+    public static double getCurrentFps() { return currentFps; }
 
-    public static StressLevel getStressLevel() {
-        return stress;
-    }
-
-    public static double getCurrentFps() {
-        return currentFps;
-    }
+    // Métodos para compatibilidade com passes de render (valores padrão)
+    public static boolean bloomEnabled()            { return true; }
+    public static float  bloomThreshold()           { return 0.0f; }
+    public static float  bloomRadius()              { return 2.0f; }
+    public static float  bloomIntensity()           { return 1.2f; }
+    public static boolean lightingPassEnabled()     { return true; }
+    public static float  warmth()                   { return 0.8f; }
+    public static float  ambientOcclusion()         { return 0.5f; }
 }
