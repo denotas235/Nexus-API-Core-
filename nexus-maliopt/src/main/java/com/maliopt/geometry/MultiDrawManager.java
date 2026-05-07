@@ -17,9 +17,9 @@ public class MultiDrawManager {
     public static void init() {
         try {
             buf = GL15.glGenBuffers();
-            GL15.glBindBuffer(GLES31.GL_DRAW_INDIRECT_BUFFER, buf);
-            GL15.glBufferData(GLES31.GL_DRAW_INDIRECT_BUFFER, MAX_DRAWS * 20L, GL15.GL_DYNAMIC_DRAW);
-            GL15.glBindBuffer(GLES31.GL_DRAW_INDIRECT_BUFFER, 0);
+            GL15.glBindBuffer(GL40.GL_DRAW_INDIRECT_BUFFER, buf);
+            GL15.glBufferData(GL40.GL_DRAW_INDIRECT_BUFFER, MAX_DRAWS * 20L, GL15.GL_DYNAMIC_DRAW);
+            GL15.glBindBuffer(GL40.GL_DRAW_INDIRECT_BUFFER, 0);
             enabled = true;
             MaliOptMod.LOGGER.info("[SFTGS] MultiDrawManager activo (max {} draws)", MAX_DRAWS);
         } catch (Exception e) {

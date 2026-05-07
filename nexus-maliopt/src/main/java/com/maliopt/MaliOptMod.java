@@ -1,6 +1,7 @@
 package com.maliopt;
 
 import com.maliopt.astc.ASTCSubsystem;
+import com.maliopt.astc.ASTCTextureLoader;
 import com.nexus.modules.textures.ASTCTextureRegistry;
 import com.nexus.modules.textures.TextureModule;
 import com.maliopt.config.MaliOptConfig;
