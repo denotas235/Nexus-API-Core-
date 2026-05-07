@@ -118,7 +118,10 @@ public class MaliOptMod implements ClientModInitializer {
         PLSLightingPass.init();
         FBFetchBloomPass.init();
 
-        // ASTC desativado temporariamente (lib nativa incompatível)
+        if (ASTCTextureRegistry.hasASTCTextures()) {
+            ASTCSubsystem.init();
+            LOGGER.info("[MaliOpt] ✅ ASTC pré-comprimido ATIVO!");
+        }
         LOGGER.info("[MaliOpt] ASTC desativado (lib nativa incompatível). Plano B: texturas pré-comprimidas.");
 
         LOGGER.info("[MaliOpt] ✅ Optimizações aplicadas com sucesso.");

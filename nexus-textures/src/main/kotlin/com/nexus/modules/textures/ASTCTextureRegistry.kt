@@ -20,3 +20,7 @@ object ASTCTextureRegistry {
         return astcFiles[astcId]
     }
 }
+
+  fun hasASTCTextures(): Boolean {
+      return astcFiles.isNotEmpty()
+  }
