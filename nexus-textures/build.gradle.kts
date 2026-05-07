@@ -1,4 +1,5 @@
 plugins {
+repositories { mavenCentral() }
     kotlin("jvm")
 }
 
