@@ -1,29 +1,19 @@
 package com.nexus.modules.textures
 
-import net.minecraft.util.Identifier
-import java.io.InputStream
 import java.util.concurrent.ConcurrentHashMap
 
 object ASTCTextureRegistry {
-    private val astcFiles = ConcurrentHashMap<Identifier, ByteArray>()
+    private val astcFiles = ConcurrentHashMap<String, ByteArray>()
 
-    fun updateMap(resources: Map<Identifier, InputStream>) {
-        resources.forEach { (id, input) ->
-            val bytes = input.readBytes()
-            astcFiles[id] = bytes
-        }
+    fun put(path: String, data: ByteArray) {
+        astcFiles[path] = data
     }
 
-    fun getASTCData(id: Identifier): ByteArray? {
-        val astcId = Identifier(id.namespace, id.path.replace(".png", ".astc"))
-        return astcFiles[astcId]
-    }
+    fun getASTCData(path: String): ByteArray? = astcFiles[path]
 
     fun hasASTCTextures(): Boolean = astcFiles.isNotEmpty()
-    
-    fun put(id: Identifier, data: ByteArray) {
-        astcFiles[id] = data
-    }
-    
+
     fun count(): Int = astcFiles.size
+
+    fun clear() = astcFiles.clear()
 }
