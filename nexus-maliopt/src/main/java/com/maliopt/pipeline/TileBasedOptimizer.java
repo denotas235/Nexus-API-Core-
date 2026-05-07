@@ -76,7 +76,7 @@ public class TileBasedOptimizer {
 
         try {
             // GL 4.3 = glDiscardFramebufferEXT em GLES — GL4ES traduz
-            GL43.glInvalidateFramebuffer(GL30.GL_FRAMEBUFFER, DEPTH_STENCIL_ATTACHMENTS);
+            // GL43.glInvalidateFramebuffer(GL30.GL_FRAMEBUFFER, DEPTH_STENCIL_ATTACHMENTS);
         } catch (Exception ignored) {
             // Falha silenciosa — nunca bloquear rendering
         }
@@ -92,7 +92,7 @@ public class TileBasedOptimizer {
         if (!ExtensionActivator.hasDiscardFramebuffer) return;
 
         try {
-            GL43.glInvalidateFramebuffer(GL30.GL_FRAMEBUFFER, ALL_ATTACHMENTS);
+            // GL43.glInvalidateFramebuffer(GL30.GL_FRAMEBUFFER, ALL_ATTACHMENTS);
         } catch (Exception ignored) {}
     }
 

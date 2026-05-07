@@ -14,10 +14,10 @@ public class NeuralLODController {
     public static void init(GameOptions opts) {
         options = opts;
         if (options != null) {
-            baseViewDistance = options.getViewDistance().getValue();
+            baseViewDistance = 8; // forçado para Elytra
             maxViewDistance = baseViewDistance;
         }
-        MaliOptMod.LOGGER.info("[NeuralLOD] Inicializado com view distance base: {}", baseViewDistance);
+        MaliOptMod.LOGGER.info("[NeuralLOD] Inicializado com view distance base: 8{}", baseViewDistance);
     }
 
     public static void tick() {
