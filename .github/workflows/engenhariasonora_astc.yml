@@ -31,9 +31,21 @@ jobs:
 
       - name: Extract Minecraft textures
         run: |
-          MINECRAFT_JAR="$HOME/.gradle/caches/fabric-loom/1.21.1/minecraft-1.21.1-client.jar"
+          # Procura o JAR em locais comuns da cache do Loom
+          MINECRAFT_JAR=$(find ~/.gradle/caches/fabric-loom -name "minecraft-1.21.1-client.jar" 2>/dev/null | head -n 1)
+          if [ -z "$MINECRAFT_JAR" ]; then
+            echo "JAR não encontrado, tentando download via Gradle..."
+            ./gradlew downloadMinecraft --no-daemon || ./gradlew build --no-daemon
+            MINECRAFT_JAR=$(find ~/.gradle/caches/fabric-loom -name "minecraft-1.21.1-client.jar" 2>/dev/null | head -n 1)
+          fi
+          echo "JAR encontrado: $MINECRAFT_JAR"
+          [ -z "$MINECRAFT_JAR" ] && { echo "FATAL: Não foi possível encontrar o JAR do Minecraft"; exit 1; }
           mkdir -p extracted_textures
-          unzip -q "$MINECRAFT_JAR" "assets/minecraft/textures/**/*.png" -d extracted_textures/
+          unzip -q "$MINECRAFT_JAR" "assets/minecraft/textures/**/*.png" -d extracted_textures/ || {
+            echo "Erro ao extrair texturas, verificando conteúdo do JAR...";
+            unzip -l "$MINECRAFT_JAR" | head -20;
+            exit 1;
+          }
           mv extracted_textures/assets/minecraft/textures textures_source
 
       - name: Create output structure
@@ -55,30 +67,21 @@ jobs:
             done
           }
 
-          # 1. BLOCOS: 6x6 medium
           if [ -d "textures_source/block" ]; then
             convert_folder "textures_source/block" "6x6" "medium"
           fi
-
-          # 2. ITENS E GUI: 4x4 medium
           if [ -d "textures_source/item" ]; then
             convert_folder "textures_source/item" "4x4" "medium"
           fi
           if [ -d "textures_source/gui" ]; then
             convert_folder "textures_source/gui" "4x4" "medium"
           fi
-
-          # 3. ENTIDADES: 5x5 medium
           if [ -d "textures_source/entity" ]; then
             convert_folder "textures_source/entity" "5x5" "medium"
           fi
-
-          # 4. AMBIENTE: 10x10 thorough
           if [ -d "textures_source/environment" ]; then
             convert_folder "textures_source/environment" "10x10" "thorough"
           fi
-
-          # 5. PARTÍCULAS: 8x8 medium
           if [ -d "textures_source/particle" ]; then
             convert_folder "textures_source/particle" "8x8" "medium"
           fi
