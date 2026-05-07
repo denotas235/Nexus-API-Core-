@@ -1,6 +1,7 @@
 package com.nexus.modules.textures
 
 import net.minecraft.util.Identifier
+import java.io.InputStream
 import java.util.concurrent.ConcurrentHashMap
 
 object ASTCTextureRegistry {
