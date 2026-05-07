@@ -18,7 +18,7 @@ public class PerformanceGuard {
 
     public static void init() {
         initialized = true;
-        MaliOptMod.LOGGER.info("[PerfGuard] Target: {} FPS (agressivo)", TARGET_FPS);
+        MaliOptMod.LOGGER.info("[PerfGuard] Target: {} FPS", TARGET_FPS);
     }
 
     public static void onFrameEnd() {
@@ -30,18 +30,12 @@ public class PerformanceGuard {
             currentFps = frameCount / (elapsedNs / 1_000_000_000.0);
             frameCount = 0;
             lastCheckTime = now;
-            if (currentFps >= GOOD_FPS) {
-                stress = StressLevel.LOW;
-            } else if (currentFps >= OK_FPS) {
-                stress = StressLevel.MEDIUM;
-            } else if (currentFps >= BAD_FPS) {
-                stress = StressLevel.HIGH;
-            } else {
-                stress = StressLevel.CRITICAL;
-            }
-            if (stress != StressLevel.LOW) {
+            if (currentFps >= GOOD_FPS) stress = StressLevel.LOW;
+            else if (currentFps >= OK_FPS) stress = StressLevel.MEDIUM;
+            else if (currentFps >= BAD_FPS) stress = StressLevel.HIGH;
+            else stress = StressLevel.CRITICAL;
+            if (stress != StressLevel.LOW)
                 MaliOptMod.LOGGER.warn("[PerfGuard] FPS: {:.1f} — Stress: {}", currentFps, stress);
-            }
         }
     }
 
@@ -49,12 +43,12 @@ public class PerformanceGuard {
     public static StressLevel getStressLevel() { return stress; }
     public static double getCurrentFps() { return currentFps; }
 
-    // Métodos para compatibilidade com passes de render (valores padrão)
-    public static boolean bloomEnabled()            { return true; }
-    public static float  bloomThreshold()           { return 0.0f; }
-    public static float  bloomRadius()              { return 2.0f; }
-    public static float  bloomIntensity()           { return 1.2f; }
-    public static boolean lightingPassEnabled()     { return true; }
-    public static float  warmth()                   { return 0.8f; }
-    public static float  ambientOcclusion()         { return 0.5f; }
+    // Métodos para passes de render
+    public static boolean bloomEnabled()        { return true; }
+    public static float bloomThreshold()        { return 0.0f; }
+    public static float bloomRadius()           { return 2.0f; }
+    public static float bloomIntensity()        { return 1.2f; }
+    public static boolean lightingPassEnabled() { return true; }
+    public static float warmth()                { return 0.8f; }
+    public static float ambientOcclusion()      { return 0.5f; }
 }
