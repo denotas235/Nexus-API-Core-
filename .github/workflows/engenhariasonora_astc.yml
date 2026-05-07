@@ -1,0 +1,103 @@
+name: EngenhariaSonora ASTC Factory
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-astc-pack:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Run gradle build to download Minecraft jar
+        run: ./gradlew build --no-daemon || true
+
+      - name: Install astcenc
+        run: |
+          curl -L -o astcenc.zip https://github.com/ARM-software/astc-encoder/releases/download/4.8.0/astcenc-4.8.0-linux-x86_64.zip
+          unzip astcenc.zip
+          chmod +x astcenc-4.8.0-linux-x86_64/astcenc
+          sudo cp astcenc-4.8.0-linux-x86_64/astcenc /usr/local/bin/astcenc
+
+      - name: Extract Minecraft textures
+        run: |
+          MINECRAFT_JAR="$HOME/.gradle/caches/fabric-loom/1.21.1/minecraft-1.21.1-client.jar"
+          mkdir -p extracted_textures
+          unzip -q "$MINECRAFT_JAR" "assets/minecraft/textures/**/*.png" -d extracted_textures/
+          # Remove o prefixo "extracted_textures/" para ficar igual a estrutura esperada
+          mv extracted_textures/assets/minecraft/textures textures_source
+
+      - name: Create output structure
+        run: mkdir -p build/assets/minecraft/textures
+
+      - name: Optimize Textures (Smart Compression)
+        run: |
+          convert_folder() {
+            local folder=$1
+            local block_size=$2
+            local quality=$3
+            echo "Processando $folder com bloco $block_size..."
+            find "$folder" -name "*.png" | while read -r img; do
+              # caminho relativo dentro de textures_source/textures/... ?
+              rel_path="${img#textures_source/}"
+              dest="build/$rel_path.astc"
+              mkdir -p "$(dirname "$dest")"
+              astcenc -cs "$img" "$dest" "$block_size" -"$quality"
+              echo "  OK: $rel_path"
+            done
+          }
+
+          # 1. BLOCOS: 6x6 medium
+          if [ -d "textures_source/block" ]; then
+            convert_folder "textures_source/block" "6x6" "medium"
+          fi
+
+          # 2. ITENS E GUI: 4x4 medium
+          if [ -d "textures_source/item" ]; then
+            convert_folder "textures_source/item" "4x4" "medium"
+          fi
+          if [ -d "textures_source/gui" ]; then
+            convert_folder "textures_source/gui" "4x4" "medium"
+          fi
+
+          # 3. ENTIDADES: 5x5 medium
+          if [ -d "textures_source/entity" ]; then
+            convert_folder "textures_source/entity" "5x5" "medium"
+          fi
+
+          # 4. AMBIENTE: 10x10 thorough
+          if [ -d "textures_source/environment" ]; then
+            convert_folder "textures_source/environment" "10x10" "thorough"
+          fi
+
+          # 5. PARTÍCULAS: 8x8 medium
+          if [ -d "textures_source/particle" ]; then
+            convert_folder "textures_source/particle" "8x8" "medium"
+          fi
+
+      - name: Copy Metadata
+        run: |
+          cd build
+          echo '{"pack":{"description":"EngenhariaSonora ASTC Pack","pack_format":15}}' > pack.mcmeta
+          # se quiseres um ícone, coloca pack.png no repo e adiciona 'cp ../pack.png . || true'
+
+      - name: Package Resource Pack
+        run: |
+          cd build
+          zip -r ../EngenhariaSonora_ASTC_Pack.zip .
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: EngenhariaSonora-ASTC-Pack
+          path: EngenhariaSonora_ASTC_Pack.zip
