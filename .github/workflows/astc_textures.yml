@@ -1,0 +1,116 @@
+name: Gerar Texturas ASTC (Oficial)
+
+on:
+  workflow_dispatch:
+    inputs:
+      quality:
+        description: "Qualidade astcenc"
+        required: true
+        default: "medium"
+        type: choice
+        options:
+          - fast
+          - medium
+          - thorough
+
+jobs:
+  generate-astc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      MC_VERSION: "1.21.1"
+      QUALITY: ${{ github.event.inputs.quality || 'medium' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Instalar astcenc e jq
+        run: |
+          sudo apt-get update -y && sudo apt-get install -y jq
+          curl -L -o astcenc.zip https://github.com/ARM-software/astc-encoder/releases/download/5.4.0/astcenc-5.4.0-linux-x64.zip
+          unzip -o astcenc.zip
+          sudo cp bin/astcenc-sse4.1 /usr/local/bin/astcenc
+          chmod +x /usr/local/bin/astcenc
+
+      - name: Baixar minecraft.jar
+        run: |
+          VERSION_MANIFEST=$(curl -s https://piston-meta.mojang.com/mc/game/version_manifest_v2.json)
+          VERSION_URL=$(echo "$VERSION_MANIFEST" | jq -r ".versions[] | select(.id==\"${MC_VERSION}\") | .url")
+          if [ -z "$VERSION_URL" ]; then
+            echo "Versão $MC_VERSION não encontrada no manifesto!"
+            exit 1
+          fi
+          CLIENT_URL=$(curl -s "$VERSION_URL" | jq -r '.downloads.client.url')
+          echo "Baixando cliente da versão ${MC_VERSION}..."
+          curl -L -o minecraft.jar "$CLIENT_URL"
+
+      - name: Extrair texturas PNG
+        run: |
+          mkdir -p textures_tmp
+          unzip -q minecraft.jar "assets/minecraft/textures/**/*.png" -d textures_tmp/
+          mv textures_tmp/assets/minecraft/textures textures_source
+          rm -rf textures_tmp
+          echo "Texturas extraídas com sucesso."
+
+      - name: Converter PNG → ASTC
+        run: |
+          convert_folder() {
+            local folder=$1
+            local block=$2
+            echo "Convertendo $folder (bloco $block)..."
+            for f in $(find textures_source/$folder -name "*.png" -type f); do
+              relative="${f#textures_source/}"
+              dest="textures_astc/${relative%.png}.astc"
+              mkdir -p "$(dirname "$dest")"
+              astcenc -cs "$f" "$dest" "$block" -${QUALITY}
+              echo "  OK: $relative"
+            done
+          }
+
+          mkdir -p textures_astc
+          # Blocos: 6x6
+          [ -d textures_source/block ] && convert_folder block 6x6
+          # Itens / GUI: 4x4
+          [ -d textures_source/item ] && convert_folder item 4x4
+          [ -d textures_source/gui ]   && convert_folder gui 4x4
+          # Entidades: 5x5
+          [ -d textures_source/entity ] && convert_folder entity 5x5
+          # Ambiente: 10x10
+          [ -d textures_source/environment ] && convert_folder environment 10x10
+          # Partículas: 8x8
+          [ -d textures_source/particle ] && convert_folder particle 8x8
+
+      - name: Criar manifesto e copiar para assets
+        run: |
+          MANIFEST_DIR="src/main/resources/assets/maliopt"
+          mkdir -p "$MANIFEST_DIR/textures_astc"
+          cp -r textures_astc/* "$MANIFEST_DIR/textures_astc/"
+          # Gera um manifesto simples
+          echo "{" > "$MANIFEST_DIR/astc_manifest.json"
+          first=true
+          for f in $(find textures_astc -name "*.astc" | sort); do
+            rel="${f#textures_astc/}"
+            size=$(stat -c%s "$f")
+            [ "$first" = true ] || echo "," >> "$MANIFEST_DIR/astc_manifest.json"
+            printf "  \"%s\": {\"file\": \"%s\", \"size\": %d}" "${rel%.astc}" "textures_astc/$rel" $size >> "$MANIFEST_DIR/astc_manifest.json"
+            first=false
+          done
+          echo -e "\n}" >> "$MANIFEST_DIR/astc_manifest.json"
+
+      - name: Commit e push das texturas ASTC
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/main/resources/assets/maliopt/textures_astc/ src/main/resources/assets/maliopt/astc_manifest.json
+          if git diff --staged --quiet; then
+            echo "Nenhuma alteração para commitar"
+          else
+            COUNT=$(find src/main/resources/assets/maliopt/textures_astc -name "*.astc" | wc -l)
+            git commit -m "chore(astc): adicionar ${COUNT} texturas ASTC (qualidade ${QUALITY})"
+            git push
+            echo "Commit feito com ${COUNT} texturas .astc"
+          fi
