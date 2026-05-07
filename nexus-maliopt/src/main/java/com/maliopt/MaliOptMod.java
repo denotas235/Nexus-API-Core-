@@ -57,6 +57,7 @@ public class MaliOptMod implements ClientModInitializer {
         WorldRenderEvents.END.register(ctx -> {
             if (!optimizationsApplied) return;
             MaliPipelineOptimizer.onFrameEnd();
+            NeuralLODController.tick();
         });
 
         // Comando /maliopt pregenerate <radius>
