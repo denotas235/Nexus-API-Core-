@@ -16,12 +16,31 @@ object ExtensionDatabase {
     val extensions: List<ExtensionDef>
         get() {
             if (_extensions == null) {
-                val json = ExtensionDatabase::class.java.classLoader
+                val gson = Gson()
+                val type = object : TypeToken<Map<String, List<ExtensionDef>>>() {}.type
+                
+                // Carregar base de dados principal
+                val mainJson = ExtensionDatabase::class.java.classLoader
                     .getResourceAsStream("extensions.json")?.bufferedReader()?.readText()
                     ?: throw RuntimeException("extensions.json not found")
-                val type = object : TypeToken<Map<String, List<ExtensionDef>>>() {}.type
-                val map: Map<String, List<ExtensionDef>> = Gson().fromJson(json, type)
-                _extensions = map["extensions"] ?: emptyList()
+                val mainMap: Map<String, List<ExtensionDef>> = gson.fromJson(mainJson, type)
+                val main = mainMap["extensions"] ?: emptyList()
+                
+                // Carregar extensões extra do sistema, se existir
+                val extra = try {
+                    val extraJson = ExtensionDatabase::class.java.classLoader
+                        .getResourceAsStream("extensoes_extra.json")?.bufferedReader()?.readText()
+                    if (extraJson != null) {
+                        val extraMap: Map<String, List<ExtensionDef>> = gson.fromJson(extraJson, type)
+                        extraMap["extensions"] ?: emptyList()
+                    } else emptyList()
+                } catch (e: Exception) {
+                    println("[Nexus] Ficheiro de extensões extra não encontrado ou inválido: ${e.message}")
+                    emptyList()
+                }
+                
+                _extensions = main + extra
+                println("[Nexus] ExtensionDatabase: ${main.size} principais + ${extra.size} extra = ${_extensions!!.size}")
             }
             return _extensions!!
         }
