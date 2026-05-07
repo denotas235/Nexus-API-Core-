@@ -1,6 +1,6 @@
 package com.maliopt.mixin;
 
-import com.maliopt.world.CalculusCore;
+import com.maliopt.world.MotionTracker;
 import net.minecraft.client.network.ClientPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

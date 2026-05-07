@@ -9,7 +9,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(VertexBuffer.class)
-public class MixinVertexBuffer {
+// Temporariamente desativado — aguardar nome correto do BuiltBuffer
+// public class MixinVertexBuffer {
 
     @Inject(method = "upload", at = @At("HEAD"), cancellable = true, require = 1)
     private void onUpload(BufferBuilder.BuiltBuffer builtBuffer, CallbackInfo ci) {
