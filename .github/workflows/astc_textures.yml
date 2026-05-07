@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       quality:
-        description: "Qualidade astcenc"
+        description: "Qualidade ./astcenc"
         required: true
         default: "medium"
         type: choice
@@ -28,13 +28,13 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Instalar astcenc e jq
+      - name: Instalar ./astcenc e jq
         run: |
           sudo apt-get update -y && sudo apt-get install -y jq
-          curl -L -o astcenc.zip https://github.com/ARM-software/astc-encoder/releases/download/5.4.0/astcenc-5.4.0-linux-x64.zip
-          unzip -o astcenc.zip
-          sudo cp bin/astcenc-sse4.1 /usr/local/bin/astcenc
-          chmod +x /usr/local/bin/astcenc
+          curl -L -o ./astcenc.zip https://github.com/ARM-software/astc-encoder/releases/download/5.4.0/./astcenc-5.4.0-linux-x64.zip
+          unzip -o ./astcenc.zip
+          cp bin/./astcenc-sse4.1 ./astcenc
+          chmod +x ./astcenc
 
       - name: Baixar minecraft.jar
         run: |
@@ -66,7 +66,7 @@ jobs:
               relative="${f#textures_source/}"
               dest="textures_astc/${relative%.png}.astc"
               mkdir -p "$(dirname "$dest")"
-              astcenc -cs "$f" "$dest" "$block" -${QUALITY}
+              ./astcenc -cs "$f" "$dest" "$block" -${QUALITY}
               echo "  OK: $relative"
             done
           }
