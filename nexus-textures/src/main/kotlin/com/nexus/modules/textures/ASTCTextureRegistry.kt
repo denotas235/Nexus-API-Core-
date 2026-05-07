@@ -6,8 +6,7 @@ import java.util.concurrent.ConcurrentHashMap
 object ASTCTextureRegistry {
     private val astcFiles = ConcurrentHashMap<Identifier, ByteArray>()
 
-    fun updateMap(resources: Map<Identifier, java.io.InputStream>) {
-        astcFiles.clear()
+    fun updateMap(resources: Map<Identifier, InputStream>) {
         resources.forEach { (id, input) ->
             val bytes = input.readBytes()
             astcFiles[id] = bytes
@@ -15,12 +14,15 @@ object ASTCTextureRegistry {
     }
 
     fun getASTCData(id: Identifier): ByteArray? {
-        // Tenta id com extensão .astc
         val astcId = Identifier(id.namespace, id.path.replace(".png", ".astc"))
         return astcFiles[astcId]
     }
-}
 
-  fun hasASTCTextures(): Boolean {
-      return astcFiles.isNotEmpty()
-  }
+    fun hasASTCTextures(): Boolean = astcFiles.isNotEmpty()
+    
+    fun put(id: Identifier, data: ByteArray) {
+        astcFiles[id] = data
+    }
+    
+    fun count(): Int = astcFiles.size
+}

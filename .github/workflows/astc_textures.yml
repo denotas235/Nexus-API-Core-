@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       quality:
-        description: "Qualidade ./astcenc"
+        description: "Qualidade de compressão"
         required: true
         default: "medium"
         type: choice
