@@ -3,52 +3,60 @@ package com.maliopt.world;
 import com.maliopt.MaliOptMod;
 import com.maliopt.performance.PerformanceGuard;
 import net.minecraft.client.option.GameOptions;
-import java.util.function.Consumer;
 
 public class NeuralLODController {
     private static int baseViewDistance = 8;
     private static int maxViewDistance  = 16;
-    private static Consumer<Integer> viewSetter = null;
     private static GameOptions options = null;
+    private static int lastSet = -1;
 
     public static void init(GameOptions opts) {
         options = opts;
         if (options != null) {
-            baseViewDistance = 8; // forçado para Elytra
-            maxViewDistance = baseViewDistance;
+            baseViewDistance = 8;
+            maxViewDistance = 16;
         }
-        MaliOptMod.LOGGER.info("[NeuralLOD] Inicializado com view distance base: 8{}", baseViewDistance);
+        MaliOptMod.LOGGER.info("[NeuralLOD] Inicializado com view distance base: {}", baseViewDistance);
     }
 
     public static void tick() {
         if (options == null) return;
 
-        double speed = CalculusCore.getSpeed();
+        double speed = MotionTracker.getSpeed();
+        MotionTracker.MovementState mov = MotionTracker.getMovementState();
+        PerformanceGuard.StressLevel stress = PerformanceGuard.getStressLevel();
         int target;
 
-        PerformanceGuard.StressLevel stress = PerformanceGuard.getStressLevel();
         switch (stress) {
             case LOW:
-                // Com folga, pode esticar até ao máximo, mas com limite
-                int boost = (int) Math.min(speed * 0.15, 4);
-                target = Math.min(baseViewDistance + boost, maxViewDistance);
+                if (mov == MotionTracker.MovementState.BOOSTING) {
+                    target = maxViewDistance;
+                } else if (mov == MotionTracker.MovementState.FLYING) {
+                    target = baseViewDistance + 4;
+                } else if (mov == MotionTracker.MovementState.RUNNING) {
+                    target = baseViewDistance + 2;
+                } else {
+                    target = baseViewDistance;
+                }
                 break;
             case MEDIUM:
-                target = baseViewDistance;
+                target = mov == MotionTracker.MovementState.BOOSTING ? baseViewDistance + 2 : baseViewDistance;
                 break;
             case HIGH:
                 target = Math.max(4, baseViewDistance - 2);
                 break;
             case CRITICAL:
-                target = 2; // mínimo absoluto
+                target = 2;
                 break;
             default:
                 target = baseViewDistance;
         }
 
-        if (target != options.getViewDistance().getValue()) {
+        if (target != lastSet && options != null) {
+            lastSet = target;
             options.getViewDistance().setValue(target);
-            MaliOptMod.LOGGER.info("[NeuralLOD] ViewDistance ajustado para {} (stress: {}, speed: {})", target, stress, speed);
+            MaliOptMod.LOGGER.info("[NeuralLOD] ViewDistance ajustado para {} (state: {}, stress: {}, speed: {})",
+                target, mov, stress, String.format("%.1f", speed));
         }
     }
 }

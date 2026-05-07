@@ -14,7 +14,7 @@ public class MixinPlayerPosition {
     private void onTick(CallbackInfo ci) {
         ClientPlayerEntity self = (ClientPlayerEntity)(Object) this;
         if (self.getWorld().isClient) {
-            CalculusCore.feedPosition(self.getPos());
+            MotionTracker.feedPosition(self.getPos());
         }
     }
 }

@@ -121,7 +121,7 @@ public class MaliOptMod implements ClientModInitializer {
         if (mc != null) {
             gameOptions = mc.options;
             NeuralLODController.init(gameOptions);
-            CalculusCore.feedPosition(mc.player != null ? mc.player.getPos() : new net.minecraft.util.math.Vec3d(0,0,0));
+            MotionTracker.feedPosition(mc.player != null ? mc.player.getPos() : new net.minecraft.util.math.Vec3d(0,0,0));
         }
 
         Path shaderCachePath = FabricLoader.getInstance().getGameDir().resolve("shader_cache");
