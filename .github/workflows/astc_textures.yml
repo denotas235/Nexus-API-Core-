@@ -66,7 +66,7 @@ jobs:
               relative="${f#textures_source/}"
               dest="textures_astc/${relative%.png}.astc"
               mkdir -p "$(dirname "$dest")"
-              ./astcenc -cs "$f" "$dest" "$block" -${QUALITY}
+              ./astcenc -cs "$f" "$dest" "$block" -${QUALITY} || echo "AVISO: falha ao converter $f"
               echo "  OK: $relative"
             done
           }
