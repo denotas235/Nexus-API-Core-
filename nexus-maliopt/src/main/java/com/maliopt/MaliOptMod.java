@@ -2,8 +2,6 @@ package com.maliopt;
 
 import com.maliopt.astc.ASTCSubsystem;
 import com.maliopt.astc.ASTCTextureLoader;
-import com.nexus.modules.textures.ASTCTextureRegistry;
-import com.nexus.modules.textures.TextureModule;
 import com.maliopt.config.MaliOptConfig;
 import com.maliopt.gpu.ExtensionActivator;
 import com.maliopt.gpu.GPUDetector;
@@ -15,6 +13,8 @@ import com.maliopt.shader.*;
 import com.maliopt.world.*;
 import com.nexuapicore.NexusAPI;
 import com.nexuapicore.core.FeatureRegistry;
+import com.nexus.modules.textures.ASTCTextureRegistry;
+import com.nexus.modules.textures.TextureModule;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
@@ -57,9 +57,24 @@ public class MaliOptMod implements ClientModInitializer {
             NexusAPI.onReady(this::applyOptimizations);
         }
 
+        // Render hook: executar passes de efeitos visuais
         WorldRenderEvents.END.register(ctx -> {
             if (!optimizationsApplied) return;
+            MinecraftClient mc = MinecraftClient.getInstance();
+            if (mc == null || mc.world == null) return;
+
+            // Pls lighting (cores vibrantes e sombras suaves)
+            if (PLSLightingPass.isReady()) {
+                PLSLightingPass.render(mc);
+            }
+            // Bloom (luzes brilhantes)
+            if (FBFetchBloomPass.isReady()) {
+                FBFetchBloomPass.render(mc);
+            }
+            // Otimizações de tile
             MaliPipelineOptimizer.onFrameEnd();
+            TileBasedOptimizer.onFrameEnd();
+            // Ajuste de LOD
             NeuralLODController.tick();
         });
 
@@ -75,7 +90,6 @@ public class MaliOptMod implements ClientModInitializer {
                         if (server == null) return 0;
                         LOGGER.info("[MaliOpt] Iniciando pré‑geração de {} chunks...", radius*radius*4);
                         server.execute(() -> {
-                            // força geração de chunks ao redor
                             net.minecraft.util.math.ChunkPos center = new net.minecraft.util.math.ChunkPos(
                                 client.player.getBlockPos());
                             for (int dx = -radius; dx <= radius; dx++) {
@@ -104,14 +118,11 @@ public class MaliOptMod implements ClientModInitializer {
         TileBasedOptimizer.init();
         MaliPipelineOptimizer.init();
 
-        // Inicializa sistemas preditivos de mundo
         WorldCache.init();
         PerformanceGuard.init();
         CalculusCore.feedPosition(MinecraftClient.getInstance().player != null
             ? MinecraftClient.getInstance().player.getPos()
             : new net.minecraft.util.math.Vec3d(0,0,0));
-        // NeuralLODController será inicializado quando o servidor iniciar
-        // (viewDistance setters dependem do servidor integrado)
 
         Path shaderCachePath = FabricLoader.getInstance().getGameDir().resolve("shader_cache");
         ShaderCache.init(shaderCachePath);
@@ -121,13 +132,14 @@ public class MaliOptMod implements ClientModInitializer {
         PLSLightingPass.init();
         FBFetchBloomPass.init();
 
+        // Carregar texturas ASTC
         TextureModule.load();
         if (ASTCTextureRegistry.hasASTCTextures()) {
             ASTCTextureLoader.init();
-        TextureModule.load();
             LOGGER.info("[MaliOpt] ✅ ASTC pré-comprimido ATIVO!");
+        } else {
+            LOGGER.info("[MaliOpt] ASTC desativado (texturas ASTC não encontradas no mod).");
         }
-        LOGGER.info("[MaliOpt] ASTC desativado (lib nativa incompatível). Plano B: texturas pré-comprimidas.");
 
         LOGGER.info("[MaliOpt] ✅ Optimizações aplicadas com sucesso.");
     }
