@@ -6,9 +6,10 @@ public class PerformanceGuard {
     public enum StressLevel { LOW, MEDIUM, HIGH, CRITICAL }
 
     private static final int TARGET_FPS = 60;
-    private static final int GOOD_FPS = 59;
-    private static final int OK_FPS   = 55;
-    private static final int BAD_FPS  = 50;
+    // Thresholds mais permissivos (o Mali não precisa de ser tão exigente)
+    private static final int GOOD_FPS = 55;   // acima disto = LOW
+    private static final int OK_FPS   = 45;   // 45-55 = MEDIUM
+    private static final int BAD_FPS  = 30;   // 30-45 = HIGH, abaixo = CRITICAL
 
     private static long lastCheckTime = System.nanoTime();
     private static int  frameCount    = 0;
@@ -18,7 +19,7 @@ public class PerformanceGuard {
 
     public static void init() {
         initialized = true;
-        MaliOptMod.LOGGER.info("[PerfGuard] Target: {} FPS", TARGET_FPS);
+        MaliOptMod.LOGGER.info("[PerfGuard] Target: {} FPS (thresholds relaxados)", TARGET_FPS);
     }
 
     public static void onFrameEnd() {
@@ -43,12 +44,12 @@ public class PerformanceGuard {
     public static StressLevel getStressLevel() { return stress; }
     public static double getCurrentFps() { return currentFps; }
 
-    // Valores AJUSTADOS para ambiente acolhedor
+    // Métodos para passes de render
     public static boolean bloomEnabled()        { return true; }
-    public static float bloomThreshold()        { return 0.3f; }  // só brilha o que realmente é luminoso
-    public static float bloomRadius()           { return 1.5f; }  // brilho mais suave
-    public static float bloomIntensity()        { return 0.7f; }  // menos intenso
+    public static float bloomThreshold()        { return 0.3f; }
+    public static float bloomRadius()           { return 1.5f; }
+    public static float bloomIntensity()        { return 0.7f; }
     public static boolean lightingPassEnabled() { return true; }
-    public static float warmth()                { return 0.3f; }  // menos quente
-    public static float ambientOcclusion()      { return 0.6f; }  // mais sombra
+    public static float warmth()                { return 0.3f; }
+    public static float ambientOcclusion()      { return 0.6f; }
 }

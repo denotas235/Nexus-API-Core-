@@ -20,6 +20,9 @@ public class NeuralLODController {
     }
 
     public static void tick() {
+        // EMERGÊNCIA: forçar 8 chunks fixos para evitar flickering
+        if (options != null) options.getViewDistance().setValue(8);
+        return;
         if (options == null) return;
 
         double speed = MotionTracker.getSpeed();
