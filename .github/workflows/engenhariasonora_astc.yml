@@ -24,17 +24,16 @@ jobs:
 
       - name: Install astcenc
         run: |
-          curl -L -o astcenc.zip https://github.com/ARM-software/astc-encoder/releases/download/4.8.0/astcenc-4.8.0-linux-x86_64.zip
+          curl -L -o astcenc.zip https://github.com/ARM-software/astc-encoder/releases/download/5.4.0/astcenc-5.4.0-linux-x64.zip
           unzip astcenc.zip
-          chmod +x astcenc-4.8.0-linux-x86_64/astcenc
-          sudo cp astcenc-4.8.0-linux-x86_64/astcenc /usr/local/bin/astcenc
+          chmod +x bin/astcenc-sse4.1
+          sudo cp bin/astcenc-sse4.1 /usr/local/bin/astcenc
 
       - name: Extract Minecraft textures
         run: |
           MINECRAFT_JAR="$HOME/.gradle/caches/fabric-loom/1.21.1/minecraft-1.21.1-client.jar"
           mkdir -p extracted_textures
           unzip -q "$MINECRAFT_JAR" "assets/minecraft/textures/**/*.png" -d extracted_textures/
-          # Remove o prefixo "extracted_textures/" para ficar igual a estrutura esperada
           mv extracted_textures/assets/minecraft/textures textures_source
 
       - name: Create output structure
@@ -48,7 +47,6 @@ jobs:
             local quality=$3
             echo "Processando $folder com bloco $block_size..."
             find "$folder" -name "*.png" | while read -r img; do
-              # caminho relativo dentro de textures_source/textures/... ?
               rel_path="${img#textures_source/}"
               dest="build/$rel_path.astc"
               mkdir -p "$(dirname "$dest")"
@@ -89,7 +87,6 @@ jobs:
         run: |
           cd build
           echo '{"pack":{"description":"EngenhariaSonora ASTC Pack","pack_format":15}}' > pack.mcmeta
-          # se quiseres um ícone, coloca pack.png no repo e adiciona 'cp ../pack.png . || true'
 
       - name: Package Resource Pack
         run: |
