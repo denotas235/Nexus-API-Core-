@@ -2,49 +2,53 @@ package com.maliopt.world;
 
 import com.maliopt.MaliOptMod;
 import com.maliopt.performance.PerformanceGuard;
+import net.minecraft.client.option.GameOptions;
 import java.util.function.Consumer;
 
-/**
- * NeuralLODController — simula uma "fóvea" de atenção.
- * Reduz a distância de visão atrás do jogador e aumenta à frente,
- * baseando-se na velocidade e aceleração.
- */
 public class NeuralLODController {
-    private static int baseViewDistance = 8;        // chunks (server view distance)
-    private static double maxBoost = 4;             // chunks extras à frente
-    private static int smoothFactor = 2;
-    private static Consumer<Integer> viewDistanceSetter = null;
+    private static int baseViewDistance = 8;
+    private static int maxViewDistance  = 16;
+    private static Consumer<Integer> viewSetter = null;
+    private static GameOptions options = null;
 
-    public static void init(Consumer<Integer> setter, int initialView) {
-        viewDistanceSetter = setter;
-        baseViewDistance = initialView;
+    public static void init(GameOptions opts) {
+        options = opts;
+        if (options != null) {
+            baseViewDistance = options.getViewDistance().getValue();
+            maxViewDistance = baseViewDistance;
+        }
+        MaliOptMod.LOGGER.info("[NeuralLOD] Inicializado com view distance base: {}", baseViewDistance);
     }
 
     public static void tick() {
-        if (viewDistanceSetter == null) return;
+        if (options == null) return;
 
         double speed = CalculusCore.getSpeed();
-        // quanto mais rápido, maior o foco à frente (até maxBoost extra)
-        double frontBoost = Math.min(maxBoost, speed * 0.1);
-        int desired = baseViewDistance + (int)frontBoost;
+        int target;
 
-        // se o FPS estiver baixo, reduz a distância
-        if (!PerformanceGuard.isFpsHealthy()) {
-            desired = Math.max(4, baseViewDistance - 2);
+        PerformanceGuard.StressLevel stress = PerformanceGuard.getStressLevel();
+        switch (stress) {
+            case LOW:
+                // Com folga, pode esticar até ao máximo, mas com limite
+                int boost = (int) Math.min(speed * 0.15, 4);
+                target = Math.min(baseViewDistance + boost, maxViewDistance);
+                break;
+            case MEDIUM:
+                target = baseViewDistance;
+                break;
+            case HIGH:
+                target = Math.max(4, baseViewDistance - 2);
+                break;
+            case CRITICAL:
+                target = 2; // mínimo absoluto
+                break;
+            default:
+                target = baseViewDistance;
         }
 
-        // enviamos a mesma distância para todos os lados (o servidor não suporta assimétrico)
-        // mas podemos fazer o próprio WorldCache priorizar chunks frontais.
-        // Apenas atualizamos se necessário.
-        setViewDistance(desired);
-    }
-
-    private static int lastSet = -1;
-    private static void setViewDistance(int target) {
-        if (target != lastSet && viewDistanceSetter != null) {
-            lastSet = target;
-            viewDistanceSetter.accept(target);
-            MaliOptMod.LOGGER.info("[NeuralLOD] ViewDistance ajustado para {}", target);
+        if (target != options.getViewDistance().getValue()) {
+            options.getViewDistance().setValue(target);
+            MaliOptMod.LOGGER.info("[NeuralLOD] ViewDistance ajustado para {} (stress: {}, speed: {})", target, stress, speed);
         }
     }
 }

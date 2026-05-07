@@ -1,38 +1,63 @@
 package com.maliopt.performance;
 
 import com.maliopt.MaliOptMod;
+import net.minecraft.client.MinecraftClient;
 
 public class PerformanceGuard {
-    private static final int TARGET_FPS = 30;
-    private static boolean healthy = true;
-    private static int frameCount = 0;
-    private static long lastCheck = 0;
+    public enum StressLevel { LOW, MEDIUM, HIGH, CRITICAL }
+
+    private static final int TARGET_FPS = 60;
+    private static final int GOOD_FPS = 58;     // acima disto = LOW stress
+    private static final int OK_FPS   = 50;     // 50-58 = MEDIUM
+    private static final int BAD_FPS  = 40;     // 40-50 = HIGH, abaixo = CRITICAL
+
+    private static long lastCheckTime = System.nanoTime();
+    private static int  frameCount    = 0;
+    private static double currentFps  = 60.0;
+    private static StressLevel stress = StressLevel.LOW;
+    private static boolean initialized = false;
 
     public static void init() {
-        MaliOptMod.LOGGER.info("[PerfGuard] Inicializado.");
+        initialized = true;
+        MaliOptMod.LOGGER.info("[PerfGuard] Target: {} FPS (agressivo)", TARGET_FPS);
     }
 
     public static void onFrameEnd() {
-        long now = System.nanoTime();
+        if (!initialized) return;
         frameCount++;
-        if (lastCheck == 0) lastCheck = now;
-        long elapsedMs = (now - lastCheck) / 1_000_000;
-        if (elapsedMs >= 1000) {
-            double actualFps = frameCount / (elapsedMs / 1000.0);
-            healthy = actualFps >= (TARGET_FPS * 0.75);
+        long now = System.nanoTime();
+        long elapsedNs = now - lastCheckTime;
+        if (elapsedNs >= 1_000_000_000L) { // 1 segundo
+            currentFps = frameCount / (elapsedNs / 1_000_000_000.0);
             frameCount = 0;
-            lastCheck = now;
+            lastCheckTime = now;
+
+            // Determinar nível de stress
+            if (currentFps >= GOOD_FPS) {
+                stress = StressLevel.LOW;
+            } else if (currentFps >= OK_FPS) {
+                stress = StressLevel.MEDIUM;
+            } else if (currentFps >= BAD_FPS) {
+                stress = StressLevel.HIGH;
+            } else {
+                stress = StressLevel.CRITICAL;
+            }
+
+            if (stress != StressLevel.LOW) {
+                MaliOptMod.LOGGER.warn("[PerfGuard] FPS: {:.1f} — Stress: {}", currentFps, stress);
+            }
         }
     }
 
-    public static boolean isFpsHealthy() { return healthy; }
+    public static boolean isFpsHealthy() {
+        return stress == StressLevel.LOW;
+    }
 
-    // Métodos exigidos pelo Bloom e Lighting Pipeline
-    public static boolean bloomEnabled() { return healthy; } // Desativa bloom se o FPS cair
-    public static float bloomThreshold() { return 0.8f; }
-    public static float bloomRadius() { return 1.5f; }
-    public static float bloomIntensity() { return 0.4f; }
-    public static boolean lightingPassEnabled() { return true; }
-    public static float warmth() { return 1.0f; }
-    public static float ambientOcclusion() { return 0.5f; }
+    public static StressLevel getStressLevel() {
+        return stress;
+    }
+
+    public static double getCurrentFps() {
+        return currentFps;
+    }
 }
