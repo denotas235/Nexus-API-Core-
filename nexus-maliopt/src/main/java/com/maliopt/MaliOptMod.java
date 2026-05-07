@@ -31,6 +31,7 @@ import org.lwjgl.opengl.GL11;
 import java.nio.file.Path;
 
 public class MaliOptMod implements ClientModInitializer {
+    static { RPGScoreboardRenderer.register(); }
 
     public static final String MOD_ID = "maliopt";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
