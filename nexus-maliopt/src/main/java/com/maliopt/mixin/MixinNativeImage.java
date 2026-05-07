@@ -1,7 +1,6 @@
 package com.maliopt.mixin;
 
 import com.maliopt.astc.ASTCSubsystem;
-import com.nexus.modules.textures.ASTCTextureRegistry;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;

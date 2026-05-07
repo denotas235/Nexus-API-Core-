@@ -36,7 +36,7 @@ public class WorldCache {
         GL30.glBindBuffer(GL30.GL_ARRAY_BUFFER, bufferId);
         if (hasBufferStorage) {
             // GL_EXT_buffer_storage: mapeável persistentemente
-            GL43.glBufferStorage(GL30.GL_ARRAY_BUFFER, data, GL43.GL_MAP_WRITE_BIT | GL43.GL_MAP_PERSISTENT_BIT);
+            GL43.glBufferStorage(GL30.GL_ARRAY_BUFFER, data, GL43.GL_MAP_WRITE_BIT | 0x0040);
         } else {
             // Fallback: glBufferData com GL_STATIC_DRAW
             GL30.glBufferData(GL30.GL_ARRAY_BUFFER, data, GL30.GL_STATIC_DRAW);
