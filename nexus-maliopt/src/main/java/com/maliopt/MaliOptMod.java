@@ -1,6 +1,7 @@
 package com.maliopt;
 
 import com.maliopt.astc.ASTCSubsystem;
+import com.nexus.modules.textures.ASTCTextureRegistry;
 import com.maliopt.config.MaliOptConfig;
 import com.maliopt.gpu.ExtensionActivator;
 import com.maliopt.gpu.GPUDetector;
@@ -119,7 +120,7 @@ public class MaliOptMod implements ClientModInitializer {
         FBFetchBloomPass.init();
 
         if (ASTCTextureRegistry.hasASTCTextures()) {
-            ASTCSubsystem.init();
+            ASTCTextureLoader.init();
             LOGGER.info("[MaliOpt] ✅ ASTC pré-comprimido ATIVO!");
         }
         LOGGER.info("[MaliOpt] ASTC desativado (lib nativa incompatível). Plano B: texturas pré-comprimidas.");

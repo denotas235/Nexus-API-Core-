@@ -1,27 +1,16 @@
 package com.maliopt.mixin;
 
-import com.maliopt.MaliOptMod;
 import com.maliopt.astc.ASTCTextureLoader;
+import com.nexus.modules.textures.ASTCTextureRegistry;
 import net.minecraft.client.texture.NativeImage;
-import net.minecraft.resource.Resource;
-import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Optional;
-
 @Mixin(NativeImage.class)
 public class MixinNativeImage {
-
-    // Referência ao ResourceManager (precisa ser injetada de alguma forma, mas para simplicidade
-    // vamos usar o ResourceManagerHelper que carrega o manifesto na TextureModule.
-    // De qualquer forma, este mixin agora apenas verifica se a textura já é ASTC.
-    // A lógica completa será feita via eventos de reload.
 
     @Inject(method = "upload(IIIIIIIZZZZ)V", at = @At("HEAD"), cancellable = true, require = 1)
     private void onUpload(int level, int xOffset, int yOffset,
@@ -30,6 +19,22 @@ public class MixinNativeImage {
                           boolean blur, boolean mipmap,
                           boolean close, boolean linear,
                           CallbackInfo ci) {
-        // Placeholder: o ASTC será carregado via TextureModule
+        if (level != 0 || !ASTCTextureLoader.isAvailable()) return;
+
+        NativeImage self = (NativeImage)(Object) this;
+        // Obtém o Identifier da textura a partir do NativeImage (via campo privado)
+        Identifier id = self.getTextureIdentifier();   // método adicionado via AW ou mixin acessor
+        if (id == null) return;
+
+        byte[] astcData = ASTCTextureRegistry.getASTCData(id);
+        if (astcData == null) return;   // só usa ASTC se existir ficheiro pré-comprimido
+
+        // Lê o cabeçalho ASTC (16 bytes) para obter dimensões e tamanho do bloco
+        if (astcData.length < 16) return;
+        int blockX = astcData[7] & 0xFF;
+        int blockY = astcData[8] & 0xFF;
+
+        ASTCTextureLoader.upload(width, height, blockX, blockY, astcData);
+        ci.cancel();   // cancela o upload vanilla
     }
 }
