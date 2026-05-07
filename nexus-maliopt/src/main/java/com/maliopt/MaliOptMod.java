@@ -117,6 +117,7 @@ public class MaliOptMod implements ClientModInitializer {
         TileBasedOptimizer.init();
         MaliPipelineOptimizer.init();
         WorldCache.init();
+        MeshDiffEngine.init();
         DirectionalStreaming.update();
         PredictiveCacheManager.update();
         PerformanceGuard.init();
@@ -126,6 +127,7 @@ public class MaliOptMod implements ClientModInitializer {
             gameOptions = mc.options;
             NeuralLODController.init(gameOptions);
             MotionTracker.feedPosition(mc.player != null ? mc.player.getPos() : new net.minecraft.util.math.Vec3d(0,0,0));
+        RuntimeBehaviorSwitch.tick();
         }
 
         Path shaderCachePath = FabricLoader.getInstance().getGameDir().resolve("shader_cache");

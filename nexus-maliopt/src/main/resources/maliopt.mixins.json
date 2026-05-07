@@ -7,7 +7,9 @@
     "MixinChunkBuilder",
     "MixinGameRenderer",
     "MixinNativeImage",
-    "MixinPlayerPosition"
+    "MixinPlayerPosition",
+    "MixinClientPlayerInteractionManager",
+    "MixinVertexBuffer"
   ],
   "injectors": {
     "defaultRequire": 1
