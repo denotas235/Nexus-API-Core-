@@ -1,4 +1,5 @@
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3d;
 package com.maliopt.world;
 
 import com.maliopt.MaliOptMod;
