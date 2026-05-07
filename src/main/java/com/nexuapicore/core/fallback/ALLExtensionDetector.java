@@ -8,51 +8,55 @@ import org.lwjgl.opengl.*;
 import java.io.*;
 import java.util.*;
 
+/**
+ * ALLExtensionDetector 3.0 — SHARINGAN RINNEGAN
+ * Lê extensões diretamente das bibliotecas do sistema, sem depender de cópias.
+ */
 public class ALLExtensionDetector {
 
-    private static final Map<String, Set<String>> extensionSources = new LinkedHashMap<>();
-
-    // Bibliotecas gráficas do sistema que podemos ler com "strings"
-    private static final String[] GRAPHICS_LIB_PATHS = {
+    // Caminhos reais das bibliotecas no sistema Android
+    private static final String[] SYSTEM_GRAPHICS_LIBS = {
         "/vendor/lib64/egl/libEGL.so",
         "/vendor/lib64/egl/libGLESv1_CM.so",
         "/vendor/lib64/egl/libGLESv2.so",
         "/vendor/lib64/egl/libGLESv3.so",
         "/vendor/lib64/egl/libGLES_mali.so",
         "/vendor/lib64/egl/libGLES_meow.so",
-        "/vendor/lib64/hw/vulkan.mt6768.so",     // Vulkan HAL típico em MediaTek
-        "/system/lib64/libvulkan.so"
+        "/vendor/lib64/hw/vulkan.mt6768.so",
+        "/system/lib64/libvulkan.so",
+        "/vendor/lib64/libmobileglues.so",
+        "/vendor/lib64/egl/libmobileglues_info_getter.so"
     };
+
+    private static final Map<String, Set<String>> extensionSources = new LinkedHashMap<>();
 
     public static List<String> detectExtensions() {
         extensionSources.clear();
         Set<String> allAvailable = new LinkedHashSet<>();
 
-        System.out.println("[Nexus] ╔══════════════════════════════════════════════════════════╗");
-        System.out.println("[Nexus] ║   DETECTOR INFALÍVEL 2.0 — SHARINGAN APRIMORADO       ║");
-        System.out.println("[Nexus] ╚══════════════════════════════════════════════════════════╝");
+        log("═══ DETECTOR INFALÍVEL 3.0 ═══");
 
-        // ── FONTE 1: GL Nativa (via .so) ─────────────────────────────
+        // FONTE 1: GL Nativa
         if (NexusNativeLoader.loaded) {
             String rawGL = NexusNativeLoader.getGLExtensionsSafe();
             if (!rawGL.isEmpty()) {
                 Set<String> extSet = new LinkedHashSet<>();
                 Collections.addAll(extSet, rawGL.split("[ \n]+"));
-                registerSource("GL Nativo (libnexus_mali_core.so)", extSet, allAvailable);
+                registerSource("GL Nativo", extSet, allAvailable);
             }
         }
 
-        // ── FONTE 2: EGL Nativa (via .so) ────────────────────────────
+        // FONTE 2: EGL Nativa
         if (NexusNativeLoader.loaded) {
             String rawEGL = NexusNativeLoader.getEGLExtensionsSafe();
             if (!rawEGL.isEmpty()) {
                 Set<String> extSet = new LinkedHashSet<>();
                 Collections.addAll(extSet, rawEGL.split("[ \n]+"));
-                registerSource("EGL Nativo (libnexus_mali_core.so)", extSet, allAvailable);
+                registerSource("EGL Nativo", extSet, allAvailable);
             }
         }
 
-        // ── FONTE 3: GL via LTW/Wrapper ──────────────────────────────
+        // FONTE 3: GL via LTW/Wrapper
         try {
             int count = GL11.glGetInteger(GL30.GL_NUM_EXTENSIONS);
             if (count > 0) {
@@ -61,7 +65,7 @@ public class ALLExtensionDetector {
                     String ext = GL30.glGetStringi(GL11.GL_EXTENSIONS, i);
                     if (ext != null && !ext.isEmpty()) ltwExts.add(ext);
                 }
-                registerSource("GL via LTW/Wrapper (glGetStringi, " + count + " extensões)", ltwExts, allAvailable);
+                registerSource("GL (glGetStringi)", ltwExts, allAvailable);
             }
         } catch (Exception e) {
             try {
@@ -69,143 +73,78 @@ public class ALLExtensionDetector {
                 if (flat != null && !flat.isEmpty()) {
                     Set<String> ltwExts = new LinkedHashSet<>();
                     Collections.addAll(ltwExts, flat.split(" "));
-                    registerSource("GL via LTW/Wrapper (glGetString)", ltwExts, allAvailable);
+                    registerSource("GL (glGetString)", ltwExts, allAvailable);
                 }
-            } catch (Exception ex) {
-                System.err.println("[Nexus] Fonte GL LTW: " + ex.getMessage());
-            }
+            } catch (Exception ignored) {}
         }
 
-        // ── FONTE 4: Vulkan ──────────────────────────────────────────
+        // FONTE 4: Vulkan Nativo
         if (NexusNativeLoader.loaded) {
             String rawVk = NexusNativeLoader.getVulkanExtensionsSafe();
             if (!rawVk.isEmpty()) {
                 Set<String> vkSet = new LinkedHashSet<>();
                 Collections.addAll(vkSet, rawVk.split("[ \n]+"));
-                registerSource("Vulkan (libnexus_mali_core.so)", vkSet, allAvailable);
+                registerSource("Vulkan Nativo", vkSet, allAvailable);
             }
         }
 
-        // ── FONTE 5: Áudio ───────────────────────────────────────────
-        if (NexusNativeLoader.loaded) {
-            String rawAudio = NexusNativeLoader.getAudioExtensionsSafe();
-            if (!rawAudio.isEmpty()) {
-                Set<String> audioSet = new LinkedHashSet<>();
-                Collections.addAll(audioSet, rawAudio.split("[ \n]+"));
-                registerSource("Áudio Nativo (libnexus_mali_core.so)", audioSet, allAvailable);
-            }
+        // FONTE 5: Strings das bibliotecas do sistema (consulta direta)
+        Set<String> systemExts = loadSystemGraphicsExtensions();
+        if (!systemExts.isEmpty()) {
+            registerSource("Sistema (" + countFoundLibs() + " libs)", systemExts, allAvailable);
         }
 
-        // ── FONTE 6: EGL via sistema ─────────────────────────────────
-        try {
-            String eglExts = System.getProperty("egl.extensions", "");
-            if (!eglExts.isEmpty()) {
-                Set<String> eglSys = new LinkedHashSet<>();
-                Collections.addAll(eglSys, eglExts.split("[ \n]+"));
-                registerSource("EGL Sistema (java property)", eglSys, allAvailable);
-            }
-        } catch (Exception ignored) {}
-
-        // ── FONTE 7: Strings de múltiplas bibliotecas gráficas ───────
-        Set<String> maliDriverExts = loadGraphicsDriverExtensions();
-        if (!maliDriverExts.isEmpty()) {
-            registerSource("Mali/Graphics Driver (strings de libs do sistema)", maliDriverExts, allAvailable);
-        }
-
-        // ── SCAN COMPLETO CONTRA A BASE DE DADOS ─────────────────────
+        // SCAN COMPLETO
         List<ExtensionDef> allKnown = ExtensionDatabase.INSTANCE.getAllExtensions();
-        System.out.println("[Nexus] ");
-        System.out.println("[Nexus] ╔══════════════════════════════════════════════════════════╗");
-        System.out.println("[Nexus] ║   SCAN COMPLETO — " + allKnown.size() + " extensões conhecidas              ║");
-        System.out.println("[Nexus] ╚══════════════════════════════════════════════════════════╝");
-        System.out.println("[Nexus] Total combinado de extensões detectadas: " + allAvailable.size());
-        System.out.println("[Nexus] ");
-
-        Map<String, List<ExtensionDef>> byGroup = new LinkedHashMap<>();
+        log("Base: " + allKnown.size() + " | Detectadas: " + allAvailable.size());
+        
+        int present = 0, absent = 0;
         for (ExtensionDef def : allKnown) {
-            byGroup.computeIfAbsent(def.getGroup(), k -> new ArrayList<>()).add(def);
+            if (allAvailable.contains(def.getName())) present++; else absent++;
         }
-
-        for (Map.Entry<String, List<ExtensionDef>> groupEntry : byGroup.entrySet()) {
-            String group = groupEntry.getKey();
-            List<ExtensionDef> defs = groupEntry.getValue();
-            System.out.println("[Nexus] ── " + group + " (" + defs.size() + " extensões) ──");
-            for (ExtensionDef def : defs) {
-                boolean found = allAvailable.contains(def.getName());
-                String symbol = found ? "✅" : "❌";
-                String source = findSource(def.getName());
-                String sourceInfo = found ? "  ← " + source : "";
-                System.out.println("[Nexus]   " + symbol + " " + def.getName() + sourceInfo);
-            }
-            System.out.println();
-        }
-
-        System.out.println("[Nexus] ╔══════════════════════════════════════════════════════════╗");
-        System.out.println("[Nexus] ║   RESUMO FINAL                                           ║");
-        System.out.println("[Nexus] ╚══════════════════════════════════════════════════════════╝");
-        int totalOK = 0, totalERR = 0;
-        for (ExtensionDef def : allKnown) {
-            if (allAvailable.contains(def.getName())) totalOK++; else totalERR++;
-        }
-        System.out.println("[Nexus]   ✅ Presentes: " + totalOK);
-        System.out.println("[Nexus]   ❌ Ausentes : " + totalERR);
-        System.out.println("[Nexus]   Total base : " + allKnown.size());
-        System.out.println("[Nexus]   Detetadas   : " + allAvailable.size());
-        System.out.println("[Nexus] ══════════════════════════════════════════════════════════");
+        log("✅ " + present + "  ❌ " + absent);
 
         return new ArrayList<>(allAvailable);
     }
 
-    // ── Helpers ────────────────────────────────────────────────────────
+    private static int countFoundLibs() {
+        int found = 0;
+        for (String path : SYSTEM_GRAPHICS_LIBS) {
+            if (new File(path).exists()) found++;
+        }
+        return found;
+    }
+
+    private static Set<String> loadSystemGraphicsExtensions() {
+        Set<String> exts = new LinkedHashSet<>();
+        for (String libPath : SYSTEM_GRAPHICS_LIBS) {
+            File libFile = new File(libPath);
+            if (!libFile.exists()) continue;
+            try {
+                Process p = new ProcessBuilder("strings", libPath).start();
+                Scanner scanner = new Scanner(p.getInputStream()).useDelimiter("\\A");
+                if (scanner.hasNext()) {
+                    for (String line : scanner.next().split("\\n")) {
+                        line = line.trim();
+                        if (line.matches("^(GL_|EGL_|VK_)[A-Za-z0-9_]+$")) {
+                            exts.add(line);
+                        }
+                    }
+                }
+                p.waitFor();
+            } catch (Exception ignored) {}
+        }
+        return exts;
+    }
 
     private static void registerSource(String label, Set<String> exts, Set<String> global) {
         extensionSources.put(label, exts);
         int before = global.size();
         global.addAll(exts);
-        int added = global.size() - before;
-        System.out.println("[Nexus] 📡 " + label + ": " + exts.size() + " extensões (+" + added + " novas)");
+        log("📡 " + label + ": " + exts.size() + " (+" + (global.size() - before) + ")");
     }
 
-    private static String findSource(String extName) {
-        List<String> sources = new ArrayList<>();
-        for (Map.Entry<String, Set<String>> entry : extensionSources.entrySet()) {
-            if (entry.getValue().contains(extName)) {
-                sources.add(entry.getKey());
-            }
-        }
-        return sources.isEmpty() ? "—" : String.join(" | ", sources);
-    }
-
-    /**
-     * FONTE 7 (melhorada) — Lê strings de todas as bibliotecas gráficas
-     * conhecidas do sistema, não apenas da libGLES_mali.so.
-     */
-    private static Set<String> loadGraphicsDriverExtensions() {
-        Set<String> exts = new LinkedHashSet<>();
-        for (String libPath : GRAPHICS_LIB_PATHS) {
-            File libFile = new File(libPath);
-            if (!libFile.exists()) {
-                System.out.println("[Nexus] FONTE 7: " + libPath + " não encontrada, ignorando.");
-                continue;
-            }
-            try {
-                ProcessBuilder pb = new ProcessBuilder("strings", libPath);
-                Process p = pb.start();
-                InputStream is = p.getInputStream();
-                Scanner scanner = new Scanner(is).useDelimiter("\\A");
-                String output = scanner.hasNext() ? scanner.next() : "";
-                String[] lines = output.split("\\n");
-                for (String line : lines) {
-                    line = line.trim();
-                    if (line.matches("^(GL_|EGL_|VK_)[A-Za-z0-9_]+$")) {
-                        exts.add(line);
-                    }
-                }
-                p.waitFor();
-            } catch (Exception e) {
-                System.err.println("[Nexus] FONTE 7: erro ao ler " + libPath + ": " + e.getMessage());
-            }
-        }
-        return exts;
+    private static void log(String msg) {
+        System.out.println("[Nexus] " + msg);
     }
 }
