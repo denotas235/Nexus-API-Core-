@@ -2,131 +2,36 @@ package com.maliopt.performance;
 
 import com.maliopt.MaliOptMod;
 import net.minecraft.client.MinecraftClient;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 
-public final class PerformanceGuard {
+public class PerformanceGuard {
+    private static final int TARGET_FPS = 30;      // 30 ou 60, conforme config
+    private static long lastFrameTime = 0;
+    private static boolean healthy = true;
+    private static int frameCount = 0;
+    private static long lastCheck = 0;
 
-    private static final int FPS_DEGRADED = 20;
-    private static final int FPS_LOW      = 35;
-    private static final int FPS_MEDIUM   = 55;
-
-    private static final int FRAMES_TO_DOWNGRADE = 60;
-    private static final int FRAMES_TO_UPGRADE   = 120;
-
-    public enum Quality { DEGRADED, LOW, MEDIUM, HIGH }
-
-    private static Quality current      = Quality.HIGH;
-    private static Quality target       = Quality.HIGH;
-    private static int     frameCounter = 0;
-    private static int     sampleSum    = 0;
-    private static int     sampleCount  = 0;
-    private static long    lastLogTime  = 0;
-
-    private static final int SAMPLE_WINDOW = 20;
-
-    private PerformanceGuard() {}
-
-    public static void update(MinecraftClient mc) {
-        if (mc == null) return;
-        int fps = mc.getCurrentFps();
-
-        sampleSum += fps;
-        sampleCount++;
-
-        if (sampleCount >= SAMPLE_WINDOW) {
-            int avgFps = sampleSum / sampleCount;
-            sampleSum   = 0;
-            sampleCount = 0;
-            evaluateFps(avgFps);
-        }
+    public static void init() {
+        MaliOptMod.LOGGER.info("[PerfGuard] Target FPS: {}", TARGET_FPS);
     }
 
-    private static void evaluateFps(int avgFps) {
-        Quality desired = classify(avgFps);
-
-        if (desired == target) {
-            frameCounter++;
-
-            int threshold = (desired.ordinal() < current.ordinal())
-                ? FRAMES_TO_DOWNGRADE
-                : FRAMES_TO_UPGRADE;
-
-            if (frameCounter >= threshold) {
-                applyQuality(desired, avgFps);
-                frameCounter = 0;
+    public static void onFrameEnd() {
+        long now = System.nanoTime();
+        frameCount++;
+        if (lastCheck == 0) lastCheck = now;
+        long elapsedMs = (now - lastCheck) / 1_000_000;
+        if (elapsedMs >= 1000) { // a cada 1 segundo
+            double actualFps = frameCount / (elapsedMs / 1000.0);
+            healthy = actualFps >= (TARGET_FPS * 0.75);
+            if (!healthy) {
+                MaliOptMod.LOGGER.warn("[PerfGuard] FPS baixo: {:.1f} (target {})", actualFps, TARGET_FPS);
             }
-        } else {
-            target       = desired;
-            frameCounter = 0;
+            frameCount = 0;
+            lastCheck = now;
         }
     }
 
-    private static Quality classify(int fps) {
-        if (fps < FPS_DEGRADED) return Quality.DEGRADED;
-        if (fps < FPS_LOW)      return Quality.LOW;
-        if (fps < FPS_MEDIUM)   return Quality.MEDIUM;
-        return Quality.HIGH;
+    public static boolean isFpsHealthy() {
+        return healthy;
     }
-
-    private static void applyQuality(Quality q, int fps) {
-        if (q == current) return;
-        Quality prev = current;
-        current = q;
-
-        long now = System.currentTimeMillis();
-        if (now - lastLogTime > 3000) {
-            MaliOptMod.LOGGER.info("[PerfGuard] Qualidade {} → {} (FPS médio: {})",
-                prev, current, fps);
-            lastLogTime = now;
-        }
-    }
-
-    public static boolean bloomEnabled()        { return current != Quality.DEGRADED; }
-    public static boolean lightingPassEnabled() { return current != Quality.DEGRADED; }
-
-    public static float bloomIntensity() {
-        switch (current) {
-            case DEGRADED: return 0.0f;
-            case LOW:      return 0.15f;
-            case MEDIUM:   return 0.25f;
-            default:       return 0.35f;
-        }
-    }
-
-    public static float bloomRadius() {
-        switch (current) {
-            case DEGRADED: return 0.0f;
-            case LOW:      return 0.8f;
-            case MEDIUM:   return 1.2f;
-            default:       return 1.8f;
-        }
-    }
-
-    public static float bloomThreshold() {
-        switch (current) {
-            case DEGRADED: return 1.0f;
-            case LOW:      return 0.80f;
-            case MEDIUM:   return 0.65f;
-            default:       return 0.55f;
-        }
-    }
-
-    public static float warmth() {
-        switch (current) {
-            case DEGRADED: return 0.0f;
-            case LOW:      return 0.04f;
-            default:       return 0.20f;
-        }
-    }
-
-    public static float ambientOcclusion() {
-        switch (current) {
-            case DEGRADED: return 0.0f;
-            case LOW:      return 0.20f;
-            case MEDIUM:   return 0.10f;
-            default:       return 0.20f;
-        }
-    }
-
-    public static Quality getCurrentQuality()  { return current; }
-    public static int     targetFpsForHigh()   { return FPS_MEDIUM; }
 }

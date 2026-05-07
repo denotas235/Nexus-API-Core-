@@ -9,13 +9,17 @@ import com.maliopt.performance.PerformanceGuard;
 import com.maliopt.pipeline.*;
 import com.maliopt.geometry.*;
 import com.maliopt.shader.*;
+import com.maliopt.world.*;
 import com.nexuapicore.NexusAPI;
 import com.nexuapicore.core.FeatureRegistry;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.server.integrated.IntegratedServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.lwjgl.opengl.GL11;
@@ -54,6 +58,34 @@ public class MaliOptMod implements ClientModInitializer {
             if (!optimizationsApplied) return;
             MaliPipelineOptimizer.onFrameEnd();
         });
+
+        // Comando /maliopt pregenerate <radius>
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
+            dispatcher.register(ClientCommandManager.literal("maliopt")
+                .then(ClientCommandManager.literal("pregenerate")
+                    .then(ClientCommandManager.argument("radius", com.mojang.brigadier.arguments.IntegerArgumentType.integer(1, 32))
+                    .executes(context -> {
+                        int radius = com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(context, "radius");
+                        MinecraftClient client = context.getSource().getClient();
+                        IntegratedServer server = client.getServer();
+                        if (server == null) return 0;
+                        LOGGER.info("[MaliOpt] Iniciando pré‑geração de {} chunks...", radius*radius*4);
+                        server.execute(() -> {
+                            // força geração de chunks ao redor
+                            net.minecraft.util.math.ChunkPos center = new net.minecraft.util.math.ChunkPos(
+                                client.player.getBlockPos());
+                            for (int dx = -radius; dx <= radius; dx++) {
+                                for (int dz = -radius; dz <= radius; dz++) {
+                                    server.getWorld(client.player.getWorld().getRegistryKey())
+                                        .getChunk(center.x + dx, center.z + dz);
+                                }
+                            }
+                            LOGGER.info("[MaliOpt] Pré‑geração concluída.");
+                        });
+                        return 1;
+                    }))
+                ));
+        });
     }
 
     private void applyOptimizations(FeatureRegistry registry) {
@@ -68,19 +100,24 @@ public class MaliOptMod implements ClientModInitializer {
         TileBasedOptimizer.init();
         MaliPipelineOptimizer.init();
 
+        // Inicializa sistemas preditivos de mundo
+        WorldCache.init();
+        PerformanceGuard.init();
+        CalculusCore.feedPosition(MinecraftClient.getInstance().player != null
+            ? MinecraftClient.getInstance().player.getPos()
+            : new net.minecraft.util.math.Vec3d(0,0,0));
+        // NeuralLODController será inicializado quando o servidor iniciar
+        // (viewDistance setters dependem do servidor integrado)
+
         Path shaderCachePath = FabricLoader.getInstance().getGameDir().resolve("shader_cache");
         ShaderCache.init(shaderCachePath);
-
-        // Inicializar ShaderCapabilities com o registry antes de qualquer shader
         ShaderCapabilities.init(registry);
         ShaderExecutionLayer.init();
 
         PLSLightingPass.init();
         FBFetchBloomPass.init();
 
-        // ASTC desativado temporariamente: libastc_bridge_64.so requer libEGL.so.1 (desktop)
-        // Para ativar, compilar uma versão Android da lib ou usar texturas ASTC offline.
-        // ASTCSubsystem.init(); 
+        // ASTC desativado temporariamente (lib nativa incompatível)
         LOGGER.info("[MaliOpt] ASTC desativado (lib nativa incompatível). Plano B: texturas pré-comprimidas.");
 
         LOGGER.info("[MaliOpt] ✅ Optimizações aplicadas com sucesso.");

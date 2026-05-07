@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "id": "nexus-textures",
+  "version": "1.0.0",
+  "name": "Nexus Textures",
+  "entrypoints": {
+    "client": [ "com.nexus.modules.textures.TextureModule" ]
+  }
+}

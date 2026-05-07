@@ -1,12 +1,13 @@
 {
   "required": true,
   "package": "com.maliopt.mixin",
-  "compatibilityLevel": "JAVA_21",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [],
   "client": [
-    "GameOptionsAccessor",
+    "MixinChunkBuilder",
     "MixinGameRenderer",
     "MixinNativeImage",
-    "MixinChunkBuilder"
+    "MixinPlayerPosition"
   ],
   "injectors": {
     "defaultRequire": 1
