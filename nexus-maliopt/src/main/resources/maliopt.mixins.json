@@ -2,14 +2,10 @@
   "required": true,
   "package": "com.maliopt.mixin",
   "compatibilityLevel": "JAVA_21",
-  "mixins": [],
-    "MixinSectionBuilder",
-    "MixinSectionBuilder",
-    "MixinSectionBuilderTask",
-    "MixinSectionBuilderTask",
-    "MixinSectionBuilderTask",
+  "mixins": [
+    "MixinSectionBuilder"
+  ],
   "client": [
-    "MixinChunkBuilder",
     "MixinGameRenderer",
     "MixinNativeImage",
     "MixinPlayerPosition",
