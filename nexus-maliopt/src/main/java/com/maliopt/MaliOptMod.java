@@ -50,10 +50,8 @@ public class MaliOptMod implements ClientModInitializer {
 
         if (NexusAPI.isReady()) {
             applyOptimizations(NexusAPI.getRegistry());
-        MinecraftClient.getInstance().options.getViewDistance().setValue(6);
         } else {
             NexusAPI.onReady(this::applyOptimizations);
-        MinecraftClient.getInstance().options.getViewDistance().setValue(6);
         }
 
         WorldRenderEvents.END.register(ctx -> {
