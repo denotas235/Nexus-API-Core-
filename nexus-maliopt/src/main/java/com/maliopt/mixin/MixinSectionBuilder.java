@@ -11,7 +11,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.nio.ByteBuffer;
 import java.util.Map;
 
 @Mixin(SectionBuilder.class)
@@ -22,13 +21,10 @@ public class MixinSectionBuilder {
                          BuiltChunk builtChunk,
                          Box box,
                          CallbackInfoReturnable<SectionBuilder.RenderData> cir) {
-        // Utilizar WorldCache para evitar reconstrução desnecessária
+        // Se o chunk já está em cache, reutiliza
         long chunkKey = builtChunk.getOrigin().asLong();
-        int cachedVbo = WorldCache.getChunkBuffer(chunkKey);
-        if (cachedVbo >= 0) {
-            // Devolver geometria em cache — zero reconstrução
+        if (WorldCache.getChunkBuffer(chunkKey) >= 0) {
             SectionBuilder.RenderData data = new SectionBuilder.RenderData();
-            // (Aqui podemos associar o VBO ao RenderData, se necessário)
             cir.setReturnValue(data);
         }
     }
