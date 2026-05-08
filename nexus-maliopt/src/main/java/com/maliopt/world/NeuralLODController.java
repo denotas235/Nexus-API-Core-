@@ -46,7 +46,7 @@ public class NeuralLODController {
                 target = Math.max(4, baseViewDistance - 2);
                 break;
             case CRITICAL:
-                target = 2;
+                target = 4; // mínimo 4 chunks
                 break;
             default:
                 target = baseViewDistance;
