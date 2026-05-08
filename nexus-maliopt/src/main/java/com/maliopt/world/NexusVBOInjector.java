@@ -6,8 +6,8 @@ import java.util.Map;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.chunk.SectionBuilder;
 import net.minecraft.client.render.chunk.ChunkOcclusionData;
-import net.minecraft.client.render.chunk.BuiltBuffer;
-import net.minecraft.client.render.chunk.BuiltBuffer.SortState;
+import net.minecraft.client.render.BuiltBuffer;
+import net.minecraft.client.render.BuiltBuffer.SortState;
 import net.minecraft.util.math.Box;
 
 public class NexusVBOInjector {

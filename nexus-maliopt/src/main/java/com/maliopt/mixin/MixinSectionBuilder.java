@@ -27,13 +27,13 @@ public abstract class MixinSectionBuilder {
         BlockBufferBuilderPool pool,
         CallbackInfoReturnable<SectionBuilder.RenderData> cir) {
 
-        var blocks = NexusBlockExtractor.extract(region);
+        var blocks = NexusBlockExtractor.extract(region, sectionPos);
 
         VulkanResult result = VulkanWorker.submitChunk(blocks);
 
-        int ox = region.getOriginX();
-        int oy = region.getOriginY();
-        int oz = region.getOriginZ();
+        int ox = sectionPos.getMinX();
+        int oy = sectionPos.getMinY();
+        int oz = sectionPos.getMinZ();
 
         cir.setReturnValue(NexusVBOInjector.createRenderData(result, ox, oy, oz));
     }

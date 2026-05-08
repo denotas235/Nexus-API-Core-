@@ -4,17 +4,18 @@ import net.minecraft.client.render.chunk.ChunkRendererRegion;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.LightType;
+import net.minecraft.util.math.ChunkSectionPos;
 
 public class NexusBlockExtractor {
 
-    public static BlockData[] extract(ChunkRendererRegion region) {
+    public static BlockData[] extract(ChunkRendererRegion region, ChunkSectionPos sectionPos) {
 
         BlockData[] out = new BlockData[18 * 18 * 18];
         int i = 0;
 
-        int ox = region.getOriginX();
-        int oy = region.getOriginY();
-        int oz = region.getOriginZ();
+        int ox = sectionPos.getMinX();
+        int oy = sectionPos.getMinY();
+        int oz = sectionPos.getMinZ();
 
         var blockLight = region.getLightingProvider().get(LightType.BLOCK);
         var skyLight   = region.getLightingProvider().get(LightType.SKY);
