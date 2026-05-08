@@ -7,7 +7,7 @@ import com.maliopt.gpu.GPUDetector;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
-import org.lwjgl.opengles.GLES30;
+import org.lwjgl.opengl.GL43;
 
 public class TileBasedOptimizer {
 
@@ -56,7 +56,7 @@ public class TileBasedOptimizer {
         if (!ExtensionActivator.hasDiscardFramebuffer) return;
 
         try {
-            GLES30.glInvalidateFramebuffer(GL30.GL_FRAMEBUFFER, DEPTH_STENCIL_ATTACHMENTS);
+            GL43.glInvalidateFramebuffer(GL30.GL_FRAMEBUFFER, DEPTH_STENCIL_ATTACHMENTS);
         } catch (Exception ignored) {}
     }
 
@@ -65,7 +65,7 @@ public class TileBasedOptimizer {
         if (!ExtensionActivator.hasDiscardFramebuffer) return;
 
         try {
-            GLES30.glInvalidateFramebuffer(GL30.GL_FRAMEBUFFER, ALL_ATTACHMENTS);
+            GL43.glInvalidateFramebuffer(GL30.GL_FRAMEBUFFER, ALL_ATTACHMENTS);
         } catch (Exception ignored) {}
     }
 
