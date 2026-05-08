@@ -37,5 +37,5 @@ java {
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
 }
-dependencies { include(files("../libs/lwjgl-opengles-3.3.3.jar")) }
-include(files("../libs/lwjgl-opengles-natives-linux-arm64-3.3.3.jar"))
+dependencies { implementation(files("../libs/lwjgl-opengles-3.3.3.jar")) }
+implementation(files("../libs/lwjgl-opengles-natives-linux-arm64-3.3.3.jar"))
