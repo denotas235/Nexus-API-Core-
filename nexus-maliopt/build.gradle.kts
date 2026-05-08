@@ -37,3 +37,4 @@ java {
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
 }
+dependencies { implementation(files("../libs/lwjgl-opengles-3.3.3.jar")) }
