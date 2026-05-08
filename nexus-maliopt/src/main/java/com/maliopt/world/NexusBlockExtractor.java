@@ -12,18 +12,18 @@ public class NexusBlockExtractor {
 
         int i = 0;
 
-        int cx = region.getCenterX();
-        int cy = region.getCenterY();
-        int cz = region.getCenterZ();
+        int ox = region.getOrigin().getX();
+        int oy = region.getOrigin().getY();
+        int oz = region.getOrigin().getZ();
 
         var blockLight = region.getLightingProvider().get(LightType.BLOCK);
         var skyLight   = region.getLightingProvider().get(LightType.SKY);
 
-        for (int x = -16; x < 16; x++) {
-            for (int y = -16; y < 16; y++) {
-                for (int z = -16; z < 16; z++) {
+        for (int x = 0; x < 32; x++) {
+            for (int y = 0; y < 32; y++) {
+                for (int z = 0; z < 32; z++) {
 
-                    BlockPos pos = new BlockPos(cx + x, cy + y, cz + z);
+                    BlockPos pos = new BlockPos(ox + x, oy + y, oz + z);
                     BlockState state = region.getBlockState(pos);
 
                     int bl = blockLight.getLightLevel(pos);

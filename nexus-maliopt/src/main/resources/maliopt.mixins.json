@@ -5,6 +5,7 @@
   "mixins": [],
     "MixinSectionBuilderTask",
     "MixinSectionBuilderTask",
+    "MixinSectionBuilderTask",
   "client": [
     "MixinChunkBuilder",
     "MixinGameRenderer",
