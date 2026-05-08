@@ -39,6 +39,12 @@ public class MaliOptConfig {
     public static boolean astcEnabled = true;
     public static int astcQuality = 6; // 4,6,8 (block size)
     public static boolean sRGB = true;
+    public static boolean enableShaderCache = true;
+    public static int shaderCacheMaxMb = 256;
+    public static boolean enableDepthOpt = true;
+    public static boolean enableTileOptimizer = true;
+    public static boolean enableTextureOpt = true;
+    public static boolean enableTextureStorage = true;
     // terreno
     public static boolean tessellation = false; // placeholder
     public static int lodMax = 4;
