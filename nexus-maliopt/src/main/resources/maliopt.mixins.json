@@ -1,16 +1,1 @@
-{
-  "required": true,
-  "package": "com.maliopt.mixin",
-  "compatibilityLevel": "JAVA_21",
-  "mixins": [],
-  "client": [
-    "MixinChunkBuilder",
-    "MixinGameRenderer",
-    "MixinNativeImage",
-    "MixinPlayerPosition",
-    "MixinVertexBuffer"
-  ],
-  "injectors": {
-    "defaultRequire": 1
-  }
-}
+{"required":true,"package":"com.maliopt.mixin","compatibilityLevel":"JAVA_21","mixins":[],"client":["MixinChunkBuilder","MixinGameRenderer","MixinNativeImage","MixinPlayerPosition","MixinClientPlayerInteractionManager","MixinVertexBuffer"],"injectors":{"defaultRequire":1}}
