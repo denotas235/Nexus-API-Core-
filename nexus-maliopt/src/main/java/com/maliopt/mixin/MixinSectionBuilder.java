@@ -8,8 +8,8 @@ import com.maliopt.world.NexusVBOInjector;
 import net.minecraft.client.render.chunk.SectionBuilder;
 import net.minecraft.client.render.chunk.ChunkRendererRegion;
 import net.minecraft.util.math.ChunkSectionPos;
-import net.minecraft.client.render.VertexSorter;
 import net.minecraft.client.render.chunk.BlockBufferBuilderPool;
+import net.minecraft.client.render.VertexSorter;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -23,12 +23,11 @@ public abstract class MixinSectionBuilder {
     private void nexus_interceptBuild(
         ChunkSectionPos sectionPos,
         ChunkRendererRegion region,
-        VertexSorter sorter,
+        VertexSorter vertexSorter,
         BlockBufferBuilderPool pool,
         CallbackInfoReturnable<SectionBuilder.RenderData> cir) {
 
         var blocks = NexusBlockExtractor.extract(region, sectionPos);
-
         VulkanResult result = VulkanWorker.submitChunk(blocks);
 
         int ox = sectionPos.getMinX();

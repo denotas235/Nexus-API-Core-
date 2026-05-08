@@ -8,8 +8,6 @@
   "client": [
     "MixinGameRenderer",
     "MixinNativeImage",
-    "MixinPlayerPosition",
-    "MixinClientPlayerInteractionManager",
     "MixinVertexBuffer"
   ],
   "injectors": {

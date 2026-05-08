@@ -8,7 +8,9 @@ import net.minecraft.client.render.chunk.SectionBuilder;
 import net.minecraft.client.render.chunk.ChunkOcclusionData;
 import net.minecraft.client.render.BuiltBuffer;
 import net.minecraft.client.render.BuiltBuffer.SortState;
+import net.minecraft.client.render.IndexType;
 import net.minecraft.util.math.Box;
+import org.joml.Vector3f;
 
 public class NexusVBOInjector {
 
@@ -16,17 +18,20 @@ public class NexusVBOInjector {
 
         Map<RenderLayer, BuiltBuffer> map = new HashMap<>();
 
-        map.put(RenderLayer.getSolid(), new BuiltBuffer(result.solid, new SortState()));
-        map.put(RenderLayer.getCutout(), new BuiltBuffer(result.cutout, new SortState()));
-        map.put(RenderLayer.getTranslucent(), new BuiltBuffer(result.translucent, new SortState()));
+        SortState sort = new SortState(new Vector3f[0], IndexType.NONE);
 
-        SectionBuilder.TranslucencyData translucency =
-            new SectionBuilder.TranslucencyData(RenderLayer.getTranslucent(), null);
+        if (result.solid != null)
+            map.put(RenderLayer.getSolid(), new BuiltBuffer(result.solid, sort));
+
+        if (result.cutout != null)
+            map.put(RenderLayer.getCutout(), new BuiltBuffer(result.cutout, sort));
+
+        if (result.translucent != null)
+            map.put(RenderLayer.getTranslucent(), new BuiltBuffer(result.translucent, sort));
 
         Box box = new Box(ox, oy, oz, ox + 16, oy + 16, oz + 16);
-
         ChunkOcclusionData occlusion = new ChunkOcclusionData();
 
-        return new SectionBuilder.RenderData(map, translucency, box, occlusion);
+        return new SectionBuilder.RenderData(map, null, box, occlusion);
     }
 }
