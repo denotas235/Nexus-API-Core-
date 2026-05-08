@@ -1,23 +1,29 @@
 name: Build MaliOpt Module
+
 on:
   push:
     paths:
       - 'nexus-maliopt/**'
-      - 'src/main/resources/natives/arm64-v8a/libnexus_mali_core.so'
+      - 'gradle/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+  workflow_dispatch:
 
 jobs:
-  build-maliopt:
-    runs-on: ubuntu-24.04
+  build:
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: gradle/actions/wrapper-validation@v4
-      - uses: actions/setup-java@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
         with:
           java-version: '21'
-          distribution: 'microsoft'
+          distribution: 'temurin'
       - run: chmod +x ./gradlew
       - run: ./gradlew :nexus-maliopt:build
-      - uses: actions/upload-artifact@v4
+      - name: Upload MaliOpt artifact
+        uses: actions/upload-artifact@v4
         with:
           name: nexus-maliopt
-          path: nexus-maliopt/build/libs/
+          path: nexus-maliopt/build/libs/nexus-maliopt-*.jar
