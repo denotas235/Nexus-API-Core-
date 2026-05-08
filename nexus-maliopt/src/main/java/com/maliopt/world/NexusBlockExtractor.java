@@ -8,20 +8,20 @@ import net.minecraft.world.LightType;
 public class NexusBlockExtractor {
 
     public static BlockData[] extract(ChunkRendererRegion region) {
-        BlockData[] out = new BlockData[32 * 32 * 32];
 
+        BlockData[] out = new BlockData[18 * 18 * 18];
         int i = 0;
 
-        int ox = region.getCenterPos().getX();
-        int oy = region.getCenterPos().getY();
-        int oz = region.getCenterPos().getZ();
+        int ox = region.getOriginX();
+        int oy = region.getOriginY();
+        int oz = region.getOriginZ();
 
         var blockLight = region.getLightingProvider().get(LightType.BLOCK);
         var skyLight   = region.getLightingProvider().get(LightType.SKY);
 
-        for (int x = 0; x < 32; x++) {
-            for (int y = 0; y < 32; y++) {
-                for (int z = 0; z < 32; z++) {
+        for (int x = -1; x <= 16; x++) {
+            for (int y = -1; y <= 16; y++) {
+                for (int z = -1; z <= 16; z++) {
 
                     BlockPos pos = new BlockPos(ox + x, oy + y, oz + z);
                     BlockState state = region.getBlockState(pos);

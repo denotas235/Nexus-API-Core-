@@ -12,7 +12,7 @@ import net.minecraft.util.math.Box;
 
 public class NexusVBOInjector {
 
-    public static SectionBuilder.RenderData createRenderData(VulkanResult result) {
+    public static SectionBuilder.RenderData createRenderData(VulkanResult result, int ox, int oy, int oz) {
 
         Map<RenderLayer, BuiltBuffer> map = new HashMap<>();
 
@@ -23,7 +23,7 @@ public class NexusVBOInjector {
         SectionBuilder.TranslucencyData translucency =
             new SectionBuilder.TranslucencyData(RenderLayer.getTranslucent(), null);
 
-        Box box = new Box(0, 0, 0, 16, 16, 16);
+        Box box = new Box(ox, oy, oz, ox + 16, oy + 16, oz + 16);
 
         ChunkOcclusionData occlusion = new ChunkOcclusionData();
 

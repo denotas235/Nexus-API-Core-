@@ -31,6 +31,10 @@ public abstract class MixinSectionBuilder {
 
         VulkanResult result = VulkanWorker.submitChunk(blocks);
 
-        cir.setReturnValue(NexusVBOInjector.createRenderData(result));
+        int ox = region.getOriginX();
+        int oy = region.getOriginY();
+        int oz = region.getOriginZ();
+
+        cir.setReturnValue(NexusVBOInjector.createRenderData(result, ox, oy, oz));
     }
 }
