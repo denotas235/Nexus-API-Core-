@@ -45,7 +45,6 @@ public class MaliOptMod implements ClientModInitializer {
             String version  = GL11.glGetString(GL11.GL_VERSION);
             LOGGER.info("[MaliOpt] GPU: {} | {} | {}", renderer, vendor, version);
             MobileGluesDetector.detect();
-        ShaderCompilerTest.runTest();
             NexusAPI.registerModule(new com.nexus.modules.maliopt.MaliOptNexusModule());
         });
 
