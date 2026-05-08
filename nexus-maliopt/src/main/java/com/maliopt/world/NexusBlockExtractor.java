@@ -12,9 +12,9 @@ public class NexusBlockExtractor {
 
         int i = 0;
 
-        int ox = region.getOrigin().getX();
-        int oy = region.getOrigin().getY();
-        int oz = region.getOrigin().getZ();
+        int ox = region.getCenterPos().getX();
+        int oy = region.getCenterPos().getY();
+        int oz = region.getCenterPos().getZ();
 
         var blockLight = region.getLightingProvider().get(LightType.BLOCK);
         var skyLight   = region.getLightingProvider().get(LightType.SKY);
