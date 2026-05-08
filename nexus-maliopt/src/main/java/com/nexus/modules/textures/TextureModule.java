@@ -10,7 +10,7 @@ public class TextureModule {
             ClassLoader cl = TextureModule.class.getClassLoader();
             InputStream manifestStream = cl.getResourceAsStream("assets/maliopt/astc_manifest.json");
             if (manifestStream == null) {
-                MaliOptMod.LOGGER.warn("[TextureModule] Manifesto ASTC não encontrado no classpath.");
+                MaliOptMod.LOGGER.warn("[TextureModule] Manifesto ASTC não encontrado.");
                 return;
             }
             String manifest = new Scanner(manifestStream, "UTF-8").useDelimiter("\\A").next();
@@ -20,7 +20,7 @@ public class TextureModule {
                 if (line.contains("\"file\":")) {
                     String[] parts = line.split("\"");
                     if (parts.length >= 4) {
-                        String astcPath = parts[3]; // ex: "textures_astc/block/stone.astc"
+                        String astcPath = parts[3];
                         String key = astcPath.replace(".astc", "");
                         String resourcePath = "assets/maliopt/" + astcPath;
                         InputStream input = cl.getResourceAsStream(resourcePath);
@@ -32,9 +32,9 @@ public class TextureModule {
                     }
                 }
             }
-            MaliOptMod.LOGGER.info("[TextureModule] {} texturas ASTC carregadas do JAR.", count);
+            MaliOptMod.LOGGER.info("[TextureModule] {} texturas ASTC carregadas.", count);
         } catch (Exception e) {
-            MaliOptMod.LOGGER.warn("[TextureModule] Erro ao carregar texturas ASTC: {}", e.getMessage());
+            MaliOptMod.LOGGER.warn("[TextureModule] Erro: {}", e.getMessage());
         }
     }
 }

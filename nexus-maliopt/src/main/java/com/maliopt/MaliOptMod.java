@@ -50,8 +50,10 @@ public class MaliOptMod implements ClientModInitializer {
 
         if (NexusAPI.isReady()) {
             applyOptimizations(NexusAPI.getRegistry());
+        MinecraftClient.getInstance().options.getViewDistance().setValue(6);
         } else {
             NexusAPI.onReady(this::applyOptimizations);
+        MinecraftClient.getInstance().options.getViewDistance().setValue(6);
         }
 
         WorldRenderEvents.END.register(ctx -> {
@@ -71,7 +73,7 @@ public class MaliOptMod implements ClientModInitializer {
             TileBasedOptimizer.onFrameEnd();
 
             // Ajuste dinâmico de LOD e qualidade
-            NeuralLODController.tick();
+            // NeuralLODController desativado — distância fixa
             DirectionalStreaming.update();
             PredictiveCacheManager.update();
             applyQualityScaler(mc);
@@ -106,6 +108,7 @@ public class MaliOptMod implements ClientModInitializer {
     }
 
     private void applyOptimizations(FeatureRegistry registry) {
+        MinecraftClient.getInstance().options.getViewDistance().setValue(6);
         if (optimizationsApplied) return;
         optimizationsApplied = true;
 

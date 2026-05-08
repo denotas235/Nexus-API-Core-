@@ -6,10 +6,10 @@ public class PerformanceGuard {
     public enum StressLevel { LOW, MEDIUM, HIGH, CRITICAL }
 
     private static final int TARGET_FPS = 60;
-    // Thresholds mais permissivos (o Mali não precisa de ser tão exigente)
-    private static final int GOOD_FPS = 55;   // acima disto = LOW
-    private static final int OK_FPS   = 45;   // 45-55 = MEDIUM
-    private static final int BAD_FPS  = 30;   // 30-45 = HIGH, abaixo = CRITICAL
+    // Modo ultra-relaxado – só entra em stress se estiver muito mau
+    private static final int GOOD_FPS = 40;
+    private static final int OK_FPS   = 30;
+    private static final int BAD_FPS  = 20;
 
     private static long lastCheckTime = System.nanoTime();
     private static int  frameCount    = 0;
@@ -19,7 +19,7 @@ public class PerformanceGuard {
 
     public static void init() {
         initialized = true;
-        MaliOptMod.LOGGER.info("[PerfGuard] Target: {} FPS (thresholds relaxados)", TARGET_FPS);
+        MaliOptMod.LOGGER.info("[PerfGuard] Modo relaxado. Target: {} FPS", TARGET_FPS);
     }
 
     public static void onFrameEnd() {
@@ -35,8 +35,6 @@ public class PerformanceGuard {
             else if (currentFps >= OK_FPS) stress = StressLevel.MEDIUM;
             else if (currentFps >= BAD_FPS) stress = StressLevel.HIGH;
             else stress = StressLevel.CRITICAL;
-            if (stress != StressLevel.LOW)
-                MaliOptMod.LOGGER.warn("[PerfGuard] FPS: {:.1f} — Stress: {}", currentFps, stress);
         }
     }
 
@@ -44,7 +42,6 @@ public class PerformanceGuard {
     public static StressLevel getStressLevel() { return stress; }
     public static double getCurrentFps() { return currentFps; }
 
-    // Métodos para passes de render
     public static boolean bloomEnabled()        { return true; }
     public static float bloomThreshold()        { return 0.3f; }
     public static float bloomRadius()           { return 1.5f; }
