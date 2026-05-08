@@ -46,6 +46,7 @@ public class MaliOptMod implements ClientModInitializer {
             LOGGER.info("[MaliOpt] GPU: {} | {} | {}", renderer, vendor, version);
             MobileGluesDetector.detect();
             NexusAPI.registerModule(new com.nexus.modules.maliopt.MaliOptNexusModule());
+        if (mc.options != null) NeuralLODController.init(mc.options);
         });
 
         if (NexusAPI.isReady()) {
