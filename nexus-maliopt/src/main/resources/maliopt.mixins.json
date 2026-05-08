@@ -10,6 +10,7 @@
     "MixinPlayerPosition",
     "MixinClientPlayerInteractionManager",
     "MixinVertexBuffer"
+    "MixinOptionsScreen",
   ],
   "injectors": {
     "defaultRequire": 1
