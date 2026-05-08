@@ -1,19 +1,24 @@
 package com.maliopt.world;
 
-import net.minecraft.client.render.chunk.RenderSection;
+import net.minecraft.client.render.chunk.ChunkBuilder;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.BufferBuilder.BuiltBuffer;
+import net.minecraft.client.render.BufferBuilder;
 
 public class NexusVBOInjector {
 
-    public static void inject(RenderSection section, VulkanResult result) {
+    public static void inject(ChunkBuilder.BuiltChunk chunk, VulkanResult result) {
 
-        BuiltBuffer solid = BuiltBuffer.fromByteBuffer(result.solid);
-        BuiltBuffer cutout = BuiltBuffer.fromByteBuffer(result.cutout);
-        BuiltBuffer translucent = BuiltBuffer.fromByteBuffer(result.translucent);
+        BufferBuilder.BuiltBuffer solid =
+            new BufferBuilder.BuiltBuffer(result.solid, null);
 
-        section.setBuffer(RenderLayer.getSolid(), solid);
-        section.setBuffer(RenderLayer.getCutout(), cutout);
-        section.setBuffer(RenderLayer.getTranslucent(), translucent);
+        BufferBuilder.BuiltBuffer cutout =
+            new BufferBuilder.BuiltBuffer(result.cutout, null);
+
+        BufferBuilder.BuiltBuffer translucent =
+            new BufferBuilder.BuiltBuffer(result.translucent, null);
+
+        chunk.setBuffer(RenderLayer.getSolid(), solid);
+        chunk.setBuffer(RenderLayer.getCutout(), cutout);
+        chunk.setBuffer(RenderLayer.getTranslucent(), translucent);
     }
 }

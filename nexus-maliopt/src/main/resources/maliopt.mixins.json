@@ -4,6 +4,7 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [],
     "MixinSectionBuilderTask",
+    "MixinSectionBuilderTask",
   "client": [
     "MixinChunkBuilder",
     "MixinGameRenderer",
