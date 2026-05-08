@@ -45,7 +45,6 @@ public class TileBasedOptimizer {
 
         MaliOptMod.LOGGER.info("[MaliOpt] TileBasedOptimizer iniciado");
         logCapabilities();
-        if (ExtensionActivator.hasDisjointTimerQuery) {
             MaliOptMod.LOGGER.info("[MaliOpt]   🔍 Overdraw query disponível para debug");
         }
     }
