@@ -5,48 +5,69 @@ import org.lwjgl.opengl.*;
 public class HdrPipeline {
     private static boolean sRGBWriteControl = false;
     private static boolean anisotropicFilter = false;
-    private static float maxAnisotropy = 1.0f;
-    private static int tonemapProgram = 0;
-    private static int quadVao = 0;
+    private static float maxAnisotropy = 16.0f; // fallback seguro
     private static boolean initialized = false;
 
     public static void init() {
         if (initialized) return;
         initialized = true;
 
-        String extensions = GL11.glGetString(GL11.GL_EXTENSIONS);
-        System.out.println("[HDR] Extensions: " + (extensions != null ? "OK" : "NULL"));
+        // Verificar as extensões directamente nas strings do driver nativo
+        String driverExtensions = getMaliDriverExtensions();
+        
+        sRGBWriteControl = driverExtensions.contains("GL_EXT_sRGB_write_control");
+        anisotropicFilter = driverExtensions.contains("GL_EXT_texture_filter_anisotropic");
 
-        sRGBWriteControl = extensions != null && extensions.contains("GL_EXT_sRGB_write_control");
+        System.out.println("[HDR] Driver Mali: sRGB " + (sRGBWriteControl ? "✅" : "❌") +
+                           " | Anisotropic " + (anisotropicFilter ? "✅" : "❌"));
+
+        // Activar sRGB no framebuffer se disponível
         if (sRGBWriteControl) {
-            GL11.glEnable(0x8BF2);
-            System.out.println("[HDR] sRGB framebuffer ENABLED");
-        } else {
-            System.out.println("[HDR] sRGB framebuffer NOT available");
-        }
-
-        anisotropicFilter = extensions != null && extensions.contains("GL_EXT_texture_filter_anisotropic");
-        if (anisotropicFilter) {
-            float[] max = new float[1];
             try {
-                GL11.glGetFloatv(0x84FF, max);
-                maxAnisotropy = max[0];
+                GL11.glEnable(0x8BF2); // GL_FRAMEBUFFER_SRGB_EXT
+                System.out.println("[HDR] sRGB framebuffer ENABLED via driver");
             } catch (Exception e) {
-                maxAnisotropy = 16.0f;
+                System.out.println("[HDR] Failed to enable sRGB: " + e.getMessage());
             }
-            System.out.println("[HDR] Anisotropic available (max " + maxAnisotropy + "x)");
-        } else {
-            System.out.println("[HDR] Anisotropic NOT available");
         }
 
+        // Compilar shader de tonemapping (versão compatível com GLES 3.0)
         TonemappingShader.compile();
         System.out.println("[HDR] Pipeline initialized.");
     }
 
+    /**
+     * Lê as strings do driver Mali directamente, sem depender do OpenLTW.
+     */
+    private static String getMaliDriverExtensions() {
+        try {
+            // Caminho do driver Mali no sistema
+            String libPath = "/vendor/lib64/egl/libGLES_mali.so";
+            java.io.File f = new java.io.File(libPath);
+            if (!f.exists()) {
+                System.out.println("[HDR] libGLES_mali.so not found at " + libPath);
+                return "";
+            }
+            ProcessBuilder pb = new ProcessBuilder("strings", libPath);
+            Process p = pb.start();
+            java.io.InputStream is = p.getInputStream();
+            java.util.Scanner scanner = new java.util.Scanner(is).useDelimiter("\\A");
+            String output = scanner.hasNext() ? scanner.next() : "";
+            p.waitFor();
+            return output;
+        } catch (Exception e) {
+            System.out.println("[HDR] Failed to read driver strings: " + e.getMessage());
+            return "";
+        }
+    }
+
     public static void applyAnisotropic(int textureId) {
         if (!anisotropicFilter || textureId == 0) return;
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureId);
-        GL11.glTexParameterf(GL11.GL_TEXTURE_2D, 0x84FE, maxAnisotropy);
+        try {
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureId);
+            // Usa a constante real da extensão para max anisotropy
+            GL11.glTexParameterf(GL11.GL_TEXTURE_2D, 0x84FE, Math.min(maxAnisotropy, 16.0f));
+        } catch (Exception ignored) {}
     }
 
     public static boolean isReady() { return initialized; }
