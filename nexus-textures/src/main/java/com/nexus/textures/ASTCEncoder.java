@@ -2,6 +2,7 @@ package com.nexus.textures;
 
 import java.io.*;
 import java.nio.file.*;
+import org.lwjgl.stb.STBImageWrite;
 
 public class ASTCEncoder {
 
@@ -12,13 +13,11 @@ public class ASTCEncoder {
         tryLoadNative();
     }
 
-    // ── Carregamento do binário astcenc ───────────────────────────────────────
-
     private static void tryLoadNative() {
         try {
+            // Caminho relativo (sem barra inicial)
             InputStream soStream = ASTCEncoder.class
-                .getResourceAsStream("/natives/arm64-v8a/libastcenc.so");
-
+                    .getResourceAsStream("/natives/arm64-v8a/libastcenc.so");
             if (soStream == null) {
                 System.err.println("[NexusASTC] libastcenc.so não encontrada no JAR");
                 return;
@@ -31,7 +30,6 @@ public class ASTCEncoder {
                 Files.copy(in, tempBin, StandardCopyOption.REPLACE_EXISTING);
             }
 
-            // Torna executável
             tempBin.toFile().setExecutable(true);
             astcencBin   = tempBin;
             nativeLoaded = true;
@@ -43,14 +41,12 @@ public class ASTCEncoder {
         }
     }
 
-    // ── API pública ───────────────────────────────────────────────────────────
-
     public static byte[] compress(
-        byte[] rgbaData,
-        int width,
-        int height,
-        ASTCTextureCategory category,
-        boolean thorough
+            byte[] rgbaData,
+            int width,
+            int height,
+            ASTCTextureCategory category,
+            boolean thorough
     ) {
         if (!nativeLoaded || astcencBin == null) {
             System.err.println("[NexusASTC] astcenc não disponível — fallback PNG");
@@ -61,14 +57,13 @@ public class ASTCEncoder {
         Path tempAstc = null;
 
         try {
-            // Escreve RGBA raw como PNG temporário
             tempPng  = Files.createTempFile("nexus_in_",  ".png");
             tempAstc = Files.createTempFile("nexus_out_", ".astc");
             tempPng.toFile().deleteOnExit();
             tempAstc.toFile().deleteOnExit();
 
-            // Escreve PNG usando raw RGBA
-            writePng(rgbaData, width, height, tempPng);
+            // Escreve PNG usando STBImageWrite (disponível no LWJGL)
+            writePngSTB(rgbaData, width, height, tempPng);
 
             // Monta comando astcenc
             String block   = category.blockX + "x" + category.blockY;
@@ -76,23 +71,20 @@ public class ASTCEncoder {
             String mode    = category.hdr ? "-ch" : (category.srgb ? "-cs" : "-cl");
 
             ProcessBuilder pb = new ProcessBuilder(
-                astcencBin.toAbsolutePath().toString(),
-                mode,
-                tempPng.toAbsolutePath().toString(),
-                tempAstc.toAbsolutePath().toString(),
-                block,
-                quality
+                    astcencBin.toAbsolutePath().toString(),
+                    mode,
+                    tempPng.toAbsolutePath().toString(),
+                    tempAstc.toAbsolutePath().toString(),
+                    block,
+                    quality
             );
             pb.redirectErrorStream(true);
 
             Process process = pb.start();
-
-            // Lê output para evitar bloqueio
             try (BufferedReader reader = new BufferedReader(
                     new InputStreamReader(process.getInputStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    // Silencioso — só loga erros
                     if (line.toLowerCase().contains("error")) {
                         System.err.println("[NexusASTC] astcenc: " + line);
                     }
@@ -105,7 +97,6 @@ public class ASTCEncoder {
                 return null;
             }
 
-            // Lê ficheiro ASTC resultante
             byte[] result = Files.readAllBytes(tempAstc);
             if (result.length < 16) {
                 System.err.println("[NexusASTC] ASTC output inválido");
@@ -118,29 +109,25 @@ public class ASTCEncoder {
             System.err.println("[NexusASTC] Erro de compressão: " + e.getMessage());
             return null;
         } finally {
-            // Limpa temporários
             tryDelete(tempPng);
             tryDelete(tempAstc);
         }
     }
 
-    // Escreve PNG mínimo a partir de RGBA8 raw
-    private static void writePng(byte[] rgba, int width, int height, Path out) throws Exception {
-        // Usa javax.imageio para escrever PNG correctamente
-        java.awt.image.BufferedImage img = new java.awt.image.BufferedImage(
-            width, height, java.awt.image.BufferedImage.TYPE_INT_ARGB
+    private static void writePngSTB(byte[] rgba, int width, int height, Path out) throws Exception {
+        // Converte RGBA para o formato esperado pelo STBImageWrite (ABGR? Não, é RGBA)
+        // STBImageWrite.stbi_write_png espera um ByteBuffer com pixel data em RGBA
+        java.nio.ByteBuffer buf = java.nio.ByteBuffer.allocateDirect(width * height * 4);
+        buf.put(rgba);
+        buf.flip();
+
+        boolean success = STBImageWrite.stbi_write_png(
+                out.toAbsolutePath().toString(),
+                width, height, 4, buf, width * 4
         );
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                int i = (y * width + x) * 4;
-                int r = rgba[i]     & 0xFF;
-                int g = rgba[i + 1] & 0xFF;
-                int b = rgba[i + 2] & 0xFF;
-                int a = rgba[i + 3] & 0xFF;
-                img.setRGB(x, y, (a << 24) | (r << 16) | (g << 8) | b);
-            }
+        if (!success) {
+            throw new IOException("stbi_write_png failed");
         }
-        javax.imageio.ImageIO.write(img, "PNG", out.toFile());
     }
 
     private static void tryDelete(Path p) {
