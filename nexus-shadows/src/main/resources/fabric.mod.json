@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "nexus-shadows",
+  "version": "${version}",
+  "name": "Nexus Shadows",
+  "description": "PCF soft shadows + anisotropic filtering for Mali-G52 MC2",
+  "authors": ["denotas235"],
+  "environment": "client",
+  "entrypoints": {
+    "client": ["com.nexus.shadows.NexusShadowsClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.5",
+    "minecraft": "~1.21.1"
+  },
+  "suggests": {
+    "nexus-api-core": ">=1.0.0",
+    "nexus-maliopt": ">=1.0.0",
+    "nexus-render-hdr": ">=1.0.0"
+  }
+}
