@@ -1,0 +1,39 @@
+name: Build Nexus Textures
+
+on:
+  push:
+    branches: [ ASTC ]
+  pull_request:
+    branches: [ ASTC ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Grant execute permission
+        run: chmod +x nexus-textures/gradlew 2>/dev/null || true
+
+      - name: Build
+        run: |
+          cd nexus-textures
+          gradle build --no-daemon
+
+      - name: Upload JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexus-textures-jar
+          path: nexus-textures/build/libs/*.jar
+          if-no-files-found: error
