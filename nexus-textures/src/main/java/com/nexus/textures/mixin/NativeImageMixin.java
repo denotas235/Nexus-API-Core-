@@ -5,65 +5,90 @@ import net.minecraft.client.texture.NativeImage;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.*;
-import java.nio.ByteBuffer;
-import java.nio.file.Path;
 
 @Mixin(NativeImage.class)
 public abstract class NativeImageMixin {
 
+    // Intercepta upload GL da NativeImage — método correcto em 1.21.1
     @Inject(
-        method = "read(Lnet/minecraft/client/texture/NativeImage$InternalFormat;Ljava/nio/ByteBuffer;)Lnet/minecraft/client/texture/NativeImage;",
-        at = @At("RETURN"),
+        method = "upload(IIIIIZZZZLnet/minecraft/client/texture/NativeImage$InternalFormat;)V",
+        at = @At("HEAD"),
         cancellable = true
     )
-    private static void onRead(
+    private void onUpload(
+        int level,
+        int offsetX,
+        int offsetY,
+        int width,
+        int height,
+        boolean mipmap,
+        boolean linearFiltering,
+        boolean clamp,
+        boolean close,
         NativeImage.InternalFormat format,
-        ByteBuffer buffer,
-        CallbackInfoReturnable<NativeImage> cir
+        CallbackInfo ci
     ) {
         if (!ASTCDecodeMode.isASTCSupported()) return;
         if (!ASTCEncoder.isAvailable())        return;
 
-        NativeImage image = cir.getReturnValue();
-        if (image == null) return;
+        NativeImage self = (NativeImage)(Object)this;
 
         try {
-            int width  = image.getWidth();
-            int height = image.getHeight();
+            int imgWidth  = self.getWidth();
+            int imgHeight = self.getHeight();
 
-            // Extrai RGBA8
-            byte[] rgbaData = extractRGBA(image, width, height);
-            if (rgbaData == null || rgbaData.length == 0) return;
+            // Só processa upload completo (level 0, sem offset)
+            if (level != 0 || offsetX != 0 || offsetY != 0) return;
 
-            // Categoria DEFAULT — TextureManagerMixin vai refinar
+            byte[] rgbaData = extractRGBA(self, imgWidth, imgHeight);
+            if (rgbaData == null) return;
+
             ASTCTextureCategory category = ASTCTextureCategory.DEFAULT;
 
             // Verifica cache THOROUGH
-            Path cached = ASTCCache.getCached(rgbaData, category, true);
+            java.nio.file.Path cached = ASTCCache.getCached(rgbaData, category, true);
 
             // Verifica cache FASTEST
             if (cached == null) {
                 cached = ASTCCache.getCached(rgbaData, category, false);
             }
 
-            // Comprime FASTEST se não há cache
+            // Comprime FASTEST se sem cache
             if (cached == null) {
                 byte[] astcFastest = ASTCEncoder.compress(
-                    rgbaData, width, height, category, false
+                    rgbaData, imgWidth, imgHeight, category, false
                 );
                 if (astcFastest != null) {
                     cached = ASTCCache.save(rgbaData, category, false, astcFastest);
-                    BackgroundRecompressor.submit(rgbaData, width, height, category);
                 }
             }
 
-            // Enfileira para upload pelo TextureManagerMixin
-            if (cached != null) {
-                ASTCUploadQueue.enqueue(image, cached, width, height, category);
+            if (cached == null) return;
+
+            // Enfileira para upload — TextureManagerMixin vai refinar categoria
+            ASTCUploadQueue.enqueue(self, cached, imgWidth, imgHeight, category, rgbaData);
+
+            // Obtém GL ID actual e faz upload imediato
+            int glId = GL11GetCurrentTexture();
+            if (glId > 0) {
+                byte[] astcData = ASTCCache.load(cached);
+                if (astcData != null) {
+                    ASTCUploader.upload(glId, imgWidth, imgHeight, category, astcData);
+                    ci.cancel(); // cancela upload vanilla
+                }
             }
 
         } catch (Exception e) {
             System.err.println("[NexusASTC] NativeImageMixin erro: " + e.getMessage());
+            // Não cancela — deixa vanilla fazer upload
+        }
+    }
+
+    private static int GL11GetCurrentTexture() {
+        try {
+            return org.lwjgl.opengl.GL11.glGetInteger(org.lwjgl.opengl.GL11.GL_TEXTURE_BINDING_2D);
+        } catch (Exception e) {
+            return -1;
         }
     }
 
@@ -74,8 +99,7 @@ public abstract class NativeImageMixin {
                 for (int x = 0; x < width; x++) {
                     int pixel = image.getColor(x, y);
                     int i     = (y * width + x) * 4;
-                    // NativeImage ABGR → RGBA
-                    data[i]     = (byte)((pixel)       & 0xFF); // R
+                    data[i]     = (byte)( pixel        & 0xFF); // R
                     data[i + 1] = (byte)((pixel >> 8)  & 0xFF); // G
                     data[i + 2] = (byte)((pixel >> 16) & 0xFF); // B
                     data[i + 3] = (byte)((pixel >> 24) & 0xFF); // A

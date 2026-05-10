@@ -23,37 +23,47 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      # ── Baixa e instala astcenc ARM64 ─────────────────────────────────────
-      - name: Download astcenc
+      # ── astcenc x86_64 para CI (pré-compressão vanilla) ──────────────────
+      - name: Download astcenc x86_64 para CI
+        run: |
+          curl -L https://github.com/ARM-software/astc-encoder/releases/download/5.4.0/astcenc-5.4.0-linux-x64.zip \
+            -o astcenc_x64.zip
+          unzip astcenc_x64.zip -d astcenc_x64
+          ASTCENC_BIN=$(find astcenc_x64 -type f -name "astcenc*" | head -1)
+          chmod +x "$ASTCENC_BIN"
+          echo "ASTCENC_BIN=$ASTCENC_BIN" >> $GITHUB_ENV
+          echo "astcenc x64 pronto: $ASTCENC_BIN"
+
+      # ── astcenc ARM64 para embalar no JAR (runtime no dispositivo) ────────
+      - name: Download astcenc ARM64 para JAR
         run: |
           curl -L https://github.com/ARM-software/astc-encoder/releases/download/5.4.0/astcenc-5.4.0-linux-arm64.zip \
-            -o astcenc.zip
-          unzip astcenc.zip -d astcenc_tmp
+            -o astcenc_arm64.zip
+          unzip astcenc_arm64.zip -d astcenc_arm64
           mkdir -p nexus-textures/src/main/resources/natives/arm64-v8a
-          find astcenc_tmp -name "astcenc*" -type f | head -1 | \
-            xargs -I{} cp {} nexus-textures/src/main/resources/natives/arm64-v8a/libastcenc.so
+          ARM64_BIN=$(find astcenc_arm64 -type f -name "astcenc*" | head -1)
+          cp "$ARM64_BIN" nexus-textures/src/main/resources/natives/arm64-v8a/libastcenc.so
           chmod +x nexus-textures/src/main/resources/natives/arm64-v8a/libastcenc.so
-          echo "astcenc instalado"
+          echo "astcenc ARM64 embalado no JAR"
 
       # ── Baixa minecraft.jar e pré-comprime texturas vanilla ───────────────
       - name: Pre-compress Vanilla Textures
         run: |
-          MINECRAFT_VERSION="1.21.1"
-          JAR_URL="https://piston-data.mojang.com/v1/objects/59353fb40c36d304f2035d51e7d6e6baa98dc05c/client.jar"
-
-          echo "A baixar minecraft.jar..."
-          curl -L "$JAR_URL" -o minecraft_client.jar
+          echo "A baixar minecraft 1.21.1 client.jar..."
+          curl -L "https://piston-data.mojang.com/v1/objects/59353fb40c36d304f2035d51e7d6e6baa98dc05c/client.jar" \
+            -o minecraft_client.jar
 
           echo "A extrair texturas PNG..."
           mkdir -p vanilla_textures
           unzip -q minecraft_client.jar "assets/minecraft/textures/*" -d vanilla_textures || true
 
-          echo "A pré-comprimir para ASTC..."
-          ASTCENC="nexus-textures/src/main/resources/natives/arm64-v8a/libastcenc.so"
-          ASTCENC_BIN=$(find astcenc_tmp -name "astcenc*" -type f | head -1)
-          chmod +x "$ASTCENC_BIN"
+          TOTAL=$(find vanilla_textures -name "*.png" | wc -l)
+          echo "Total de texturas: $TOTAL"
 
           mkdir -p nexus-textures/src/main/resources/assets/nexus-textures/astc_cache
+
+          SUCCESS=0
+          SKIP=0
 
           find vanilla_textures -name "*.png" | while read PNG; do
             REL="${PNG#vanilla_textures/}"
@@ -62,30 +72,38 @@ jobs:
 
             # Escolhe formato por path
             if echo "$REL" | grep -qE "block|terrain|atlas"; then
-              BLOCK="5x5"
+              BLOCK="5x5"; MODE="-cs"
             elif echo "$REL" | grep -qE "entity|item|gui"; then
-              BLOCK="4x4"
+              BLOCK="4x4"; MODE="-cs"
             elif echo "$REL" | grep -qE "particle|foliage|grass|leaves"; then
-              BLOCK="8x8"
-            elif echo "$REL" | grep -qE "environment|sky"; then
-              BLOCK="12x12"
+              BLOCK="8x8"; MODE="-cs"
+            elif echo "$REL" | grep -qE "environment|sky|cloud"; then
+              BLOCK="12x12"; MODE="-cs"
+            elif echo "$REL" | grep -qE "normal|normalmap"; then
+              BLOCK="4x4"; MODE="-cl"
+            elif echo "$REL" | grep -qE "emissive|effect"; then
+              BLOCK="4x4"; MODE="-ch"
             else
-              BLOCK="4x4"
+              BLOCK="4x4"; MODE="-cs"
             fi
 
-            "$ASTCENC_BIN" -cl "$PNG" "$OUT" "$BLOCK" -thorough 2>/dev/null || \
-            "$ASTCENC_BIN" -cl "$PNG" "$OUT" "$BLOCK" -fast 2>/dev/null || \
-            echo "SKIP: $PNG"
+            if "$ASTCENC_BIN" $MODE "$PNG" "$OUT" "$BLOCK" -thorough 2>/dev/null; then
+              SUCCESS=$((SUCCESS + 1))
+            else
+              SKIP=$((SKIP + 1))
+              echo "SKIP: $REL"
+            fi
           done
 
-          echo "Pré-compressão vanilla concluída"
-          find nexus-textures/src/main/resources/assets/nexus-textures/astc_cache -name "*.astc" | wc -l
+          echo "Pré-compressão concluída"
+          find nexus-textures/src/main/resources/assets/nexus-textures/astc_cache \
+            -name "*.astc" | wc -l
 
-      # ── Build do mod ──────────────────────────────────────────────────────
+      # ── Build ─────────────────────────────────────────────────────────────
       - name: Build
         run: |
           cd nexus-textures
-          ../gradlew build --no-daemon --stacktrace
+          ../gradlew build --no-daemon --stacktrace 2>&1
 
       # ── Upload JAR ────────────────────────────────────────────────────────
       - name: Upload JAR
