@@ -6,7 +6,8 @@ import net.fabricmc.loader.api.FabricLoader;
 public class NexusShadowsClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
-        System.out.println("[Shadows] Module loaded.");
+        System.out.println("[Shadows] ═══ Module loading ═══");
+        // O pipeline é inicializado no primeiro frame (GameRendererMixin)
         if (FabricLoader.getInstance().isModLoaded("nexus-api-core")) {
             System.out.println("[Shadows] nexus-api-core detected.");
         }
@@ -16,5 +17,6 @@ public class NexusShadowsClient implements ClientModInitializer {
         if (FabricLoader.getInstance().isModLoaded("nexus-render-hdr")) {
             System.out.println("[Shadows] nexus-render-hdr detected – HDR + Shadows combo active.");
         }
+        System.out.println("[Shadows] ═══ Module ready ═══");
     }
 }
