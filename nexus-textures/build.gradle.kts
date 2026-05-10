@@ -25,7 +25,7 @@ dependencies {
 loom {
     splitEnvironmentSourceSets()
     mixin {
-        add(sourceSets.main.get(), "nexus-textures.refmap.json")
+        add(sourceSets["client"], "nexus-textures.refmap.json")
     }
 }
 
