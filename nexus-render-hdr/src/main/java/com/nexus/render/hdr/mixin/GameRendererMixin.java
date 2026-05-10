@@ -17,7 +17,10 @@ public class GameRendererMixin {
 
     @Inject(method = "render", at = @At("TAIL"), require = 0)
     private void onRenderTail(RenderTickCounter tickCounter, boolean bl, CallbackInfo ci) {
-        // Inicializa o pipeline HDR no primeiro frame (contexto GL já existe)
+        MinecraftClient mc = MinecraftClient.getInstance();
+        // Só aplica tonemapping se estivermos dentro de um mundo
+        if (mc == null || mc.world == null) return;
+
         if (!hdrInitialized) {
             HdrPipeline.init();
             hdrInitialized = true;
@@ -28,13 +31,12 @@ public class GameRendererMixin {
         int vao = TonemappingShader.getQuadVao();
         if (program == 0 || vao == 0) return;
 
-        MinecraftClient mc = MinecraftClient.getInstance();
-        if (mc == null || mc.getFramebuffer() == null) return;
+        if (mc.getFramebuffer() == null) return;
         int fbo = mc.getFramebuffer().fbo;
         int w = mc.getWindow().getFramebufferWidth();
         int h = mc.getWindow().getFramebufferHeight();
 
-        // Aplicar o tonemapping como um fullscreen quad
+        // Guarda estado OpenGL
         int prevFbo = GL11.glGetInteger(GL30.GL_FRAMEBUFFER_BINDING);
         int prevProg = GL11.glGetInteger(GL20.GL_CURRENT_PROGRAM);
 
