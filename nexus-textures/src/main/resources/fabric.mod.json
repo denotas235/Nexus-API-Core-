@@ -5,10 +5,9 @@
   "name": "Nexus Textures",
   "description": "ASTC runtime texture compression for Mali-G52 MC2",
   "authors": ["denotas235"],
-  "icon": "assets/nexus-textures/icon.png",
   "environment": "client",
   "entrypoints": {
-    "client": ["com.nexus.textures.NexusTexturesClient"]
+    "client": ["com.nexus.textures.TextureMod"]
   },
   "mixins": ["nexus-textures.mixins.json"],
   "depends": {
