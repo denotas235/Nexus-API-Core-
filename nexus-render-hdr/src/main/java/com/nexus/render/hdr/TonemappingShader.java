@@ -7,7 +7,8 @@ public class TonemappingShader {
         "#version 300 es\n" +
         "out vec2 vUv;\n" +
         "void main() {\n" +
-        "    vec2 uv = vec2((uint(gl_VertexID) << 1u) & 2u, uint(gl_VertexID) & 2u);\n" +
+        "    int vid = gl_VertexID;\n" +
+        "    vec2 uv = vec2((vid << 1) & 2, vid & 2);\n" +
         "    vUv = uv;\n" +
         "    gl_Position = vec4(uv * 2.0 - 1.0, 0.0, 1.0);\n" +
         "}\n";

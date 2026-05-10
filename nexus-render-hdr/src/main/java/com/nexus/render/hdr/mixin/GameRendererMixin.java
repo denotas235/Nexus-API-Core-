@@ -13,8 +13,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(GameRenderer.class)
 public class GameRendererMixin {
+    private static boolean hdrInitialized = false;
+
     @Inject(method = "render", at = @At("TAIL"), require = 0)
     private void onRenderTail(RenderTickCounter tickCounter, boolean bl, CallbackInfo ci) {
+        // Inicializa o pipeline HDR no primeiro frame (contexto GL já existe)
+        if (!hdrInitialized) {
+            HdrPipeline.init();
+            hdrInitialized = true;
+        }
+
         if (!HdrPipeline.isReady()) return;
         int program = TonemappingShader.getProgram();
         int vao = TonemappingShader.getQuadVao();

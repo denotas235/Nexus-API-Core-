@@ -7,7 +7,7 @@ public class NexusRenderHdrClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         System.out.println("[NexusRenderHDR] ═══ Module loading ═══");
-        HdrPipeline.init();
+        // HdrPipeline.init() será chamado no primeiro frame (GameRendererMixin)
         if (FabricLoader.getInstance().isModLoaded("nexus-api-core")) {
             System.out.println("[NexusRenderHDR] nexus-api-core detected.");
         }
