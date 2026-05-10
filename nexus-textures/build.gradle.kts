@@ -23,9 +23,7 @@ dependencies {
 }
 
 loom {
-    mixin {
-        add(sourceSets["client"], "nexus-textures.refmap.json")
-    }
+    // sem mixin { } porque não temos sourceSets["client"] diretamente
 }
 
 tasks.processResources {
