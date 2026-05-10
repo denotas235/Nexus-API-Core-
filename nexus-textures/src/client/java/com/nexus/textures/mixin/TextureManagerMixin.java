@@ -5,5 +5,5 @@ import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(TextureManager.class)
 public class TextureManagerMixin {
-    // Mixin placeholder — pronto para futuras injeções
+    // Mixin pronto para futuras injeções ASTC
 }

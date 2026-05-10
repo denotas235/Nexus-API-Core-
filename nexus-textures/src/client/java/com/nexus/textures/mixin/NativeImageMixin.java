@@ -5,5 +5,5 @@ import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(NativeImage.class)
 public class NativeImageMixin {
-    // Mixin placeholder — pronto para futuras injeções
+    // Mixin pronto para futuras injeções ASTC
 }

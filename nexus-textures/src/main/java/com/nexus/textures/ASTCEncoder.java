@@ -15,26 +15,21 @@ public class ASTCEncoder {
 
     private static void tryLoadNative() {
         try {
-            // Caminho relativo (sem barra inicial)
             InputStream soStream = ASTCEncoder.class
                     .getResourceAsStream("/natives/arm64-v8a/libastcenc.so");
             if (soStream == null) {
                 System.err.println("[NexusASTC] libastcenc.so não encontrada no JAR");
                 return;
             }
-
             Path tempBin = Files.createTempFile("astcenc_", ".bin");
             tempBin.toFile().deleteOnExit();
-
             try (InputStream in = soStream) {
                 Files.copy(in, tempBin, StandardCopyOption.REPLACE_EXISTING);
             }
-
             tempBin.toFile().setExecutable(true);
             astcencBin   = tempBin;
             nativeLoaded = true;
             System.out.println("[NexusASTC] astcenc extraído: " + tempBin);
-
         } catch (Exception e) {
             System.err.println("[NexusASTC] Falha ao extrair astcenc: " + e.getMessage());
             nativeLoaded = false;
@@ -52,20 +47,20 @@ public class ASTCEncoder {
             System.err.println("[NexusASTC] astcenc não disponível — fallback PNG");
             return null;
         }
-
         Path tempPng  = null;
         Path tempAstc = null;
-
         try {
             tempPng  = Files.createTempFile("nexus_in_",  ".png");
             tempAstc = Files.createTempFile("nexus_out_", ".astc");
             tempPng.toFile().deleteOnExit();
             tempAstc.toFile().deleteOnExit();
 
-            // Escreve PNG usando STBImageWrite (disponível no LWJGL)
-            writePngSTB(rgbaData, width, height, tempPng);
+            // Usa STBImageWrite para escrever PNG a partir de RGBA raw
+            java.nio.ByteBuffer buf = java.nio.ByteBuffer.allocateDirect(width * height * 4);
+            buf.put(rgbaData);
+            buf.flip();
+            STBImageWrite.stbi_write_png(tempPng.toAbsolutePath().toString(), width, height, 4, buf, width * 4);
 
-            // Monta comando astcenc
             String block   = category.blockX + "x" + category.blockY;
             String quality = thorough ? "-thorough" : "-fastest";
             String mode    = category.hdr ? "-ch" : (category.srgb ? "-cs" : "-cl");
@@ -79,7 +74,6 @@ public class ASTCEncoder {
                     quality
             );
             pb.redirectErrorStream(true);
-
             Process process = pb.start();
             try (BufferedReader reader = new BufferedReader(
                     new InputStreamReader(process.getInputStream()))) {
@@ -90,43 +84,23 @@ public class ASTCEncoder {
                     }
                 }
             }
-
             int exitCode = process.waitFor();
             if (exitCode != 0) {
                 System.err.println("[NexusASTC] astcenc falhou com código: " + exitCode);
                 return null;
             }
-
             byte[] result = Files.readAllBytes(tempAstc);
             if (result.length < 16) {
                 System.err.println("[NexusASTC] ASTC output inválido");
                 return null;
             }
-
             return result;
-
         } catch (Exception e) {
             System.err.println("[NexusASTC] Erro de compressão: " + e.getMessage());
             return null;
         } finally {
             tryDelete(tempPng);
             tryDelete(tempAstc);
-        }
-    }
-
-    private static void writePngSTB(byte[] rgba, int width, int height, Path out) throws Exception {
-        // Converte RGBA para o formato esperado pelo STBImageWrite (ABGR? Não, é RGBA)
-        // STBImageWrite.stbi_write_png espera um ByteBuffer com pixel data em RGBA
-        java.nio.ByteBuffer buf = java.nio.ByteBuffer.allocateDirect(width * height * 4);
-        buf.put(rgba);
-        buf.flip();
-
-        boolean success = STBImageWrite.stbi_write_png(
-                out.toAbsolutePath().toString(),
-                width, height, 4, buf, width * 4
-        );
-        if (!success) {
-            throw new IOException("stbi_write_png failed");
         }
     }
 
