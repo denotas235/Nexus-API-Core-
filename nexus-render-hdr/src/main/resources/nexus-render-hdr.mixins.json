@@ -2,6 +2,9 @@
   "required": true,
   "package": "com.nexus.render.hdr.mixin",
   "compatibilityLevel": "JAVA_21",
-  "client": ["GlStateManagerMixin"],
+  "client": [
+    "GameRendererMixin",
+    "TextureManagerMixin"
+  ],
   "injectors": { "defaultRequire": 1 }
 }
