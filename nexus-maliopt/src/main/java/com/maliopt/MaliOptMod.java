@@ -13,8 +13,6 @@ import com.maliopt.shader.*;
 import com.maliopt.world.*;
 import com.nexuapicore.NexusAPI;
 import com.nexuapicore.core.FeatureRegistry;
-import com.nexus.modules.textures.ASTCTextureRegistry;
-import com.nexus.modules.textures.TextureModule;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
@@ -129,8 +127,9 @@ public class MaliOptMod implements ClientModInitializer {
         PLSLightingPass.init();
         FBFetchBloomPass.init();
 
-        TextureModule.load();
-        if (ASTCTextureRegistry.hasASTCTextures()) {
+        if (FabricLoader.getInstance().isModLoaded("nexus-textures")) {
+            LOGGER.info("[MaliOpt] ASTC pack detected.");
+        } else { LOGGER.info("[MaliOpt] ASTC pack NOT installed."); }
             ASTCTextureLoader.init();
             LOGGER.info("[MaliOpt] ✅ ASTC ATIVO");
         } else {
