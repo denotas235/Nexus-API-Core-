@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "id": "nexus-render-hdr",
+  "version": "${version}",
+  "name": "Nexus Render HDR",
+  "description": "HDR pipeline, sRGB correction, normal maps, float buffers for Mali-G52 MC2",
+  "authors": ["denotas235"],
+  "environment": "client",
+  "entrypoints": {
+    "client": ["com.nexus.render.hdr.NexusRenderHdrClient"]
+  },
+  "mixins": ["nexus-render-hdr.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.16.5",
+    "minecraft": "~1.21.1"
+  }
+}

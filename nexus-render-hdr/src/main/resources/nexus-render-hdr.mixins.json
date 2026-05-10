@@ -1,0 +1,7 @@
+{
+  "required": true,
+  "package": "com.nexus.render.hdr.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": ["GlStateManagerMixin"],
+  "injectors": { "defaultRequire": 1 }
+}
