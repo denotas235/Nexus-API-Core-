@@ -9,14 +9,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ASTCUploadQueue {
 
     public static class Entry {
-        public final AbstractTexture   texture;
-        public final Path              cachePath;
-        public final int               width;
-        public final int               height;
+        public final Path                cachePath;
+        public final int                 width;
+        public final int                 height;
         public       ASTCTextureCategory category;
 
-        public Entry(AbstractTexture texture, Path cachePath, int width, int height, ASTCTextureCategory category) {
-            this.texture   = texture;
+        public Entry(Path cachePath, int width, int height, ASTCTextureCategory category) {
             this.cachePath = cachePath;
             this.width     = width;
             this.height    = height;
@@ -24,11 +22,11 @@ public class ASTCUploadQueue {
         }
     }
 
-    // Mapa NativeImage → Entry (preenchido pelo NativeImageMixin)
-    private static final ConcurrentHashMap<NativeImage, Entry> imageQueue
+    // Chave: identityHashCode da NativeImage → Entry
+    private static final ConcurrentHashMap<Integer, Entry> imageQueue
         = new ConcurrentHashMap<>();
 
-    // Mapa path string → Entry (preenchido pelo TextureManagerMixin)
+    // Chave: path real da textura → Entry
     private static final ConcurrentHashMap<String, Entry> pathQueue
         = new ConcurrentHashMap<>();
 
@@ -40,26 +38,24 @@ public class ASTCUploadQueue {
         int height,
         ASTCTextureCategory category
     ) {
-        imageQueue.put(image, new Entry(null, cachePath, width, height, category));
+        int key = System.identityHashCode(image);
+        imageQueue.put(key, new Entry(cachePath, width, height, category));
     }
 
-    // TextureManagerMixin refina categoria com path real
-    public static void updateCategory(AbstractTexture texture, ASTCTextureCategory category) {
-        // Procura entrada sem texture associada e associa
-        imageQueue.forEach((image, entry) -> {
-            if (entry.texture == null) {
-                entry.category = category;
-                pathQueue.put(texture.toString(), entry);
-            }
-        });
+    // TextureManagerMixin associa path real à entry
+    public static void registerPath(String path, NativeImage image) {
+        int key   = System.identityHashCode(image);
+        Entry entry = imageQueue.remove(key);
+        if (entry == null) return;
+        entry.category = ASTCTextureCategory.fromPath(path);
+        pathQueue.put(path, entry);
     }
 
-    // TextureManagerMixin consome entrada pelo identifier
-    public static Entry pollByIdentifier(String path) {
+    // TextureManagerMixin consome entry pelo path
+    public static Entry poll(String path) {
         return pathQueue.remove(path);
     }
 
-    // Limpa filas — chamado no shutdown
     public static void clear() {
         imageQueue.clear();
         pathQueue.clear();

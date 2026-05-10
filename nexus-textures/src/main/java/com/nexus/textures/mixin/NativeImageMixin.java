@@ -5,13 +5,12 @@ import net.minecraft.client.texture.NativeImage;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.*;
-
+import java.nio.ByteBuffer;
 import java.nio.file.Path;
 
 @Mixin(NativeImage.class)
 public abstract class NativeImageMixin {
 
-    // Intercepta logo após o PNG ser lido para memória
     @Inject(
         method = "read(Lnet/minecraft/client/texture/NativeImage$InternalFormat;Ljava/nio/ByteBuffer;)Lnet/minecraft/client/texture/NativeImage;",
         at = @At("RETURN"),
@@ -19,7 +18,7 @@ public abstract class NativeImageMixin {
     )
     private static void onRead(
         NativeImage.InternalFormat format,
-        java.nio.ByteBuffer buffer,
+        ByteBuffer buffer,
         CallbackInfoReturnable<NativeImage> cir
     ) {
         if (!ASTCDecodeMode.isASTCSupported()) return;
@@ -32,34 +31,33 @@ public abstract class NativeImageMixin {
             int width  = image.getWidth();
             int height = image.getHeight();
 
-            // Lê pixels RGBA8 da NativeImage
+            // Extrai RGBA8
             byte[] rgbaData = extractRGBA(image, width, height);
-            if (rgbaData == null) return;
+            if (rgbaData == null || rgbaData.length == 0) return;
 
-            // Categoria baseada no path — DEFAULT por agora
-            // TextureManagerMixin irá refinar com path real
+            // Categoria DEFAULT — TextureManagerMixin vai refinar
             ASTCTextureCategory category = ASTCTextureCategory.DEFAULT;
 
-            // Verifica cache THOROUGH primeiro
+            // Verifica cache THOROUGH
             Path cached = ASTCCache.getCached(rgbaData, category, true);
 
+            // Verifica cache FASTEST
             if (cached == null) {
-                // Verifica cache FASTEST
                 cached = ASTCCache.getCached(rgbaData, category, false);
             }
 
+            // Comprime FASTEST se não há cache
             if (cached == null) {
-                // Comprime FASTEST agora
-                byte[] astcFastest = ASTCEncoder.compress(rgbaData, width, height, category, false);
+                byte[] astcFastest = ASTCEncoder.compress(
+                    rgbaData, width, height, category, false
+                );
                 if (astcFastest != null) {
                     cached = ASTCCache.save(rgbaData, category, false, astcFastest);
-
-                    // Submete THOROUGH para background
                     BackgroundRecompressor.submit(rgbaData, width, height, category);
                 }
             }
 
-            // Guarda dados para o TextureManagerMixin usar no upload
+            // Enfileira para upload pelo TextureManagerMixin
             if (cached != null) {
                 ASTCUploadQueue.enqueue(image, cached, width, height, category);
             }
@@ -76,8 +74,8 @@ public abstract class NativeImageMixin {
                 for (int x = 0; x < width; x++) {
                     int pixel = image.getColor(x, y);
                     int i     = (y * width + x) * 4;
-                    // NativeImage usa ABGR — converte para RGBA
-                    data[i]     = (byte)((pixel >> 0)  & 0xFF); // R
+                    // NativeImage ABGR → RGBA
+                    data[i]     = (byte)((pixel)       & 0xFF); // R
                     data[i + 1] = (byte)((pixel >> 8)  & 0xFF); // G
                     data[i + 2] = (byte)((pixel >> 16) & 0xFF); // B
                     data[i + 3] = (byte)((pixel >> 24) & 0xFF); // A
@@ -85,6 +83,7 @@ public abstract class NativeImageMixin {
             }
             return data;
         } catch (Exception e) {
+            System.err.println("[NexusASTC] extractRGBA erro: " + e.getMessage());
             return null;
         }
     }
