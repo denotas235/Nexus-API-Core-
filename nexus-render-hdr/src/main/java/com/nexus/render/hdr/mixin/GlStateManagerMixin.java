@@ -5,5 +5,5 @@ import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(GlStateManager.class)
 public class GlStateManagerMixin {
-    // Placeholder para futuras injecções HDR
+    // Placeholder para futuras injecções HDR (sRGB, float buffers, etc.)
 }

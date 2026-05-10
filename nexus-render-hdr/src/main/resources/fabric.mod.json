@@ -13,5 +13,9 @@
   "depends": {
     "fabricloader": ">=0.16.5",
     "minecraft": "~1.21.1"
+  },
+  "suggests": {
+    "nexus-api-core": ">=1.0.0",
+    "nexus-maliopt": ">=1.0.0"
   }
 }
