@@ -23,7 +23,7 @@ dependencies {
 }
 
 loom {
-    // sem mixin { } porque não temos sourceSets["client"] diretamente
+    // sem splitEnvironmentSourceSets — tudo em main
 }
 
 tasks.processResources {
