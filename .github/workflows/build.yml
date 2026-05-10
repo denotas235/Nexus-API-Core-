@@ -1,14 +1,8 @@
-name: Build API Core & MaliOpt
+name: Build nexus-render-hdr
 
 on:
   push:
-    paths:
-      - 'src/**'
-      - 'gradle/**'
-      - 'build.gradle.kts'
-      - 'settings.gradle.kts'
-      - '!nexus-maliopt/**'
-  workflow_dispatch:
+    branches: [ mod-nexus-render-hdr ]
 
 jobs:
   build:
@@ -21,10 +15,13 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
-      - run: chmod +x ./gradlew
-      - run: ./gradlew build publishToMavenLocal
-      - name: Upload Core artifact
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Build
+        run: ./gradlew :nexus-render-hdr:build --no-daemon
+      - name: Upload JAR
         uses: actions/upload-artifact@v4
         with:
-          name: nexus-api-core
-          path: build/libs/nexus-api-core-*.jar
+          name: nexus-render-hdr
+          path: nexus-render-hdr/build/libs/*.jar
+          if-no-files-found: error
