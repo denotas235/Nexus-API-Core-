@@ -46,13 +46,19 @@ jobs:
           chmod +x nexus-textures/src/main/resources/natives/arm64-v8a/libastcenc.so
           echo "astcenc ARM64 embalado no JAR"
 
-      # ── Baixa minecraft.jar e pré-comprime texturas vanilla ───────────────
+      # ── Baixa minecraft.jar (via API oficial da Mojang) ─────────────────
+      - name: Download Minecraft JAR
+        run: |
+          VERSION_MANIFEST=$(curl -s https://piston-meta.mojang.com/mc/game/version_manifest_v2.json)
+          VERSION_URL=$(echo "$VERSION_MANIFEST" | jq -r '.versions[] | select(.id=="1.21.1") | .url')
+          CLIENT_URL=$(curl -s "$VERSION_URL" | jq -r '.downloads.client.url')
+          echo "URL do client: $CLIENT_URL"
+          curl -L -o minecraft_client.jar "$CLIENT_URL"
+          echo "JAR descarregado: $(ls -lh minecraft_client.jar)"
+
+      # ── Pré-comprime texturas vanilla ──────────────────────────────────
       - name: Pre-compress Vanilla Textures
         run: |
-          echo "A baixar minecraft 1.21.1 client.jar..."
-          curl -L "https://piston-data.mojang.com/v1/objects/59353fb40c36d304f2035d51e7d6e6baa98dc05c/client.jar" \
-            -o minecraft_client.jar
-
           echo "A extrair texturas PNG..."
           mkdir -p vanilla_textures
           unzip -q minecraft_client.jar "assets/minecraft/textures/*" -d vanilla_textures || true
@@ -61,9 +67,6 @@ jobs:
           echo "Total de texturas: $TOTAL"
 
           mkdir -p nexus-textures/src/main/resources/assets/nexus-textures/astc_cache
-
-          SUCCESS=0
-          SKIP=0
 
           find vanilla_textures -name "*.png" | while read PNG; do
             REL="${PNG#vanilla_textures/}"
@@ -88,10 +91,9 @@ jobs:
             fi
 
             if "$ASTCENC_BIN" $MODE "$PNG" "$OUT" "$BLOCK" -thorough 2>/dev/null; then
-              SUCCESS=$((SUCCESS + 1))
+              echo "  OK: $REL -> $BLOCK"
             else
-              SKIP=$((SKIP + 1))
-              echo "SKIP: $REL"
+              echo "  SKIP: $REL"
             fi
           done
 
