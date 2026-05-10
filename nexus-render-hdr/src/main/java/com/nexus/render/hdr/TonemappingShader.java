@@ -1,7 +1,6 @@
 package com.nexus.render.hdr;
 
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL20;
+import org.lwjgl.opengl.*;
 
 public class TonemappingShader {
     private static final String VERT =
@@ -33,25 +32,14 @@ public class TonemappingShader {
         "    fragColor = vec4(color, 1.0);\n" +
         "}\n";
 
-    public static int compile() {
+    public static void compile() {
         try {
             int vert = GL20.glCreateShader(GL20.GL_VERTEX_SHADER);
             GL20.glShaderSource(vert, VERT);
             GL20.glCompileShader(vert);
-            if (GL20.glGetShaderi(vert, GL20.GL_COMPILE_STATUS) == GL11.GL_FALSE) {
-                System.out.println("[HDR] Vertex shader compile error: " + GL20.glGetShaderInfoLog(vert));
-                GL20.glDeleteShader(vert);
-                return 0;
-            }
             int frag = GL20.glCreateShader(GL20.GL_FRAGMENT_SHADER);
             GL20.glShaderSource(frag, FRAG);
             GL20.glCompileShader(frag);
-            if (GL20.glGetShaderi(frag, GL20.GL_COMPILE_STATUS) == GL11.GL_FALSE) {
-                System.out.println("[HDR] Fragment shader compile error: " + GL20.glGetShaderInfoLog(frag));
-                GL20.glDeleteShader(vert);
-                GL20.glDeleteShader(frag);
-                return 0;
-            }
             int prog = GL20.glCreateProgram();
             GL20.glAttachShader(prog, vert);
             GL20.glAttachShader(prog, frag);
@@ -59,14 +47,13 @@ public class TonemappingShader {
             GL20.glDeleteShader(vert);
             GL20.glDeleteShader(frag);
             if (GL20.glGetProgrami(prog, GL20.GL_LINK_STATUS) == GL11.GL_FALSE) {
-                System.out.println("[HDR] Program link error: " + GL20.glGetProgramInfoLog(prog));
+                System.out.println("[HDR] Tonemapping shader link failed: " + GL20.glGetProgramInfoLog(prog));
                 GL20.glDeleteProgram(prog);
-                return 0;
+            } else {
+                System.out.println("[HDR] Tonemapping shader compiled (program " + prog + ")");
             }
-            return prog;
         } catch (Exception e) {
-            System.out.println("[HDR] Shader compile exception: " + e.getMessage());
-            return 0;
+            System.out.println("[HDR] Tonemapping shader exception: " + e.getMessage());
         }
     }
 }

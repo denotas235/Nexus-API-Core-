@@ -14,7 +14,6 @@ public class TextureManagerMixin {
     @Inject(method = "bindTexture", at = @At("TAIL"), require = 0)
     private void onBindTexture(Identifier id, AbstractTexture texture, CallbackInfo ci) {
         if (!HdrPipeline.isReady() || texture == null) return;
-        int glId = texture.getGlId();
-        if (glId > 0) HdrPipeline.applyAnisotropic(glId);
+        HdrPipeline.applyAnisotropic(texture.getGlId());
     }
 }

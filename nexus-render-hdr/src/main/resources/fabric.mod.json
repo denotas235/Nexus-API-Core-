@@ -3,7 +3,7 @@
   "id": "nexus-render-hdr",
   "version": "${version}",
   "name": "Nexus Render HDR",
-  "description": "HDR pipeline, sRGB correction, normal maps, float buffers for Mali-G52 MC2",
+  "description": "HDR pipeline, sRGB correction, anisotropic filtering, tonemapping ACES",
   "authors": ["denotas235"],
   "environment": "client",
   "entrypoints": {
@@ -13,9 +13,5 @@
   "depends": {
     "fabricloader": ">=0.16.5",
     "minecraft": "~1.21.1"
-  },
-  "suggests": {
-    "nexus-api-core": ">=1.0.0",
-    "nexus-maliopt": ">=1.0.0"
   }
 }
