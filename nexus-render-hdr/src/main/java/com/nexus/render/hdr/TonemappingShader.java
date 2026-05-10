@@ -3,18 +3,19 @@ package com.nexus.render.hdr;
 import org.lwjgl.opengl.*;
 
 public class TonemappingShader {
+    // Vertex shader optimizado para ES 3.2
     private static final String VERT =
-        "#version 300 es\n" +
+        "#version 310 es\n" +
         "out vec2 vUv;\n" +
         "void main() {\n" +
-        "    int vid = gl_VertexID;\n" +
-        "    vec2 uv = vec2((vid << 1) & 2, vid & 2);\n" +
+        "    vec2 uv = vec2((gl_VertexID << 1) & 2, gl_VertexID & 2);\n" +
         "    vUv = uv;\n" +
         "    gl_Position = vec4(uv * 2.0 - 1.0, 0.0, 1.0);\n" +
         "}\n";
 
+    // Fragment shader ACES para ES 3.2
     private static final String FRAG =
-        "#version 300 es\n" +
+        "#version 310 es\n" +
         "precision mediump float;\n" +
         "uniform sampler2D uScene;\n" +
         "in vec2 vUv;\n" +
@@ -67,7 +68,7 @@ public class TonemappingShader {
                 program = 0;
             } else {
                 quadVao = GL30.glGenVertexArrays();
-                System.out.println("[HDR] Tonemapping shader compiled (program " + program + ")");
+                System.out.println("[HDR] Tonemapping shader compiled for ES 3.2 (program " + program + ")");
             }
         } catch (Exception e) {
             System.out.println("[HDR] Tonemapping shader exception: " + e.getMessage());
