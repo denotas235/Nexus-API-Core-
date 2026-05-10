@@ -1,15 +1,25 @@
 plugins {
-    id("fabric-loom") version "1.7.+"
+    id("fabric-loom") version "1.16-SNAPSHOT"
+    id("java")
 }
 
-version = "1.0.0"
-group = "com.nexus.textures"
+version = property("mod_version").toString()
+group = property("maven_group").toString()
+
+base {
+    archivesName = "nexus-textures"
+}
+
+repositories {
+    maven("https://maven.fabricmc.net/")
+    mavenCentral()
+}
 
 dependencies {
-    minecraft("com.mojang:minecraft:1.21.1")
-    mappings("net.fabricmc:yarn:1.21.1+build.3:v2")
-    modImplementation("net.fabricmc:fabric-loader:0.16.5")
-    modImplementation("net.fabricmc.fabric-api:fabric-api:0.102.0+1.21.1")
+    minecraft("com.mojang:minecraft:${property("minecraft_version")}")
+    mappings("net.fabricmc:yarn:${property("yarn_mappings")}:v2")
+    modImplementation("net.fabricmc:fabric-loader:${property("loader_version")}")
+    modImplementation("net.fabricmc.fabric-api:fabric-api:${property("fabric_api_version")}")
 }
 
 loom {
@@ -28,4 +38,11 @@ tasks.processResources {
 
 tasks.withType<JavaCompile>().configureEach {
     options.release = 21
+    options.encoding = "UTF-8"
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+    withSourcesJar()
 }
