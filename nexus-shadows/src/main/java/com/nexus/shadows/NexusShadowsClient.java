@@ -5,42 +5,43 @@ import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import org.lwjgl.opengl.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NexusShadowsClient implements ClientModInitializer {
-    private static boolean shadowInit = false;
+    public static final String MOD_ID = "nexus-shadows";
+    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     @Override
     public void onInitializeClient() {
-        System.out.println("[Shadows] ═══ Module loading ═══");
+        LOGGER.info("[Shadows] ═══ Module loading ═══");
 
-        if (FabricLoader.getInstance().isModLoaded("nexus-api-core")) {
-            System.out.println("[Shadows] nexus-api-core detected.");
-        }
-        if (FabricLoader.getInstance().isModLoaded("nexus-maliopt")) {
-            System.out.println("[Shadows] nexus-maliopt detected.");
-        }
-        if (FabricLoader.getInstance().isModLoaded("nexus-render-hdr")) {
-            System.out.println("[Shadows] nexus-render-hdr detected.");
-        }
+        if (FabricLoader.getInstance().isModLoaded("nexus-api-core"))   LOGGER.info("[Shadows] nexus-api-core detetado.");
+        if (FabricLoader.getInstance().isModLoaded("nexus-maliopt"))    LOGGER.info("[Shadows] nexus-maliopt detetado — TBDR reduz custo do shadow pass.");
+        if (FabricLoader.getInstance().isModLoaded("nexus-render-hdr")) LOGGER.info("[Shadows] nexus-render-hdr detetado — sombras aplicadas antes do tonemapping.");
+        if (FabricLoader.getInstance().isModLoaded("nexus-textures"))   LOGGER.info("[Shadows] nexus-textures detetado — ASTC liberta VRAM para shadow map.");
 
-        // Aplica PCF depois das entidades e antes do tonemapping
-        WorldRenderEvents.AFTER_ENTITIES.register(ctx -> {
-            if (!shadowInit) {
-                ShadowPipeline.init();
-                shadowInit = true;
-            }
+        // Shadow pass: renderizado ANTES das entidades, do ponto de vista da luz
+        WorldRenderEvents.BEFORE_ENTITIES.register(ctx -> {
             if (!ShadowPipeline.isReady()) return;
-            int prog = ShadowPCFShader.getProgram();
-            int vao  = ShadowPCFShader.getQuadVao();
-            if (prog == 0 || vao == 0) return;
+            float td = ctx.tickCounter().getTickDelta(true);
+            ShadowPipeline.renderShadowPass(td);
+        });
+
+        // PCF pass: pós-processamento aplicado APÓS as entidades
+        WorldRenderEvents.AFTER_ENTITIES.register(ctx -> {
+            if (!ShadowPipeline.isReady()) return;
+            int prog    = ShadowPCFShader.getProgram();
+            int vao     = ShadowPCFShader.getQuadVao();
+            int shadowT = ShadowPipeline.getShadowTexture();
+            if (prog == 0 || vao == 0 || shadowT == 0) return;
 
             MinecraftClient mc = MinecraftClient.getInstance();
             if (mc == null || mc.world == null || mc.getFramebuffer() == null) return;
+
             int fbo = mc.getFramebuffer().fbo;
-            int w = mc.getWindow().getFramebufferWidth();
-            int h = mc.getWindow().getFramebufferHeight();
-            int shadowTex = ShadowPipeline.getShadowTexture();
-            if (shadowTex == 0) return;
+            int w   = mc.getWindow().getFramebufferWidth();
+            int h   = mc.getWindow().getFramebufferHeight();
 
             int prevFbo  = GL11.glGetInteger(GL30.GL_FRAMEBUFFER_BINDING);
             int prevProg = GL11.glGetInteger(GL20.GL_CURRENT_PROGRAM);
@@ -54,7 +55,7 @@ public class NexusShadowsClient implements ClientModInitializer {
             GL20.glUniform1i(GL20.glGetUniformLocation(prog, "uScene"), 0);
 
             GL13.glActiveTexture(GL13.GL_TEXTURE1);
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, shadowTex);
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, shadowT);
             GL20.glUniform1i(GL20.glGetUniformLocation(prog, "uShadowMap"), 1);
 
             GL20.glUniform2f(GL20.glGetUniformLocation(prog, "uScreenSize"), (float) w, (float) h);
@@ -67,6 +68,6 @@ public class NexusShadowsClient implements ClientModInitializer {
             GL20.glUseProgram(prevProg);
         });
 
-        System.out.println("[Shadows] ═══ Module ready ═══");
+        LOGGER.info("[Shadows] ═══ Module registado — GL inicia no primeiro frame ═══");
     }
 }
