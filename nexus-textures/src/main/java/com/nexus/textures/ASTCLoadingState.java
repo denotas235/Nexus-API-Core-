@@ -31,6 +31,10 @@ public class ASTCLoadingState {
         runtimeUploads.incrementAndGet();
     }
 
+    public static void resetRuntimeUploads() {
+        runtimeUploads.set(0);
+    }
+
     public static int getLoaded()         { return loaded.get(); }
     public static int getTotal()          { return total; }
     public static boolean isDone()        { return done; }
