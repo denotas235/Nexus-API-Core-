@@ -1,7 +1,6 @@
 package com.maliopt.mixin;
 
 import com.maliopt.astc.ASTCTextureLoader;
-import com.nexus.modules.textures.ASTCTextureRegistry;
 import net.minecraft.client.texture.NativeImage;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
