@@ -20,6 +20,7 @@ loom {
 
 dependencies {
     implementation(project(":", configuration = "namedElements"))
+    implementation(project(":nexus-textures", configuration = "namedElements"))
     minecraft("com.mojang:minecraft:${providers.gradleProperty("minecraft_version").get()}")
     mappings("net.fabricmc:yarn:${providers.gradleProperty("yarn_mappings").get()}:v2")
     modImplementation("net.fabricmc:fabric-loader:${providers.gradleProperty("loader_version").get()}")
@@ -41,4 +42,3 @@ java {
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
 }
-
