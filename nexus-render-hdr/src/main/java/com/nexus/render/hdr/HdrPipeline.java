@@ -1,75 +1,93 @@
 package com.nexus.render.hdr;
 
-import org.lwjgl.opengl.*;
+import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GLCapabilities;
 
+/**
+ * Pipeline HDR para Mali-G52 MC2 (ARM64).
+ *
+ * Nao chamar init() fora do contexto GL (nao chamar em onInitializeClient).
+ * Usar GameRendererMixin que invoca initGL() no primeiro frame de render.
+ */
 public class HdrPipeline {
-    private static boolean sRGBWriteControl = false;
-    private static boolean anisotropicFilter = false;
-    private static float maxAnisotropy = 16.0f; // fallback seguro
-    private static boolean initialized = false;
 
-    public static void init() {
-        if (initialized) return;
-        initialized = true;
+    // GL_FRAMEBUFFER_SRGB  (OpenGL 3.0 / GL_EXT_sRGB_write_control)
+    private static final int GL_FRAMEBUFFER_SRGB = 0x8DB9;
+    // GL_TEXTURE_MAX_ANISOTROPY_EXT
+    private static final int GL_TEXTURE_MAX_ANISOTROPY     = 0x84FE;
+    // GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT
+    private static final int GL_MAX_TEXTURE_MAX_ANISOTROPY = 0x84FF;
 
-        // Verificar as extensões directamente nas strings do driver nativo
-        String driverExtensions = getMaliDriverExtensions();
-        
-        sRGBWriteControl = driverExtensions.contains("GL_EXT_sRGB_write_control");
-        anisotropicFilter = driverExtensions.contains("GL_EXT_texture_filter_anisotropic");
-
-        System.out.println("[HDR] Driver Mali: sRGB " + (sRGBWriteControl ? "✅" : "❌") +
-                           " | Anisotropic " + (anisotropicFilter ? "✅" : "❌"));
-
-        // Activar sRGB no framebuffer se disponível
-        if (sRGBWriteControl) {
-            try {
-                GL11.glEnable(0x8BF2); // GL_FRAMEBUFFER_SRGB_EXT
-                System.out.println("[HDR] sRGB framebuffer ENABLED via driver");
-            } catch (Exception e) {
-                System.out.println("[HDR] Failed to enable sRGB: " + e.getMessage());
-            }
-        }
-
-        // Compilar shader de tonemapping (versão compatível com GLES 3.0)
-        TonemappingShader.compile();
-        System.out.println("[HDR] Pipeline initialized.");
-    }
+    private static boolean sRGB        = false;
+    private static boolean anisotropic = false;
+    private static float   maxAniso    = 1.0f;
+    private static boolean acesReady   = false;
+    private static boolean ready       = false;
 
     /**
-     * Lê as strings do driver Mali directamente, sem depender do OpenLTW.
+     * Chamado pelo GameRendererMixin no primeiro frame — GL esta disponivel.
      */
-    private static String getMaliDriverExtensions() {
+    public static void initGL() {
+        if (ready) return;
+
         try {
-            // Caminho do driver Mali no sistema
-            String libPath = "/vendor/lib64/egl/libGLES_mali.so";
-            java.io.File f = new java.io.File(libPath);
-            if (!f.exists()) {
-                System.out.println("[HDR] libGLES_mali.so not found at " + libPath);
-                return "";
+            GLCapabilities caps = GL.getCapabilities();
+
+            // ── sRGB framebuffer ─────────────────────────────────────────────
+            // Disponivel em OpenGL 3.0 ou via GL_EXT_sRGB_write_control (Mali)
+            if (caps.OpenGL30 || caps.GL_EXT_sRGB_write_control) {
+                try {
+                    GL11.glEnable(GL_FRAMEBUFFER_SRGB);
+                    sRGB = true;
+                    NexusRenderHdrClient.LOGGER.info("[NexusHDR] sRGB framebuffer ativado.");
+                } catch (Exception e) {
+                    NexusRenderHdrClient.LOGGER.warn("[NexusHDR] sRGB enable falhou: {}", e.getMessage());
+                }
+            } else {
+                NexusRenderHdrClient.LOGGER.warn("[NexusHDR] sRGB nao suportado pelo driver.");
             }
-            ProcessBuilder pb = new ProcessBuilder("strings", libPath);
-            Process p = pb.start();
-            java.io.InputStream is = p.getInputStream();
-            java.util.Scanner scanner = new java.util.Scanner(is).useDelimiter("\\A");
-            String output = scanner.hasNext() ? scanner.next() : "";
-            p.waitFor();
-            return output;
+
+            // ── Anisotropic filtering ────────────────────────────────────────
+            if (caps.GL_EXT_texture_filter_anisotropic) {
+                maxAniso = GL11.glGetFloat(GL_MAX_TEXTURE_MAX_ANISOTROPY);
+                maxAniso = Math.min(maxAniso, 16.0f);
+                anisotropic = true;
+                NexusRenderHdrClient.LOGGER.info("[NexusHDR] Anisotropic filtering ativo ({}x).", (int) maxAniso);
+            } else {
+                NexusRenderHdrClient.LOGGER.warn("[NexusHDR] GL_EXT_texture_filter_anisotropic nao suportado.");
+            }
+
+            // ── ACES Tonemapping shader ──────────────────────────────────────
+            TonemappingShader.compile();
+            acesReady = TonemappingShader.getProgram() != 0;
+            NexusRenderHdrClient.LOGGER.info("[NexusHDR] ACES shader: {}.",
+                    acesReady ? "compilado" : "nao disponivel");
+
         } catch (Exception e) {
-            System.out.println("[HDR] Failed to read driver strings: " + e.getMessage());
-            return "";
+            NexusRenderHdrClient.LOGGER.error("[NexusHDR] Pipeline GL falhou: {}", e.getMessage());
+        } finally {
+            ready = true;
+            NexusRenderHdrClient.LOGGER.info(
+                "[NexusHDR] Pipeline pronto — sRGB:{} AF:{}({}x) ACES:{}",
+                sRGB, anisotropic, (int) maxAniso, acesReady);
         }
     }
 
-    public static void applyAnisotropic(int textureId) {
-        if (!anisotropicFilter || textureId == 0) return;
+    public static boolean isReady()        { return ready; }
+    public static boolean hasSRGB()        { return sRGB; }
+    public static boolean hasAnisotropic() { return anisotropic; }
+    public static float   getMaxAnisotropy(){ return maxAniso; }
+    public static boolean hasACES()        { return acesReady; }
+
+    /**
+     * Aplica filtragem anisotropica a textura atualmente ligada (GL_TEXTURE_2D).
+     * Chamar apos glBindTexture.
+     */
+    public static void applyAnisotropic() {
+        if (!anisotropic) return;
         try {
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureId);
-            // Usa a constante real da extensão para max anisotropy
-            GL11.glTexParameterf(GL11.GL_TEXTURE_2D, 0x84FE, Math.min(maxAnisotropy, 16.0f));
+            GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, maxAniso);
         } catch (Exception ignored) {}
     }
-
-    public static boolean isReady() { return initialized; }
-    public static boolean hasSRGB() { return sRGBWriteControl; }
 }
