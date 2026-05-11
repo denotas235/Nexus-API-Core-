@@ -1,6 +1,6 @@
 plugins {
-    id("fabric-loom") version "1.8.10"
-    id("maven-publish")
+    id("net.fabricmc.fabric-loom-remap")
+    `maven-publish`
 }
 
 version = "1.0.0"
@@ -23,3 +23,4 @@ loom {
         }
     }
 }
+
