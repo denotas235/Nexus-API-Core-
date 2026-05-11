@@ -12,9 +12,20 @@ public class TextureModule {
                 TextureMod.LOGGER.warn("[TextureModule] Manifest not found.");
                 return;
             }
+
             String manifest = new Scanner(is, "UTF-8").useDelimiter("\\A").next();
+            String[] lines = manifest.split("\n");
+
+            // Contar total primeiro para inicializar o estado de carregamento
+            int total = 0;
+            for (String line : lines) {
+                if (line.contains("\"file\":")) total++;
+            }
+            ASTCLoadingState.begin(total);
+
+            long start = System.currentTimeMillis();
             int count = 0;
-            for (String line : manifest.split("\n")) {
+            for (String line : lines) {
                 if (line.contains("\"file\":")) {
                     String[] parts = line.split("\"");
                     if (parts.length >= 4) {
@@ -28,8 +39,10 @@ public class TextureModule {
                             count++;
                         }
                     }
+                    ASTCLoadingState.increment();
                 }
             }
+            ASTCLoadingState.finish(System.currentTimeMillis() - start);
             TextureMod.LOGGER.info("[TextureModule] {} ASTC textures loaded.", count);
         } catch (Exception e) {
             TextureMod.LOGGER.error("[TextureModule] Load failed: {}", e.getMessage());
