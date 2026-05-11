@@ -5,7 +5,8 @@
   "mixins": [],
   "client": [
     "NativeImageMixin",
-    "TextureManagerMixin"
+    "TextureManagerMixin",
+    "DebugHudMixin"
   ],
   "injectors": {
     "defaultRequire": 1
