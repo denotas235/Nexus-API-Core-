@@ -8,17 +8,20 @@ public class ASTCEncoder {
 
     private static boolean nativeLoaded = false;
     private static Path    astcencBin   = null;
+    private static String  loadError    = null;
 
     static {
         tryLoadNative();
     }
 
     private static void tryLoadNative() {
+        String resPath = "/natives/arm64-v8a/libastcenc.so";
         try {
-            InputStream soStream = ASTCEncoder.class
-                    .getResourceAsStream("/natives/arm64-v8a/libastcenc.so");
+            InputStream soStream = ASTCEncoder.class.getResourceAsStream(resPath);
             if (soStream == null) {
-                System.err.println("[NexusASTC] libastcenc.so não encontrada no JAR");
+                loadError = "libastcenc.so não encontrada no JAR em: " + resPath
+                        + "  — resource pack externo não terá compressão ASTC em runtime.";
+                System.err.println("[NexusASTC] " + loadError);
                 return;
             }
             Path tempBin = Files.createTempFile("astcenc_", ".bin");
@@ -29,9 +32,12 @@ public class ASTCEncoder {
             tempBin.toFile().setExecutable(true);
             astcencBin   = tempBin;
             nativeLoaded = true;
-            System.out.println("[NexusASTC] astcenc extraído: " + tempBin);
+            System.out.println("[NexusASTC] astcenc-neon (ARM64) extraído com sucesso: "
+                    + tempBin + "  (" + Files.size(tempBin) / 1024 + " KB)"
+                    + " — compressão ASTC em runtime ATIVA.");
         } catch (Exception e) {
-            System.err.println("[NexusASTC] Falha ao extrair astcenc: " + e.getMessage());
+            loadError = "Falha ao extrair astcenc: " + e.getMessage();
+            System.err.println("[NexusASTC] " + loadError);
             nativeLoaded = false;
         }
     }
@@ -44,7 +50,7 @@ public class ASTCEncoder {
             boolean thorough
     ) {
         if (!nativeLoaded || astcencBin == null) {
-            System.err.println("[NexusASTC] astcenc não disponível — fallback PNG");
+            System.err.println("[NexusASTC] astcenc não disponível — fallback PNG. Razão: " + loadError);
             return null;
         }
         Path tempPng  = null;
@@ -55,7 +61,6 @@ public class ASTCEncoder {
             tempPng.toFile().deleteOnExit();
             tempAstc.toFile().deleteOnExit();
 
-            // Usa STBImageWrite para escrever PNG a partir de RGBA raw
             java.nio.ByteBuffer buf = java.nio.ByteBuffer.allocateDirect(width * height * 4);
             buf.put(rgbaData);
             buf.flip();
@@ -110,4 +115,5 @@ public class ASTCEncoder {
     }
 
     public static boolean isAvailable() { return nativeLoaded; }
+    public static String getLoadError()  { return loadError; }
 }
