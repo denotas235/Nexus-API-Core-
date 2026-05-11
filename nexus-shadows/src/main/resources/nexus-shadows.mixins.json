@@ -1,1 +1,12 @@
-{ "required": true, "package": "com.nexus.shadows.mixin", "compatibilityLevel": "JAVA_21", "client": [], "injectors": { "defaultRequire": 1 } }
+{
+  "required": true,
+  "package": "com.nexus.shadows.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [],
+  "client": [
+    "GameRendererMixin",
+    "DebugHudMixin",
+    "WorldRendererMixin"
+  ],
+  "injectors": { "defaultRequire": 1 }
+}
