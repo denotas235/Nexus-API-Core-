@@ -12,14 +12,23 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+/**
+ * WorldRendererMixin (nexus-shadows) — apenas regista o tamanho do framebuffer
+ * para uso interno do ShadowPipeline. NAO renderiza o shadow pass aqui
+ * (isso e feito em BEFORE_ENTITIES via NexusShadowsClient).
+ *
+ * Fix: remocao do renderShadowPass() em HEAD — estava a duplicar o shadow pass
+ * causando 2x o custo de render por frame e resultados incorretos.
+ */
 @Mixin(WorldRenderer.class)
 public class WorldRendererMixin {
+
     @Inject(
         method = "render",
-        at = @At("HEAD"),
-        require = 0  // nao falha se a assinatura do metodo mudar entre versoes
+        at = @At("TAIL"),
+        require = 0
     )
-    private void onRenderHead(
+    private void onRenderTail(
             RenderTickCounter tickCounter,
             boolean renderBlockOutline,
             Camera camera,
@@ -28,8 +37,7 @@ public class WorldRendererMixin {
             Matrix4f positionMatrix,
             Matrix4f projectionMatrix,
             CallbackInfo ci) {
-        if (!ShadowPipeline.isReady()) return;
-        float td = tickCounter.getTickDelta(true);
-        ShadowPipeline.renderShadowPass(td);
+        // Hook reservado para uso futuro (ex: debug overlay, stats)
     }
 }
+
