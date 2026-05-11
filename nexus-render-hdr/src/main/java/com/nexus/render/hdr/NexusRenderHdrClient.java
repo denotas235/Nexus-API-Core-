@@ -25,7 +25,7 @@ public class NexusRenderHdrClient implements ClientModInitializer {
         }
 
         // Aplica tonemapping APÓS o mundo e ANTES da GUI
-        WorldRenderEvents.END.register(ctx -> {
+        // WorldRenderEvents.END.register(ctx -> {
             if (!hdrInitialized) {
                 HdrPipeline.init();
                 hdrInitialized = true;
