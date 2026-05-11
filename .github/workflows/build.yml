@@ -1,18 +1,19 @@
-name: Build Nexus Ecosystem JARs
+name: Build nexus-api-core + nexus-maliopt
 
 on:
   push:
-    branches: [main, ASTC, mod-nexus-shadows, mod-nexus-render-hdr, "render/nefu-core"]
+    branches: [main]
   release:
     types: [created]
   workflow_dispatch:
 
 jobs:
   build:
-    name: Build JAR
+    name: Build JARs (nexus-api-core + nexus-maliopt)
     runs-on: ubuntu-latest
     permissions:
       contents: write
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,30 +30,35 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles("**/*.gradle*", "**/gradle-wrapper.properties") }}
+          key: gradle-${{ runner.os }}-${{ hashFiles("**/*.gradle.kts", "**/gradle-wrapper.properties") }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
 
       - name: Make gradlew executable
         run: chmod +x gradlew
 
-      - name: Build
-        run: ./gradlew build --no-daemon
+      - name: Build nexus-api-core
+        run: ./gradlew build :nexus-maliopt:build --no-daemon
 
-      - name: Upload JAR artifact
+      - name: Collect JARs
+        run: |
+          mkdir -p out
+          cp build/libs/nexus-api-core-*.jar out/ 2>/dev/null || true
+          cp nexus-maliopt/build/libs/nexus-maliopt-*.jar out/ 2>/dev/null || true
+          ls -la out/
+
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: nexus-mods-${{ github.ref_name }}-${{ github.sha }}
-          path: |
-            build/libs/*.jar
-            */build/libs/*.jar
+          name: nexus-core-maliopt-${{ github.sha }}
+          path: out/*.jar
           if-no-files-found: warn
 
-      - name: Attach JAR to release
+      - name: Attach JARs to release
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            build/libs/*.jar
-            */build/libs/*.jar
+          files: out/*.jar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
