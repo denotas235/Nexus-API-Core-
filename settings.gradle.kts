@@ -4,5 +4,6 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
-
+rootProject.name = "nexus-textures"
 include(":nexus-textures")
+
