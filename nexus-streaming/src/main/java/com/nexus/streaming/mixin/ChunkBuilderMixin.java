@@ -13,12 +13,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * Interceta o agendamento de rebuild de chunks para enfileirar uploads incrementais.
  *
  * Alvo: net.minecraft.client.render.chunk.ChunkBuilder (Yarn 1.21.1)
- * require=0 — nao falha se a classe/metodo mudar entre versoes menores.
  */
-@Mixin(targets = "net.minecraft.client.render.chunk.ChunkBuilder", require = 0)
+@Mixin(targets = "net.minecraft.client.render.chunk.ChunkBuilder")
 public class ChunkBuilderMixin {
 
-    @Inject(method = "scheduleRebuild(IIIbZ)V", at = @At("HEAD"), require = 0)
+    @Inject(method = "scheduleRebuild(IIIbZ)V", at = @At("HEAD"))
     private void onScheduleRebuild(int x, int y, int z, boolean important, boolean important2, CallbackInfo ci) {
         if (!StreamingPipeline.isInitialized()) return;
         long key = ChunkBufferManager.keyOf(x, y, z);
@@ -29,7 +28,7 @@ public class ChunkBuilderMixin {
     }
 
     @Inject(method = "scheduleRebuild(Lnet/minecraft/client/render/chunk/ChunkRendererRegion;Z)V",
-            at = @At("HEAD"), require = 0)
+            at = @At("HEAD"))
     private void onScheduleRebuildRegion(Object region, boolean important, CallbackInfo ci) {
         // Variante alternativa da assinatura em versoes diferentes do Yarn
         if (!StreamingPipeline.isInitialized()) return;
