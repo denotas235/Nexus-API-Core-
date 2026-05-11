@@ -9,7 +9,6 @@
   "entrypoints": {
     "client": ["com.nexus.textures.TextureMod"]
   },
-  "mixins": ["nexus-textures.mixins.json"],
   "depends": {
     "fabricloader": ">=0.16.5",
     "fabric-api": "*",
