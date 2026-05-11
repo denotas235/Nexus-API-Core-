@@ -13,8 +13,8 @@ public class WorldRendererMixin {
     @Inject(method = "render", at = @At("HEAD"), require = 0)
     private void onRenderHead(CallbackInfo ci) {
         MinecraftClient mc = MinecraftClient.getInstance();
-        if (mc != null && mc.world != null) {
-            ShadowPipeline.renderShadowPass(mc);
-        }
+        if (mc == null || mc.world == null) return;
+        // Usa tickDelta = 1.0 para o shadow map (não precisamos de interpolação aqui)
+        ShadowPipeline.renderShadowPass(1.0f);
     }
 }

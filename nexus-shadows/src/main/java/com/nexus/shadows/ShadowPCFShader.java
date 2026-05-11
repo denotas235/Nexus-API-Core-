@@ -47,20 +47,9 @@ public class ShadowPCFShader {
             int vert = GL20.glCreateShader(GL20.GL_VERTEX_SHADER);
             GL20.glShaderSource(vert, VERT);
             GL20.glCompileShader(vert);
-            if (GL20.glGetShaderi(vert, GL20.GL_COMPILE_STATUS) == GL11.GL_FALSE) {
-                System.out.println("[Shadows] PCF vertex error: " + GL20.glGetShaderInfoLog(vert));
-                GL20.glDeleteShader(vert);
-                return;
-            }
             int frag = GL20.glCreateShader(GL20.GL_FRAGMENT_SHADER);
             GL20.glShaderSource(frag, FRAG);
             GL20.glCompileShader(frag);
-            if (GL20.glGetShaderi(frag, GL20.GL_COMPILE_STATUS) == GL11.GL_FALSE) {
-                System.out.println("[Shadows] PCF fragment error: " + GL20.glGetShaderInfoLog(frag));
-                GL20.glDeleteShader(vert);
-                GL20.glDeleteShader(frag);
-                return;
-            }
             program = GL20.glCreateProgram();
             GL20.glAttachShader(program, vert);
             GL20.glAttachShader(program, frag);
@@ -68,12 +57,12 @@ public class ShadowPCFShader {
             GL20.glDeleteShader(vert);
             GL20.glDeleteShader(frag);
             if (GL20.glGetProgrami(program, GL20.GL_LINK_STATUS) == GL11.GL_FALSE) {
-                System.out.println("[Shadows] PCF link error: " + GL20.glGetProgramInfoLog(program));
+                System.out.println("[Shadows] PCF link error");
                 GL20.glDeleteProgram(program);
                 program = 0;
             } else {
                 quadVao = GL30.glGenVertexArrays();
-                System.out.println("[Shadows] PCF shader compiled (program " + program + ")");
+                System.out.println("[Shadows] PCF shader compiled");
             }
         } catch (Exception e) {
             System.out.println("[Shadows] PCF exception: " + e.getMessage());
