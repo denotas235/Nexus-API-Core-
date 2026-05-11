@@ -25,6 +25,9 @@ dependencies {
     modImplementation("net.fabricmc:fabric-loader:${providers.gradleProperty("loader_version").get()}")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${providers.gradleProperty("fabric_api_version").get()}")
     modImplementation("net.fabricmc:fabric-language-kotlin:${providers.gradleProperty("fabric_kotlin_version").get()}")
+    // LWJGL OpenGL ES stubs para compilacao (sem natives ARM64 no compile classpath)
+    compileOnly(files("../libs/lwjgl-opengles-3.3.3.jar"))
+    compileOnly(files("../libs/lwjgl-opengles-natives-linux-arm64-3.3.3.jar"))
 }
 
 tasks.processResources {
@@ -32,10 +35,10 @@ tasks.processResources {
 }
 
 kotlin { compilerOptions { jvmTarget = JvmTarget.JVM_21 } }
+
 java {
     withSourcesJar()
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
 }
-dependencies { implementation(files("../libs/lwjgl-opengles-3.3.3.jar")) }
-implementation(files("../libs/lwjgl-opengles-natives-linux-arm64-3.3.3.jar"))
+
