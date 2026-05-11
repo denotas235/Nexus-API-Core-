@@ -60,15 +60,20 @@ public class MaliOptMod implements ClientModInitializer {
             // Medir FPS e stress
             PerformanceGuard.onFrameEnd();
 
-            // Efeitos visuais (PLS e Bloom)
+            // Efeitos visuais (PLS e Bloom) — aplicados como post-process no END
             if (PLSLightingPass.isReady()) PLSLightingPass.render(mc);
             if (FBFetchBloomPass.isReady()) FBFetchBloomPass.render(mc);
 
-            // Otimizações de frame
+            // Invalidacao TBDR final (optimizacao Mali)
+            org.lwjgl.opengl.GL43.glInvalidateFramebuffer(
+                org.lwjgl.opengl.GL30.GL_FRAMEBUFFER,
+                new int[]{0x8D00, 0x8D20});
+
+            // Otimizacoes de frame
             MaliPipelineOptimizer.onFrameEnd();
             TileBasedOptimizer.onFrameEnd();
 
-            // Ajuste dinâmico de LOD e qualidade
+            // Ajuste dinamico de LOD e qualidade
             applyQualityScaler(mc);
         });
 
@@ -82,7 +87,7 @@ public class MaliOptMod implements ClientModInitializer {
                         MinecraftClient client = context.getSource().getClient();
                         IntegratedServer server = client.getServer();
                         if (server == null) return 0;
-                        LOGGER.info("[MaliOpt] Pré-geração de {} chunks...", radius*radius*4);
+                        LOGGER.info("[MaliOpt] Pre-geracao de {} chunks...", radius*radius*4);
                         server.execute(() -> {
                             net.minecraft.util.math.ChunkPos center = new net.minecraft.util.math.ChunkPos(
                                 client.player.getBlockPos());
@@ -92,7 +97,7 @@ public class MaliOptMod implements ClientModInitializer {
                                         .getChunk(center.x + dx, center.z + dz);
                                 }
                             }
-                            LOGGER.info("[MaliOpt] Pré-geração concluída.");
+                            LOGGER.info("[MaliOpt] Pre-geracao concluida.");
                         });
                         return 1;
                     }))
@@ -127,44 +132,36 @@ public class MaliOptMod implements ClientModInitializer {
         PLSLightingPass.init();
         FBFetchBloomPass.init();
 
+        // ASTC — verifica se o pack de texturas esta instalado
         if (FabricLoader.getInstance().isModLoaded("nexus-textures")) {
-            LOGGER.info("[MaliOpt] ASTC pack detected.");
-        } else { LOGGER.info("[MaliOpt] ASTC pack NOT installed."); }
+            LOGGER.info("[MaliOpt] ASTC pack detected — inicializando loader.");
             ASTCTextureLoader.init();
-            LOGGER.info("[MaliOpt] ✅ ASTC ATIVO");
+            LOGGER.info("[MaliOpt] ASTC ATIVO");
         } else {
-            LOGGER.info("[MaliOpt] ASTC desativado (sem texturas no JAR)");
+            LOGGER.info("[MaliOpt] ASTC desativado (nexus-textures nao instalado)");
         }
 
-        LOGGER.info("[MaliOpt] ✅ Otimizações aplicadas — 60 FPS lock ativo.");
+        LOGGER.info("[MaliOpt] Otimizacoes aplicadas — 60 FPS lock ativo.");
     }
 
-    // Escalonador de qualidade agressivo
     private void applyQualityScaler(MinecraftClient mc) {
         if (mc == null || gameOptions == null) return;
         PerformanceGuard.StressLevel stress = PerformanceGuard.getStressLevel();
 
-        // Partículas
         if (stress == PerformanceGuard.StressLevel.CRITICAL) {
             if (gameOptions.getParticles().getValue() != ParticlesMode.MINIMAL) {
                 gameOptions.getParticles().setValue(ParticlesMode.MINIMAL);
-                LOGGER.warn("[MaliOpt] Partículas reduzidas ao mínimo (CRITICAL)");
+                LOGGER.warn("[MaliOpt] Particulas reduzidas ao minimo (CRITICAL)");
             }
         } else if (stress == PerformanceGuard.StressLevel.HIGH) {
             if (gameOptions.getParticles().getValue() != ParticlesMode.DECREASED) {
                 gameOptions.getParticles().setValue(ParticlesMode.DECREASED);
-                LOGGER.info("[MaliOpt] Partículas diminuídas (HIGH)");
+                LOGGER.info("[MaliOpt] Particulas diminuidas (HIGH)");
             }
         } else if (stress == PerformanceGuard.StressLevel.LOW) {
             if (gameOptions.getParticles().getValue() != ParticlesMode.ALL) {
                 gameOptions.getParticles().setValue(ParticlesMode.ALL);
             }
         }
-
-        // Distância de simulação (server side) — usa o mesmo valor da view?
-        // Já controlado pelo NeuralLOD
-
-        // Outras otimizações possíveis: reduzir a renderização de nuvens, etc.
-        // Exemplo: gameOptions.enableClouds = (stress != StressLevel.CRITICAL);
     }
 }
