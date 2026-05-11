@@ -29,24 +29,39 @@ jobs:
           curl -L https://github.com/ARM-software/astc-encoder/releases/download/5.4.0/astcenc-5.4.0-linux-x64.zip \
             -o astcenc_x64.zip
           unzip astcenc_x64.zip -d astcenc_x64
-          ASTCENC_BIN=$(find astcenc_x64 -type f -name "astcenc*" | head -1)
+          # x64 usa astcenc-avx2
+          ASTCENC_BIN="astcenc_x64/bin/astcenc-avx2"
+          if [ ! -f "$ASTCENC_BIN" ]; then
+            ASTCENC_BIN=$(find astcenc_x64 -type f -name "astcenc*" | head -1)
+          fi
           chmod +x "$ASTCENC_BIN"
           echo "ASTCENC_BIN=$ASTCENC_BIN" >> $GITHUB_ENV
           echo "astcenc x64 pronto: $ASTCENC_BIN"
 
-      # ── astcenc ARM64 para embalar no JAR (runtime no dispositivo) ────────
-      - name: Download astcenc ARM64 para JAR
+      # ── astcenc ARM64 (neon) para embalar no JAR ──────────────────────────
+      - name: Embalar astcenc-neon ARM64 no JAR
         run: |
           curl -L https://github.com/ARM-software/astc-encoder/releases/download/5.4.0/astcenc-5.4.0-linux-arm64.zip \
             -o astcenc_arm64.zip
           unzip astcenc_arm64.zip -d astcenc_arm64
           mkdir -p nexus-textures/src/main/resources/natives/arm64-v8a
-          ARM64_BIN=$(find astcenc_arm64 -type f -name "astcenc*" | head -1)
+
+          # Usar explicitamente astcenc-neon (NEON SIMD — compatível com Mali-G52 MC2)
+          ARM64_BIN="astcenc_arm64/bin/astcenc-neon"
+          if [ ! -f "$ARM64_BIN" ]; then
+            echo "ERRO: astcenc-neon não encontrado. Conteúdo do zip:"
+            find astcenc_arm64 -type f
+            exit 1
+          fi
+
           cp "$ARM64_BIN" nexus-textures/src/main/resources/natives/arm64-v8a/libastcenc.so
           chmod +x nexus-textures/src/main/resources/natives/arm64-v8a/libastcenc.so
-          echo "astcenc ARM64 embalado no JAR"
 
-      # ── Baixa minecraft.jar (via API oficial da Mojang) ─────────────────
+          echo "✅ libastcenc.so embalado: $(ls -lh nexus-textures/src/main/resources/natives/arm64-v8a/libastcenc.so)"
+          # Verificar que está em resources (será incluído no JAR)
+          ls -la nexus-textures/src/main/resources/natives/arm64-v8a/
+
+      # ── Baixa minecraft.jar ──────────────────────────────────────────────
       - name: Download Minecraft JAR
         run: |
           VERSION_MANIFEST=$(curl -s https://piston-meta.mojang.com/mc/game/version_manifest_v2.json)
@@ -56,7 +71,7 @@ jobs:
           curl -L -o minecraft_client.jar "$CLIENT_URL"
           echo "JAR descarregado: $(ls -lh minecraft_client.jar)"
 
-      # ── Pré-comprime texturas vanilla ──────────────────────────────────
+      # ── Pré-comprime texturas vanilla ────────────────────────────────────
       - name: Pre-compress Vanilla Textures
         run: |
           echo "A extrair texturas PNG..."
@@ -73,7 +88,6 @@ jobs:
             OUT="nexus-textures/src/main/resources/assets/nexus-textures/astc_cache/${REL%.png}.astc"
             mkdir -p "$(dirname "$OUT")"
 
-            # Escolhe formato por path
             if echo "$REL" | grep -qE "block|terrain|atlas"; then
               BLOCK="5x5"; MODE="-cs"
             elif echo "$REL" | grep -qE "entity|item|gui"; then
@@ -104,8 +118,23 @@ jobs:
       # ── Build ─────────────────────────────────────────────────────────────
       - name: Build
         run: |
+          # Confirmar que libastcenc.so ainda está em resources antes de compilar
+          if [ ! -f nexus-textures/src/main/resources/natives/arm64-v8a/libastcenc.so ]; then
+            echo "ERRO CRÍTICO: libastcenc.so desapareceu antes do build!"
+            exit 1
+          fi
           cd nexus-textures
           ../gradlew build --no-daemon --stacktrace 2>&1
+
+          # Verificar que o binário está no JAR final
+          JAR=$(find build/libs -name "*.jar" ! -name "*sources*" | head -1)
+          if unzip -l "$JAR" | grep -q "natives/arm64-v8a/libastcenc.so"; then
+            echo "✅ libastcenc.so confirmado no JAR: $JAR"
+          else
+            echo "ERRO: libastcenc.so NÃO está no JAR!"
+            unzip -l "$JAR" | grep -i "native" || echo "(nenhuma entrada native encontrada)"
+            exit 1
+          fi
 
       # ── Upload JAR ────────────────────────────────────────────────────────
       - name: Upload JAR
