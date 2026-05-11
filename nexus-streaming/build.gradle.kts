@@ -1,5 +1,5 @@
 plugins {
-    id("fabric-loom") version "1.16-SNAPSHOT"
+    id("net.fabricmc.fabric-loom-remap")
     id("java")
 }
 version = property("mod_version").toString()
