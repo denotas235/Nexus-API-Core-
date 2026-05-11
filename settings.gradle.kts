@@ -4,4 +4,6 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+rootProject.name = "nexus-shadows"
 include(":nexus-shadows")
+
