@@ -32,6 +32,7 @@ public class NativeImageMixin {
         byte[] astc = ASTCCache.get(path);
         if (astc != null) {
             uploadASTC(astc, width, height);
+            ASTCLoadingState.trackRuntimeUpload();
             ci.cancel();
             return;
         }
@@ -51,10 +52,11 @@ public class NativeImageMixin {
 
         // Comprimir
         ASTCTextureCategory cat = ASTCTextureCategory.fromPath(path);
-        byte[] compressed = ASTCEncoder.compress(rgba, width, height, cat, false); // fast
+        byte[] compressed = ASTCEncoder.compress(rgba, width, height, cat, false);
         if (compressed != null && compressed.length >= 16) {
             ASTCCache.put(path, compressed);
             uploadASTC(compressed, width, height);
+            ASTCLoadingState.trackRuntimeUpload();
             ci.cancel();
             // Agendar recompressão de alta qualidade em background
             BackgroundRecompressor.schedule(path, rgba, width, height, cat);
@@ -66,8 +68,7 @@ public class NativeImageMixin {
         if (astcData.length < 16) return;
         int blockX = astcData[7] & 0xFF;
         int blockY = astcData[8] & 0xFF;
-        int glFormat = ASTCTextureCategory.fromPath("").getGLInternalFormat(); // fallback
-        // Usar o formato real da categoria seria melhor, mas para já usamos 4x4 SRGB
+        int glFormat;
         if (blockX == 5 && blockY == 5) glFormat = 0x93B3;
         else if (blockX == 8 && blockY == 8) glFormat = 0x93B7;
         else if (blockX == 10 && blockY == 10) glFormat = 0x93BD;
@@ -82,6 +83,5 @@ public class NativeImageMixin {
                 width, height, 0,
                 ByteBuffer.wrap(astcData, 16, astcData.length - 16));
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
-        System.out.println("[NexusASTC] Uploaded compressed texture: " + TexturePathTracker.getCurrentPath());
     }
 }
