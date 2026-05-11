@@ -3,69 +3,98 @@ package com.nexus.shadows;
 import org.lwjgl.opengl.*;
 
 public class ShadowPCFShader {
-    private static final String VERT =
+
+    private static final String VERT_CORE =
+        "#version 330 core\n" +
+        "out vec2 vUv;\n" +
+        "void main() {\n" +
+        "    vec2 uv=vec2((gl_VertexID<<1)&2,gl_VertexID&2);\n" +
+        "    vUv=uv; gl_Position=vec4(uv*2.0-1.0,0.0,1.0);\n" +
+        "}\n";
+
+    private static final String FRAG_CORE =
+        "#version 330 core\n" +
+        "uniform sampler2D uScene;\n" +
+        "uniform sampler2D uShadowMap;\n" +
+        "uniform vec2 uScreenSize;\n" +
+        "in vec2 vUv; out vec4 fragColor;\n" +
+        "float PCF(sampler2D sm, vec2 uv, float d) {\n" +
+        "    float s=0.0; vec2 tx=1.0/vec2(1024.0);\n" +
+        "    for(int x=-1;x<=1;x++) for(int y=-1;y<=1;y++)\n" +
+        "        s+=(d-0.001>texture(sm,uv+vec2(x,y)*tx).r)?0.5:0.0;\n" +
+        "    return s/9.0;\n" +
+        "}\n" +
+        "void main() {\n" +
+        "    vec3 c=texture(uScene,vUv).rgb;\n" +
+        "    float sh=PCF(uShadowMap,vUv,texture(uShadowMap,vUv).r);\n" +
+        "    fragColor=vec4(c*(1.0-sh*0.6),1.0);\n" +
+        "}\n";
+
+    private static final String VERT_ES =
         "#version 310 es\n" +
         "out vec2 vUv;\n" +
         "void main() {\n" +
-        "    vec2 uv = vec2((gl_VertexID << 1) & 2, gl_VertexID & 2);\n" +
-        "    vUv = uv;\n" +
-        "    gl_Position = vec4(uv * 2.0 - 1.0, 0.0, 1.0);\n" +
+        "    vec2 uv=vec2((gl_VertexID<<1)&2,gl_VertexID&2);\n" +
+        "    vUv=uv; gl_Position=vec4(uv*2.0-1.0,0.0,1.0);\n" +
         "}\n";
 
-    private static final String FRAG =
+    private static final String FRAG_ES =
         "#version 310 es\n" +
         "precision mediump float;\n" +
         "uniform sampler2D uScene;\n" +
         "uniform sampler2D uShadowMap;\n" +
         "uniform vec2 uScreenSize;\n" +
-        "in vec2 vUv;\n" +
-        "out vec4 fragColor;\n" +
-        "float PCF(sampler2D shadowMap, vec2 uv, float depth) {\n" +
-        "    float shadow = 0.0;\n" +
-        "    vec2 texelSize = 1.0 / vec2(1024.0);\n" +
-        "    for (int x = -1; x <= 1; x++) {\n" +
-        "        for (int y = -1; y <= 1; y++) {\n" +
-        "            float pcfDepth = texture(shadowMap, uv + vec2(x, y) * texelSize).r;\n" +
-        "            shadow += depth - 0.001 > pcfDepth ? 0.5 : 0.0;\n" +
-        "        }\n" +
-        "    }\n" +
-        "    return shadow / 9.0;\n" +
+        "in vec2 vUv; out vec4 fragColor;\n" +
+        "float PCF(sampler2D sm, vec2 uv, float d) {\n" +
+        "    float s=0.0; vec2 tx=1.0/vec2(1024.0);\n" +
+        "    for(int x=-1;x<=1;x++) for(int y=-1;y<=1;y++)\n" +
+        "        s+=(d-0.001>texture(sm,uv+vec2(float(x),float(y))*tx).r)?0.5:0.0;\n" +
+        "    return s/9.0;\n" +
         "}\n" +
         "void main() {\n" +
-        "    vec3 color = texture(uScene, vUv).rgb;\n" +
-        "    float depth = texture(uShadowMap, vUv).r;\n" +
-        "    float shadow = PCF(uShadowMap, vUv, depth);\n" +
-        "    color *= 1.0 - shadow;\n" +
-        "    fragColor = vec4(color, 1.0);\n" +
+        "    vec3 c=texture(uScene,vUv).rgb;\n" +
+        "    float sh=PCF(uShadowMap,vUv,texture(uShadowMap,vUv).r);\n" +
+        "    fragColor=vec4(c*(1.0-sh*0.6),1.0);\n" +
         "}\n";
 
     private static int program = 0;
     private static int quadVao = 0;
 
     public static void compile() {
+        if (tryCompile(VERT_CORE, FRAG_CORE, "330 core")) return;
+        if (tryCompile(VERT_ES,   FRAG_ES,   "310 es"))   return;
+        NexusShadowsClient.LOGGER.warn("[Shadows] ShadowPCFShader nao compilado.");
+    }
+
+    private static boolean tryCompile(String vs, String fs, String label) {
         try {
             int vert = GL20.glCreateShader(GL20.GL_VERTEX_SHADER);
-            GL20.glShaderSource(vert, VERT);
-            GL20.glCompileShader(vert);
-            int frag = GL20.glCreateShader(GL20.GL_FRAGMENT_SHADER);
-            GL20.glShaderSource(frag, FRAG);
-            GL20.glCompileShader(frag);
-            program = GL20.glCreateProgram();
-            GL20.glAttachShader(program, vert);
-            GL20.glAttachShader(program, frag);
-            GL20.glLinkProgram(program);
-            GL20.glDeleteShader(vert);
-            GL20.glDeleteShader(frag);
-            if (GL20.glGetProgrami(program, GL20.GL_LINK_STATUS) == GL11.GL_FALSE) {
-                System.out.println("[Shadows] PCF link error");
-                GL20.glDeleteProgram(program);
-                program = 0;
-            } else {
-                quadVao = GL30.glGenVertexArrays();
-                System.out.println("[Shadows] PCF shader compiled");
+            GL20.glShaderSource(vert, vs); GL20.glCompileShader(vert);
+            if (GL20.glGetShaderi(vert, GL20.GL_COMPILE_STATUS) == GL11.GL_FALSE) {
+                NexusShadowsClient.LOGGER.debug("[Shadows] PCF vert {} falhou: {}", label, GL20.glGetShaderInfoLog(vert));
+                GL20.glDeleteShader(vert); return false;
             }
+            int frag = GL20.glCreateShader(GL20.GL_FRAGMENT_SHADER);
+            GL20.glShaderSource(frag, fs); GL20.glCompileShader(frag);
+            if (GL20.glGetShaderi(frag, GL20.GL_COMPILE_STATUS) == GL11.GL_FALSE) {
+                NexusShadowsClient.LOGGER.debug("[Shadows] PCF frag {} falhou: {}", label, GL20.glGetShaderInfoLog(frag));
+                GL20.glDeleteShader(vert); GL20.glDeleteShader(frag); return false;
+            }
+            int prog = GL20.glCreateProgram();
+            GL20.glAttachShader(prog, vert); GL20.glAttachShader(prog, frag);
+            GL20.glLinkProgram(prog);
+            GL20.glDeleteShader(vert); GL20.glDeleteShader(frag);
+            if (GL20.glGetProgrami(prog, GL20.GL_LINK_STATUS) == GL11.GL_FALSE) {
+                NexusShadowsClient.LOGGER.debug("[Shadows] PCF link {} falhou.", label);
+                GL20.glDeleteProgram(prog); return false;
+            }
+            program = prog;
+            quadVao = GL30.glGenVertexArrays();
+            NexusShadowsClient.LOGGER.info("[Shadows] ShadowPCFShader compilado ({}).", label);
+            return true;
         } catch (Exception e) {
-            System.out.println("[Shadows] PCF exception: " + e.getMessage());
+            NexusShadowsClient.LOGGER.debug("[Shadows] PCF excecao {}: {}", label, e.getMessage());
+            return false;
         }
     }
 
