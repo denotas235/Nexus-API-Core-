@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "nexus-streaming",
+  "version": "${version}",
+  "name": "Nexus Streaming",
+  "description": "Upload incremental de chunks via GL_EXT_buffer_storage — sem stutter em voo de Elytra",
+  "authors": ["denotas235"],
+  "environment": "client",
+  "entrypoints": {
+    "client": ["com.nexus.streaming.NexusStreamingClient"]
+  },
+  "mixins": ["nexus-streaming.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.16.5",
+    "minecraft": "~1.21.1",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "nexus-textures": ">=1.2.0",
+    "nexus-render-hdr": ">=1.0.0",
+    "nexus-shadows": ">=1.0.0"
+  }
+}
