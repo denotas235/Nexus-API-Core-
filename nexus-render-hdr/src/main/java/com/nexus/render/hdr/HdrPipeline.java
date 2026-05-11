@@ -36,7 +36,7 @@ public class HdrPipeline {
 
             // ── sRGB framebuffer ─────────────────────────────────────────────
             // Disponivel em OpenGL 3.0 ou via GL_EXT_sRGB_write_control (Mali)
-            if (caps.OpenGL30 || caps.GL_EXT_sRGB_write_control) {
+            if (caps.OpenGL30) {
                 try {
                     GL11.glEnable(GL_FRAMEBUFFER_SRGB);
                     sRGB = true;
