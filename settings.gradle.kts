@@ -4,4 +4,6 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+rootProject.name = "nexus-render-hdr"
 include(":nexus-render-hdr")
+
