@@ -18,14 +18,44 @@ public class ShadowPass {
     private static int[] shadowTexs      = new int[CASCADE_COUNT];
     private static int   previousFbo     = 0;
     private static boolean ready         = false;
+    private static boolean glInitDone    = false;
 
-    private static final float[] CASCADE_SPLITS = { 0.0f, 0.25f, 1.0f }; // near, mid, far
+    private static final float[] CASCADE_SPLITS = { 0.0f, 0.25f, 1.0f };
 
-    private static int   locLightMVP;
-    private static int   locModel;
+    private static int locLightMVP;
+    private static int locModel;
 
-    // ── GLSL VERTEX (depth-only) ────────────────────────────────────
-    private static final String VERT =
+    // Compositing shader (PCF fullscreen quad)
+    private static int  pcfProgram  = 0;
+    private static int  pcfQuadVao  = 0;
+    private static final String VERT_PCF =
+        "#version 310 es\n" +
+        "out vec2 vUv;\n" +
+        "void main() {\n" +
+        "    vec2 uv = vec2((gl_VertexID << 1) & 2, gl_VertexID & 2);\n" +
+        "    vUv = uv;\n" +
+        "    gl_Position = vec4(uv * 2.0 - 1.0, 0.0, 1.0);\n" +
+        "}\n";
+    private static final String FRAG_PCF =
+        "#version 310 es\n" +
+        "precision mediump float;\n" +
+        "uniform sampler2D uScene;\n" +
+        "uniform sampler2D uShadowMap;\n" +
+        "in  vec2 vUv;\n" +
+        "out vec4 fragColor;\n" +
+        "float pcf(sampler2D sm, vec2 uv) {\n" +
+        "    float s = 0.0; vec2 tx = 1.0/vec2(1024.0);\n" +
+        "    for(int x=-1;x<=1;x++) for(int y=-1;y<=1;y++)\n" +
+        "        s += texture(sm, uv + vec2(float(x),float(y))*tx).r < 0.999 ? 0.5 : 0.0;\n" +
+        "    return s / 9.0;\n" +
+        "}\n" +
+        "void main() {\n" +
+        "    vec3 c = texture(uScene, vUv).rgb;\n" +
+        "    float sh = pcf(uShadowMap, vUv);\n" +
+        "    fragColor = vec4(c * (1.0 - sh * 0.55), 1.0);\n" +
+        "}\n";
+
+    private static final String VERT_DEPTH =
         "#version 310 es\n" +
         "layout(location = 0) in vec3 aPos;\n" +
         "uniform mat4 uLightMVP;\n" +
@@ -34,17 +64,19 @@ public class ShadowPass {
         "    gl_Position = uLightMVP * uModel * vec4(aPos, 1.0);\n" +
         "}\n";
 
-    // ── GLSL FRAGMENT (depth-only, vazio) ──────────────────────────
-    private static final String FRAG =
+    private static final String FRAG_DEPTH =
         "#version 310 es\n" +
         "void main() {}\n";
 
+    /** Deferred GL init — deve ser chamado dentro do contexto GL (primeiro frame de render). */
     public static void init() {
-        if (ready) return;
+        if (glInitDone) return;
+        glInitDone = true;
         try {
-            int vert = ShaderExecutionLayer.compile(GL20.GL_VERTEX_SHADER, VERT, "Shadow_vert");
-            int frag = ShaderExecutionLayer.compile(GL20.GL_FRAGMENT_SHADER, FRAG, "Shadow_frag");
-            if (vert == 0 || frag == 0) { ready = false; return; }
+            // Depth shader
+            int vert = ShaderExecutionLayer.compile(GL20.GL_VERTEX_SHADER, VERT_DEPTH, "Shadow_vert");
+            int frag = ShaderExecutionLayer.compile(GL20.GL_FRAGMENT_SHADER, FRAG_DEPTH, "Shadow_frag");
+            if (vert == 0 || frag == 0) { return; }
             program = GL20.glCreateProgram();
             GL20.glAttachShader(program, vert);
             GL20.glAttachShader(program, frag);
@@ -52,24 +84,45 @@ public class ShadowPass {
             GL20.glDeleteShader(vert);
             GL20.glDeleteShader(frag);
             if (GL20.glGetProgrami(program, GL20.GL_LINK_STATUS) == GL11.GL_FALSE) {
-                MaliOptMod.LOGGER.error("[MaliOpt] ShadowPass link falhou: {}", GL20.glGetProgramInfoLog(program));
-                ready = false; return;
+                MaliOptMod.LOGGER.error("[ShadowPass] depth link falhou: {}", GL20.glGetProgramInfoLog(program));
+                return;
             }
             locLightMVP = GL20.glGetUniformLocation(program, "uLightMVP");
             locModel    = GL20.glGetUniformLocation(program, "uModel");
             rebuildAllCascades();
+
+            // PCF compositing shader
+            int pv = ShaderExecutionLayer.compile(GL20.GL_VERTEX_SHADER, VERT_PCF, "ShadowPCF_vert");
+            int pf = ShaderExecutionLayer.compile(GL20.GL_FRAGMENT_SHADER, FRAG_PCF, "ShadowPCF_frag");
+            if (pv != 0 && pf != 0) {
+                pcfProgram = GL20.glCreateProgram();
+                GL20.glAttachShader(pcfProgram, pv);
+                GL20.glAttachShader(pcfProgram, pf);
+                GL20.glLinkProgram(pcfProgram);
+                GL20.glDeleteShader(pv);
+                GL20.glDeleteShader(pf);
+                if (GL20.glGetProgrami(pcfProgram, GL20.GL_LINK_STATUS) == GL11.GL_FALSE) {
+                    MaliOptMod.LOGGER.warn("[ShadowPass] PCF link falhou — compositing desativado.");
+                    GL20.glDeleteProgram(pcfProgram);
+                    pcfProgram = 0;
+                } else {
+                    pcfQuadVao = GL30.glGenVertexArrays();
+                }
+            } else {
+                GL20.glDeleteShader(pv);
+                GL20.glDeleteShader(pf);
+            }
+
             ready = true;
-            MaliOptMod.LOGGER.info("[MaliOpt] ✅ ShadowPass CSM ({} cascatas) iniciado", CASCADE_COUNT);
+            MaliOptMod.LOGGER.info("[ShadowPass] Pronto — CSM:{} cascatas, PCF:{}", CASCADE_COUNT, pcfProgram != 0);
         } catch (Exception e) {
-            MaliOptMod.LOGGER.error("[MaliOpt] ShadowPass.init() excepção: {}", e.getMessage());
-            ready = false;
+            MaliOptMod.LOGGER.error("[ShadowPass] init() excecao: {}", e.getMessage());
         }
     }
 
     public static void render(MinecraftClient mc) {
         if (!ready || mc.world == null || program == 0) return;
 
-        // Guarda estado GL
         previousFbo     = GL11.glGetInteger(GL30.GL_FRAMEBUFFER_BINDING);
         int prevProgram = GL11.glGetInteger(GL20.GL_CURRENT_PROGRAM);
         int[] prevVp    = new int[4];
@@ -79,42 +132,25 @@ public class ShadowPass {
 
         GL11.glEnable(GL11.GL_DEPTH_TEST);
         GL11.glEnable(GL11.GL_CULL_FACE);
-        GL11.glCullFace(GL11.GL_FRONT); // shadow acne mitigation
+        GL11.glCullFace(GL11.GL_FRONT);
         GL11.glDepthFunc(GL11.GL_LEQUAL);
-
         GL20.glUseProgram(program);
 
-        // Para cada cascata, renderizar a cena do ponto de vista da luz
         for (int cascade = 0; cascade < CASCADE_COUNT; cascade++) {
             GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, shadowFbos[cascade]);
             GL11.glViewport(0, 0, SHADOW_SIZE, SHADOW_SIZE);
             GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
 
-            // MVP da luz (simplificado: sol direcional)
             Matrix4f lightView = new Matrix4f().lookAt(
-                new Vector3f(50f, 80f, 50f),
-                new Vector3f(0f, 0f, 0f),
-                new Vector3f(0f, 1f, 0f)
-            );
-            Matrix4f lightProj = new Matrix4f().ortho(
-                -80f, 80f, -80f, 80f, 0.1f, 160f
-            );
-            Matrix4f lightMVP = lightProj.mul(lightView);
+                new Vector3f(50f, 80f, 50f), new Vector3f(0f, 0f, 0f), new Vector3f(0f, 1f, 0f));
+            Matrix4f lightProj = new Matrix4f().ortho(-80f, 80f, -80f, 80f, 0.1f, 160f);
+            Matrix4f lightMVP  = lightProj.mul(lightView);
             float[] mvpArr = new float[16];
             lightMVP.get(mvpArr);
             GL20.glUniformMatrix4fv(locLightMVP, false, mvpArr);
-
-            // Modelo identidade (MVP faz tudo)
-            GL20.glUniformMatrix4fv(locModel, false, new float[]{
-                1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1
-            });
-
-            // Minecraft renderiza os chunks dentro deste FBO (via Mixin)
-            // O MixinGameRenderer já injeta hooks no render do WorldRenderer
-            // (a ligação será feita pelo MaliOptMod via WorldRenderEvents)
+            GL20.glUniformMatrix4fv(locModel, false, new float[]{1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1});
         }
 
-        // Restaura estado GL
         GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, previousFbo);
         GL11.glViewport(prevVp[0], prevVp[1], prevVp[2], prevVp[3]);
         GL20.glUseProgram(prevProgram);
@@ -124,10 +160,46 @@ public class ShadowPass {
         GL11.glDepthFunc(GL11.GL_LESS);
     }
 
-    // ── Métodos para o PLSLightingPass usar ──────────────────────
-    public static int getShadowMap(int cascade) { return shadowTexs[cascade]; }
-    public static float[] getCascadeSplits()   { return CASCADE_SPLITS; }
-    public static int   getCascadeCount()      { return CASCADE_COUNT; }
+    /** Aplica o shadow map como post-process sobre o framebuffer do Minecraft.
+     *  Deve ser chamado em WorldRenderEvents.END ou WorldRendererMixin TAIL. */
+    public static void applyToScreen() {
+        if (!ready || pcfProgram == 0 || shadowTexs[0] == 0) return;
+
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc == null || mc.world == null || mc.getFramebuffer() == null) return;
+
+        int fbo = mc.getFramebuffer().fbo;
+        int w   = mc.getWindow().getFramebufferWidth();
+        int h   = mc.getWindow().getFramebufferHeight();
+
+        int prevFbo  = GL11.glGetInteger(GL30.GL_FRAMEBUFFER_BINDING);
+        int prevProg = GL11.glGetInteger(GL20.GL_CURRENT_PROGRAM);
+
+        GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, fbo);
+        GL11.glViewport(0, 0, w, h);
+        GL20.glUseProgram(pcfProgram);
+
+        GL13.glActiveTexture(GL13.GL_TEXTURE0);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, mc.getFramebuffer().getColorAttachment());
+        GL20.glUniform1i(GL20.glGetUniformLocation(pcfProgram, "uScene"), 0);
+
+        GL13.glActiveTexture(GL13.GL_TEXTURE1);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, shadowTexs[0]);
+        GL20.glUniform1i(GL20.glGetUniformLocation(pcfProgram, "uShadowMap"), 1);
+
+        GL30.glBindVertexArray(pcfQuadVao);
+        GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, 3);
+        GL30.glBindVertexArray(0);
+
+        GL13.glActiveTexture(GL13.GL_TEXTURE0);
+        GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, prevFbo);
+        GL20.glUseProgram(prevProg);
+    }
+
+    public static int getShadowMap(int cascade) { return cascade < CASCADE_COUNT ? shadowTexs[cascade] : 0; }
+    public static float[] getCascadeSplits()    { return CASCADE_SPLITS; }
+    public static int getCascadeCount()         { return CASCADE_COUNT; }
+    public static boolean isReady()             { return ready; }
 
     private static void rebuildAllCascades() {
         for (int i = 0; i < CASCADE_COUNT; i++) {
@@ -154,11 +226,13 @@ public class ShadowPass {
 
     public static void cleanup() {
         if (program != 0) { GL20.glDeleteProgram(program); program = 0; }
+        if (pcfProgram != 0) { GL20.glDeleteProgram(pcfProgram); pcfProgram = 0; }
         for (int i = 0; i < CASCADE_COUNT; i++) {
             if (shadowFbos[i] != 0) GL30.glDeleteFramebuffers(shadowFbos[i]);
             if (shadowTexs[i] != 0) GL11.glDeleteTextures(shadowTexs[i]);
         }
         ready = false;
+        glInitDone = false;
     }
-    public static boolean isReady() { return ready; }
 }
+
