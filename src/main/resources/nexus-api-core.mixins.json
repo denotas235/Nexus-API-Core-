@@ -3,7 +3,9 @@
   "package": "com.nexuapicore.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [],
-  "client": [],
+  "client": [
+    "WorldRendererMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   }
