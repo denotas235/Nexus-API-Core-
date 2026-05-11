@@ -3,40 +3,45 @@ package com.nexuapicore.client
 import com.nexuapicore.NexusAPI
 import com.nexuapicore.core.fallback.ALLExtensionDetector
 import com.nexuapicore.core.pipeline.RenderPipeline
-import com.maliopt.pipeline.ShadowPass
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
+import net.fabricmc.loader.api.FabricLoader
 
 class NexusAPICoreClient : ClientModInitializer {
+
+    private val hasMaliOpt = FabricLoader.getInstance().isModLoaded("nexus-maliopt")
+
     override fun onInitializeClient() {
 
-        ClientLifecycleEvents.CLIENT_STARTED.register { client ->
-            // 1. Detectar extensões GPU
+        ClientLifecycleEvents.CLIENT_STARTED.register { _ ->
             println("[Nexus] GL context ready — executando Detetor Infalivel 2.0")
             val detected = ALLExtensionDetector.detectExtensions()
             println("[Nexus] Detetor concluido — ${detected.size} extensoes encontradas.")
-
-            // 2. Inicializa API com extensoes reais
             NexusAPI.init(detected)
-
-            // 3. Inicializa ShadowPass (cria FBO + shaders)
-            ShadowPass.init()
+            // ShadowPass.init() e invocado pelo GameRendererMixin no primeiro frame GL
         }
 
-        // Shadow map — ANTES das entidades (gera depth map da cena)
-        WorldRenderEvents.BEFORE_ENTITIES.register {
-            try {
-                val mc = net.minecraft.client.MinecraftClient.getInstance()
-                if (mc != null && mc.world != null && ShadowPass.isReady()) {
-                    ShadowPass.render(mc)
+        // Shadow map depth pass — ANTES das entidades (apenas se nexus-maliopt instalado)
+        if (hasMaliOpt) {
+            WorldRenderEvents.BEFORE_ENTITIES.register {
+                try {
+                    val shadowPass = Class.forName("com.maliopt.pipeline.ShadowPass")
+                    val isReady = shadowPass.getMethod("isReady").invoke(null) as Boolean
+                    if (isReady) {
+                        val mc = net.minecraft.client.MinecraftClient.getInstance()
+                        if (mc != null && mc.world != null) {
+                            shadowPass.getMethod("render", net.minecraft.client.MinecraftClient::class.java)
+                                .invoke(null, mc)
+                        }
+                    }
+                } catch (t: Throwable) {
+                    println("[Nexus] ShadowPass.render erro (silenciado): ${t.message}")
                 }
-            } catch (t: Throwable) {
-                println("[Nexus] ShadowPass.render erro: ${t.message}")
             }
         }
 
-        // Post-process — APOS tudo renderizado pelo Minecraft
+        // Post-process pipeline — APOS tudo renderizado
         WorldRenderEvents.END.register {
             try {
                 RenderPipeline.executeFrame()
@@ -46,3 +51,4 @@ class NexusAPICoreClient : ClientModInitializer {
         }
     }
 }
+
