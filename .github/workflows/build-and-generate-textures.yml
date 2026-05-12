@@ -33,23 +33,7 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x gradlew
 
-      - name: Download Minecraft via Loom
-        run: ./gradlew :nexus-textures:build --no-daemon || true
-
-      - name: Locate Minecraft JAR
-        id: find_jar
-        run: |
-          JAR=$(find ~/.gradle -name "minecraft-1.21.1-client.jar" 2>/dev/null | head -1)
-          if [ -z "$JAR" ]; then
-            echo "Minecraft JAR not found. Listing all minecraft jars in .gradle..."
-            find ~/.gradle -name "minecraft-*.jar" -type f 2>/dev/null
-            exit 1
-          fi
-          echo "jar_path=$JAR" >> $GITHUB_OUTPUT
-          echo "Found: $JAR"
-
-      - name: Copy Minecraft JAR
-        run: cp "${{ steps.find_jar.outputs.jar_path }}" ./minecraft.jar
+      # O JAR minecraft.jar já está no repositório, não é necessário download
 
       - name: Install astcenc
         run: |
