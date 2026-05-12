@@ -39,9 +39,10 @@ jobs:
       - name: Locate Minecraft JAR
         id: find_jar
         run: |
-          JAR=$(find ~/.gradle/caches -name "minecraft-1.21.1-client.jar" 2>/dev/null | head -1)
+          JAR=$(find ~/.gradle -name "minecraft-1.21.1-client.jar" 2>/dev/null | head -1)
           if [ -z "$JAR" ]; then
-            echo "Minecraft JAR not found"
+            echo "Minecraft JAR not found. Listing all minecraft jars in .gradle..."
+            find ~/.gradle -name "minecraft-*.jar" -type f 2>/dev/null
             exit 1
           fi
           echo "jar_path=$JAR" >> $GITHUB_OUTPUT
