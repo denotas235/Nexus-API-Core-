@@ -1,0 +1,156 @@
+name: Generate ASTC + Build JAR
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ASTC]
+
+jobs:
+  generate-and-build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle.kts','**/gradle-wrapper.properties') }}
+          restore-keys: gradle-${{ runner.os }}-
+
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
+      - name: Download Minecraft via Loom
+        run: ./gradlew :nexus-textures:build --no-daemon || true
+
+      - name: Locate Minecraft JAR
+        id: find_jar
+        run: |
+          JAR=$(find ~/.gradle/caches -name "minecraft-1.21.1-client.jar" 2>/dev/null | head -1)
+          if [ -z "$JAR" ]; then
+            echo "Minecraft JAR not found"
+            exit 1
+          fi
+          echo "jar_path=$JAR" >> $GITHUB_OUTPUT
+          echo "Found: $JAR"
+
+      - name: Copy Minecraft JAR
+        run: cp "${{ steps.find_jar.outputs.jar_path }}" ./minecraft.jar
+
+      - name: Install astcenc
+        run: |
+          curl -L -o astcenc.zip https://github.com/ARM-software/astc-encoder/releases/download/5.4.0/astcenc-5.4.0-linux-x64.zip
+          unzip -o astcenc.zip
+          sudo cp bin/astcenc-sse4.1 /usr/local/bin/astcenc
+          sudo chmod +x /usr/local/bin/astcenc
+          astcenc --version
+
+      - name: Extract PNGs
+        run: |
+          mkdir -p textures_png
+          unzip -q minecraft.jar "assets/minecraft/textures/**/*.png" -d textures_raw/ || true
+          find textures_raw -name "*.png" | while read f; do
+            rel="${f#textures_raw/assets/minecraft/textures/}"
+            mkdir -p "textures_png/$(dirname "$rel")"
+            cp "$f" "textures_png/$rel"
+          done
+          echo "PNGs extraídos: $(find textures_png -name '*.png' | wc -l)"
+
+      - name: Convert PNG to ASTC
+        run: |
+          python3 - << 'PYEOF'
+          import os, subprocess, json, hashlib
+          from pathlib import Path
+
+          CATEGORY_MAP = {
+              "block":       ("5x5",  "-cs"),
+              "item":        ("4x4",  "-cs"),
+              "entity":      ("4x4",  "-cs"),
+              "gui":         ("4x4",  "-cs"),
+              "particle":    ("8x8",  "-cs"),
+              "environment": ("12x12","-cs"),
+              "effect":      ("4x4",  "-ch"),
+              "default":     ("4x4",  "-cs"),
+          }
+
+          def get_category(path):
+              p = str(path).lower()
+              for cat in CATEGORY_MAP:
+                  if cat in p:
+                      return cat
+              return "default"
+
+          src  = Path("textures_png")
+          dst  = Path("nexus-textures/src/main/resources/assets/nexus-textures/textures_astc")
+          dst.mkdir(parents=True, exist_ok=True)
+
+          manifest = {}
+          total = 0
+          errors = 0
+
+          for png in sorted(src.rglob("*.png")):
+              rel   = png.relative_to(src)
+              cat   = get_category(rel)
+              block, flag = CATEGORY_MAP[cat]
+              out  = dst / rel.with_suffix(".astc")
+              out.parent.mkdir(parents=True, exist_ok=True)
+              cmd = ["astcenc", flag, str(png), str(out), block, "-fast"]
+              result = subprocess.run(cmd, capture_output=True, text=True)
+              if result.returncode != 0:
+                  print(f"  ERRO: {rel}")
+                  errors += 1
+                  continue
+              sha = hashlib.sha256(out.read_bytes()).hexdigest()[:12]
+              manifest[str(rel.with_suffix(""))] = {
+                  "astc": str(out.relative_to(Path("nexus-textures/src/main/resources"))),
+                  "block": block,
+                  "category": cat,
+                  "sha256": sha
+              }
+              total += 1
+              if total % 100 == 0:
+                  print(f"  {total} convertidas...")
+
+          mf_path = Path("nexus-textures/src/main/resources/assets/nexus-textures/astc_manifest.json")
+          mf_path.parent.mkdir(parents=True, exist_ok=True)
+          with open(mf_path, "w") as f:
+              json.dump(manifest, f, indent=2)
+          print(f"\nConcluído: {total} texturas, {errors} erros")
+          print(f"Manifest: {mf_path}")
+          PYEOF
+
+      - name: Commit ASTC textures
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add nexus-textures/src/main/resources/assets/nexus-textures/
+          if git diff --staged --quiet; then
+            echo "Sem alterações"
+          else
+            git commit -m "textures: ASTC geradas automaticamente"
+            git push
+            echo "Commit feito ✅"
+          fi
+
+      - name: Build nexus-textures JAR
+        run: ./gradlew :nexus-textures:build --no-daemon
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexus-textures-${{ github.sha }}
+          path: nexus-textures/build/libs/*.jar
+          if-no-files-found: error
