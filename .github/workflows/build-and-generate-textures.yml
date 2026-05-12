@@ -41,7 +41,7 @@ jobs:
           unzip -o astcenc.zip
           sudo cp bin/astcenc-sse4.1 /usr/local/bin/astcenc
           sudo chmod +x /usr/local/bin/astcenc
-          astcenc --version
+          astcenc -help
 
       - name: Extract PNGs
         run: |
