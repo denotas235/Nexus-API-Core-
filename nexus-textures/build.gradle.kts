@@ -1,5 +1,5 @@
 plugins {
-    id("fabric-loom") version "1.6.12"
+    id("fabric-loom") version "1.16-SNAPSHOT"
     id("org.jetbrains.kotlin.jvm") version "2.3.21"
     `maven-publish`
 }
