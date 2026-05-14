@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * Flushes all pending NEFU batched draw calls after WorldRenderer.renderWorld completes.
- * Target: WorldRenderer.renderWorld(RenderTickCounter) — MC 1.21.1 yarn-mapped name.
+ * Target: WorldRenderer.renderWorld(RenderTickCounter) -- MC 1.21.1 yarn-mapped name.
  */
 @Mixin(WorldRenderer.class)
 public class WorldRendererMixin {

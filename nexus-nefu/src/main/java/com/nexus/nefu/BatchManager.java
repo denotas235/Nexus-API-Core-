@@ -1,5 +1,6 @@
 package com.nexus.nefu;
 
+import org.lwjgl.opengl.GL11;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +25,8 @@ public class BatchManager {
             currentMode = mode;
         }
         pending.add(new int[]{first, count});
-        int totalVerts = pending.stream().mapToInt(a -> a[1]).sum();
+        int totalVerts = 0;
+        for (int[] entry : pending) totalVerts += entry[1];
         if (totalVerts >= MAX_VERTICES) {
             flush();
         }
@@ -44,6 +46,6 @@ public class BatchManager {
     }
 
     private static void directDraw(int mode, int first, int count) {
-        com.mojang.blaze3d.systems.RenderSystem.drawArrays(mode, first, count);
+        GL11.glDrawArrays(mode, first, count);
     }
 }
