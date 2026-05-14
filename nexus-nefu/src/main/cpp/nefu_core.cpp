@@ -7,18 +7,41 @@
 #define LOG_TAG "NEFU"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 
+// ── Headers dos tradutores (cada um será ativado quando a pasta existir) ──
+#ifdef NEFU_HAS_LTW
+  #include "ltw/main.h"                // função ltw_glDrawArrays
+#endif
+#ifdef NEFU_HAS_MOBILEGLUES
+  #include "mobileglues/gl/gl.h"      // função mobileglues_glDrawArrays
+#endif
+// ... (krypton, zink, virgl serão adicionados depois)
+
 typedef void (*draw_arrays_t)(GLenum mode, GLint first, GLsizei count);
 
+// Stubs que serão substituídos pelas funções reais
 void ltw_drawArrays(GLenum mode, GLint first, GLsizei count) {
+#ifdef NEFU_HAS_LTW
+    ltw_glDrawArrays(mode, first, count);
+#else
     glDrawArrays(mode, first, count);
+#endif
 }
+
 void mobileglues_drawArrays(GLenum mode, GLint first, GLsizei count) {
+#ifdef NEFU_HAS_MOBILEGLUES
+    mobileglues_glDrawArrays(mode, first, count);
+#else
     glDrawArrays(mode, first, count);
+#endif
 }
+
 void krypton_drawArrays(GLenum mode, GLint first, GLsizei count) {
+    // TODO: integrar krypton
     glDrawArrays(mode, first, count);
 }
+
 void zink_drawArrays(GLenum mode, GLint first, GLsizei count) {
+    // TODO: integrar zink
     glDrawArrays(mode, first, count);
 }
 
