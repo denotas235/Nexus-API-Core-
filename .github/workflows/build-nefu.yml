@@ -1,20 +1,71 @@
 name: Build NEFU
+
 on:
   push:
     branches: [ render/nefu-core ]
+    tags:     [ 'v*.*.*' ]
+  pull_request:
+    branches: [ render/nefu-core ]
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # required for softprops/action-gh-release
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
-      - uses: gradle/actions/setup-gradle@v4
-      - run: ./gradlew :nexus-nefu:build --no-daemon
-      - uses: actions/upload-artifact@v4
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build mod JAR
+        run: ./gradlew :nexus-nefu:build --no-daemon
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: nexus-nefu
+          name: nexus-nefu-${{ github.sha }}
           path: nexus-nefu/build/libs/*.jar
           if-no-files-found: error
+
+      # ── Release (only on v*.*.* tags) ────────────────────────────────────
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "NEFU ${{ github.ref_name }}"
+          generate_release_notes: true
+          body: |
+            ## NexusFusion Render (NEFU) — ${{ github.ref_name }}
+
+            Renderizador híbrido optimizado para GPUs Mali (TBDR) no
+            Minecraft: Java Edition via Fabric.
+
+            ### Instalação
+            1. Instala o [Fabric Loader](https://fabricmc.net/use/installer/) ≥ 0.16.0 para MC 1.21.1.
+            2. Copia **nexus-nefu-${{ github.ref_name }}.jar** para a pasta `mods/`.
+            3. (Opcional) Sodium e Iris são totalmente compatíveis.
+
+            ### Compatibilidade
+            | Mod | Estado |
+            |-----|--------|
+            | Sodium | ✅ Compatível |
+            | Iris | ✅ Compatível |
+            | OptiFabric | ❌ Incompatível |
+            | Canvas | ❌ Incompatível |
+
+            ### Tier de Hardware detectado no arranque
+            O ficheiro `nefu_device_profile.json` (pasta do jogo) mostra o Tier detectado e as extensões TBDR disponíveis.
+          files: nexus-nefu/build/libs/nexus-nefu-*.jar
+          fail_on_unmatched_files: true
