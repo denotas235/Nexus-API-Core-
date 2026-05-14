@@ -1,21 +1,16 @@
 {
   "schemaVersion": 1,
   "id": "nexus-nefu",
-  "version": "${version}",
+  "version": "1.0.0",
   "name": "NexusFusion Render (NEFU)",
-  "description": "Fusion renderer: LTW + MobileGlues + Krypton + Zink + VirGL — optimized for Mali-G52",
-  "authors": ["denotas235"],
+  "description": "Renderizador híbrido otimizado para Mali TBDR e Android.",
+  "authors": ["Antonio (SerpentSpirale)"],
+  "license": "MIT",
   "environment": "client",
-  "entrypoints": {
-    "client": ["com.nexus.nefu.NexusNefuClient"]
-  },
+  "entrypoints": { "client": ["com.nexus.nefu.NexusNefuClient"] },
   "mixins": ["nexus-nefu.mixins.json"],
   "depends": {
-    "fabricloader": ">=0.16.5",
-    "minecraft": "~1.21.1"
-  },
-  "suggests": {
-    "nexus-api-core": ">=1.0.0",
-    "nexus-maliopt": ">=1.0.0"
+    "fabricloader": ">=0.14.0",
+    "minecraft": "1.16.x"
   }
 }

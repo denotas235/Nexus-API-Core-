@@ -1,12 +1,11 @@
 package com.nexus.nefu;
 
 public class ShaderOrchestrator {
-    public static NefuCoreEngine.Renderer selectForShader(String source) {
-        if (source.contains("#version 450") || source.contains("vulkan")) {
-            return NefuCoreEngine.Renderer.ZINK;
-        } else if (source.contains("#version 330") || source.contains("layout(binding")) {
-            return NefuCoreEngine.Renderer.MOBILEGLUES;
-        }
-        return NefuCoreEngine.Renderer.LTW;
+    public static int selectRendererForShader(String glslSource) {
+        if (glslSource.contains("#version 450") || glslSource.toLowerCase().contains("vulkan"))
+            return NefuCoreEngine.RENDERER_ZINK;
+        if (glslSource.contains("#version 330") || glslSource.contains("layout(binding"))
+            return NefuCoreEngine.RENDERER_MOBILEGLUES;
+        return NefuCoreEngine.RENDERER_LTW;
     }
 }

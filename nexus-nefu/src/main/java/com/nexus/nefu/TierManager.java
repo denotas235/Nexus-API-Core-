@@ -1,13 +1,21 @@
 package com.nexus.nefu;
 
-public class TierManager {
-    public enum Tier { T0, T1, T2, T3, T4, T5 }
-    private static Tier current = Tier.T2;
+import org.lwjgl.opengl.GL11;
 
-    public static Tier detectTier() {
-        String gl = org.lwjgl.opengl.GL11.glGetString(org.lwjgl.opengl.GL11.GL_RENDERER);
-        if (gl != null && gl.contains("Mali-G52")) return Tier.T2;
-        return Tier.T2;
+public class TierManager {
+    private static int cachedTier = -1;
+
+    public static int detectTier() {
+        if (cachedTier != -1) return cachedTier;
+        String renderer = GL11.glGetString(GL11.GL_RENDERER).toLowerCase();
+        if (renderer.contains("mali-400") || renderer.contains("adreno 200")) return cache(0);
+        if (renderer.contains("mali-t720") || renderer.contains("adreno 506")) return cache(1);
+        if (renderer.contains("mali-g52")) return cache(2);
+        if (renderer.contains("mali-g76") || renderer.contains("adreno 650")) return cache(3);
+        if (renderer.contains("adreno 7") || renderer.contains("snapdragon 8 gen")) return cache(4);
+        return cache(5);
     }
-    public static Tier getCurrentTier() { return current; }
+
+    private static int cache(int tier) { cachedTier = tier; return tier; }
+    public static int getTier() { return cachedTier; }
 }

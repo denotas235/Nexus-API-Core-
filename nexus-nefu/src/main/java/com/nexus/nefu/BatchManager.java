@@ -1,36 +1,49 @@
 package com.nexus.nefu;
 
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL20;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class BatchManager {
-    private static int lastMode = -1;
-    private static final List<Integer> pendingVertices = new ArrayList<>();
-    private static boolean initialized = false;
+    private static boolean enabled = true;
+    private static int currentMode = -1;
+    private static final List<int[]> pending = new ArrayList<>();
+    private static final int MAX_VERTICES = 65536;
 
-    public static void init() {
-        if (initialized) return;
-        initialized = true;
-        System.out.println("[NEFU] BatchManager initialized.");
+    public static void setEnabled(boolean en) {
+        enabled = en;
+        if (!en) flush();
     }
 
-    public static boolean shouldBatch(int mode, int count) {
-        return mode == lastMode;
-    }
-
-    public static void addToBatch(int mode, int first, int count) {
-        pendingVertices.addAll(IntStream.range(first, first + count).boxed().collect(Collectors.toList()));
-        lastMode = mode;
+    public static void queue(int mode, int first, int count) {
+        if (!enabled || !NefuCoreEngine.isActive()) {
+            directDraw(mode, first, count);
+            return;
+        }
+        if (mode != currentMode) {
+            flush();
+            currentMode = mode;
+        }
+        pending.add(new int[]{first, count});
+        int totalVerts = pending.stream().mapToInt(a -> a[1]).sum();
+        if (totalVerts >= MAX_VERTICES) {
+            flush();
+        }
     }
 
     public static void flush() {
-        if (!pendingVertices.isEmpty()) {
-            GL11.glDrawArrays(lastMode, 0, pendingVertices.size());
-            pendingVertices.clear();
+        if (pending.isEmpty()) return;
+        int[] firsts = new int[pending.size()];
+        int[] counts = new int[pending.size()];
+        for (int i = 0; i < pending.size(); i++) {
+            firsts[i] = pending.get(i)[0];
+            counts[i] = pending.get(i)[1];
         }
+        NefuCoreEngine.nativeDrawArraysBatched(currentMode, firsts, counts);
+        pending.clear();
+        currentMode = -1;
+    }
+
+    private static void directDraw(int mode, int first, int count) {
+        com.mojang.blaze3d.systems.RenderSystem.drawArrays(mode, first, count);
     }
 }

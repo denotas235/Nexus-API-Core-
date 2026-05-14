@@ -1,7 +1,6 @@
 {
   "required": true,
   "package": "com.nexus.nefu.mixin",
-  "compatibilityLevel": "JAVA_21",
-  "client": ["RenderSystemMixin"],
-  "injectors": { "defaultRequire": 1 }
+  "compatibilityLevel": "JAVA_8",
+  "client": ["RenderSystemMixin", "WorldRendererMixin"]
 }
