@@ -1,0 +1,32 @@
+name: Generate Loom Cache 1.21.11
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Run Loom to generate Minecraft cache
+        run: ./gradlew --refresh-dependencies build || true
+
+      - name: Zip Loom cache
+        run: |
+          cd ~/.gradle/caches/
+          zip -r fabric-loom-cache-1.21.11.zip fabric-loom
+
+      - name: Upload Loom cache artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: loom-cache-1.21.11
+          path: ~/.gradle/caches/fabric-loom-cache-1.21.11.zip
